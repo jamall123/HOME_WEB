@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools | Jamal's Portfolio</title><link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Video Background (Optional: reused or static bg for tools page) -->
+    <div class="video-container">
+        <!-- We can use the same video or a different background. Using the same one for consistency. -->
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="assets/video/bg-video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <header class="glass-header">
+        <nav>
+            <div class="logo">JAMAL</div>
+            <button class="hamburger-btn" aria-label="Toggle navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay">
+        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <ul class="nav-links-overlay">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="projects.html" class="nav-link">Projects</a></li>
+            <li><a href="ai-tools.html" class="nav-link active">AI Tools</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="tools-page">
+        <section class="hero-small">
+            <div class="hero-content">
+                <h1 class="fade-in-up">Essential AI Tools 🤖</h1>
+                <p class="fade-in-up delay-1">The powerful ecosystem I leverage for intelligent development</p>
+            </div>
+        </section>
+
+        <!-- Advanced Language Models -->
+        <section class="section-container">
+            <h2 class="section-title">Advanced Language Models</h2>
+            <div class="projects-grid">
+                <div class="glass-card fade-on-scroll">
+                    <h3>OpenAI GPT-4</h3>
+                    <p>Most advanced language model for conversational AI, content generation, and complex reasoning.
+                    </p>
+                    <a href="https://openai.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-1">
+                    <h3>Claude 3.5 Sonnet</h3>
+                    <p>Anthropic's most intelligent model with enhanced reasoning and coding capabilities.</p>
+                    <a href="https://claude.ai" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-2">
+                    <h3>Google Gemini</h3>
+                    <p>Google's multimodal AI model with advanced reasoning and vision capabilities.</p>
+                    <a href="https://gemini.google.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-3">
+                    <h3>DeepSeek</h3>
+                    <p>Advanced AI model specialized in coding, mathematics, and technical problem-solving.</p>
+                    <a href="https://www.deepseek.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Development Platforms -->
+        <section class="section-container">
+            <h2 class="section-title">AI Development Platforms</h2>
+            <div class="projects-grid">
+                <div class="glass-card fade-on-scroll">
+                    <h3>Google AI Studio</h3>
+                    <p>Powerful platform for experimenting with Google's AI models and building AI applications.</p>
+                    <a href="https://aistudio.google.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-1">
+                    <h3>Antigravity</h3>
+                    <p>Advanced AI coding assistant by Google DeepMind for intelligent development workflows.</p>
+                    <a href="https://deepmind.google" target="_blank" class="project-link">Learn More <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-2">
+                    <h3>Hugging Face</h3>
+                    <p>The AI community hub with thousands of pre-trained models and datasets.</p>
+                    <a href="https://huggingface.co" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-3">
+                    <h3>Cursor AI</h3>
+                    <p>AI-powered code editor that helps you write code faster with intelligent suggestions.</p>
+                    <a href="https://cursor.sh" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Image Generation & Editing -->
+        <section class="section-container">
+            <h2 class="section-title">Image Generation</h2>
+            <div class="projects-grid">
+                <div class="glass-card fade-on-scroll">
+                    <h3>Midjourney</h3>
+                    <p>Leading AI art generator creating stunning, high-quality images from text descriptions.</p>
+                    <a href="https://midjourney.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-1">
+                    <h3>DALL-E 3</h3>
+                    <p>OpenAI's advanced image generation model with precise prompt understanding.</p>
+                    <a href="https://openai.com/dall-e-3" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-2">
+                    <h3>Stable Diffusion</h3>
+                    <p>Open-source image generation model with extensive customization options.</p>
+                    <a href="https://stability.ai" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-3">
+                    <h3>Adobe Firefly</h3>
+                    <p>Adobe's generative AI for creative workflows, integrated with Creative Cloud.</p>
+                    <a href="https://firefly.adobe.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll">
+                    <h3>Leonardo AI</h3>
+                    <p>AI-powered creative suite for generating production-ready art and designs.</p>
+                    <a href="https://leonardo.ai" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Generation -->
+        <section class="section-container">
+            <h2 class="section-title">Video & Animation</h2>
+            <div class="projects-grid">
+                <div class="glass-card fade-on-scroll">
+                    <h3>Runway ML</h3>
+                    <p>Advanced AI video generation and editing platform with Gen-2 model.</p>
+                    <a href="https://runwayml.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-1">
+                    <h3>Pika Labs</h3>
+                    <p>AI-powered video creation tool for generating and editing videos from text.</p>
+                    <a href="https://pika.art" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-2">
+                    <h3>Synthesia</h3>
+                    <p>AI video platform for creating professional videos with AI avatars.</p>
+                    <a href="https://synthesia.io" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-3">
+                    <h3>D-ID</h3>
+                    <p>Create talking avatars and animated videos from photos using AI.</p>
+                    <a href="https://d-id.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll">
+                    <h3>Kaiber AI</h3>
+                    <p>Transform images and videos into stunning animations with AI.</p>
+                    <a href="https://kaiber.ai" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio Generation -->
+        <section class="section-container">
+            <h2 class="section-title">Audio & Music</h2>
+            <div class="projects-grid">
+                <div class="glass-card fade-on-scroll">
+                    <h3>Suno AI</h3>
+                    <p>Create complete songs with vocals and instruments from text descriptions.</p>
+                    <a href="https://suno.ai" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-1">
+                    <h3>ElevenLabs</h3>
+                    <p>Advanced AI voice generation and cloning with natural-sounding speech.</p>
+                    <a href="https://elevenlabs.io" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+                <div class="glass-card fade-on-scroll delay-2">
+                    <h3>Udio</h3>
+                    <p>AI music generation platform for creating professional-quality tracks.</p>
+                    <a href="https://udio.com" target="_blank" class="project-link">Visit Website <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Jamal. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

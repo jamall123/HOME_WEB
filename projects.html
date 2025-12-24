@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications | Jamal's Portfolio</title><link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="video-container">
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="assets/video/bg-video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <header class="glass-header">
+        <nav>
+            <div class="logo">JAMAL</div>
+            <button class="hamburger-btn" aria-label="Toggle navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="nav-overlay">
+        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <ul class="nav-links-overlay">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="projects.html" class="nav-link active">Projects</a></li>
+            <li><a href="ai-tools.html" class="nav-link">AI Tools</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <section class="hero-small">
+            <div class="hero-content">
+                <h1 class="fade-in-up">My Applications</h1>
+                <p class="fade-in-up delay-1">A showcase of my recent development projects</p>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="projects-grid">
+                <!-- Camera Avatar App -->
+                <div class="project-card glass-card fade-on-scroll">
+                    <div class="project-icon"><i class="fas fa-camera"></i></div>
+                    <h3>Camera Avatar App</h3>
+                    <p>Interactive web application that uses MediaPipe face tracking to control 3D avatars in real-time.
+                    </p>
+                    <a href="https://jamall123.github.io/Camra-app/?v=1" target="_blank" class="project-link">Launch App
+                        <i class="fas fa-external-link-alt"></i></a>
+                </div>
+
+                <!-- HomePot Bot -->
+                <div class="project-card glass-card fade-on-scroll delay-1">
+                    <div class="project-icon"><i class="fab fa-telegram"></i></div>
+                    <h3>HomePot Bot</h3>
+                    <p>Comprehensive Telegram bot for professional channel management with AI content generation.</p>
+                    <a href="https://t.me/JamalJhome" target="_blank" class="project-link">View Channel <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+
+                <!-- StoreHome Manager -->
+                <div class="project-card glass-card fade-on-scroll delay-2">
+                    <div class="project-icon"><i class="fas fa-store"></i></div>
+                    <h3>StoreHome Manager</h3>
+                    <p>Comprehensive store management solution for inventory tracking and financial accounting.</p>
+                    <a href="https://jamall123.github.io/portfolio/downloads/store_home.apk"
+                        class="project-link">Download APK <i class="fas fa-download"></i></a>
+                </div>
+
+                <!-- Enjaz Todo -->
+                <div class="project-card glass-card fade-on-scroll delay-3">
+                    <div class="project-icon"><i class="fas fa-check-circle"></i></div>
+                    <h3>Enjaz Todo</h3>
+                    <p>Smart task management application designed to help you organize your daily tasks efficiently.</p>
+                    <a href="https://jamall123.github.io/portfolio/downloads/enjaz_todo.apk"
+                        class="project-link">Download APK <i class="fas fa-download"></i></a>
+                </div>
+
+                <!-- TaskFlow Pro -->
+                <div class="project-card glass-card fade-on-scroll">
+                    <div class="project-icon"><i class="fas fa-tasks"></i></div>
+                    <h3>TaskFlow Pro</h3>
+                    <p>Powerful task management application using AI to prioritize tasks and suggest optimal schedules.
+                    </p>
+                    <a href="https://jamall123.github.io/portfolio/applications.html" class="project-link">Download App
+                        <i class="fas fa-download"></i></a>
+                </div>
+
+                <!-- Insight Analytics -->
+                <div class="project-card glass-card fade-on-scroll delay-1">
+                    <div class="project-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Insight Analytics</h3>
+                    <p>Data visualization dashboard providing actionable real-time insights for businesses.</p>
+                    <a href="https://jamall123.github.io/portfolio/applications.html" class="project-link">View Demo <i
+                            class="fas fa-external-link-alt"></i></a>
+                </div>
+
+                <!-- Nexus AI Assistant -->
+                <div class="project-card glass-card fade-on-scroll delay-2">
+                    <div class="project-icon"><i class="fas fa-microphone"></i></div>
+                    <h3>Nexus AI Assistant</h3>
+                    <p>Personal voice-activated AI companion capable of understanding complex natural language queries.
+                    </p>
+                    <a href="https://jamall123.github.io/portfolio/applications.html" class="project-link">View on
+                        AppStore <i class="fas fa-external-link-alt"></i></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Jamal. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
