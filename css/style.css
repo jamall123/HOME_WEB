@@ -8,6 +8,43 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --card-bg: rgba(30, 41, 59, 0.7);
     --hover-bg: rgba(255, 255, 255, 0.1);
+    --success-color: #10b981;
+}
+
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feature-item {
+    padding: 1.5rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-5px);
+}
+
+.feature-item i {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    display: block;
 }
 
 * {
