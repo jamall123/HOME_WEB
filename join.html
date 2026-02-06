@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شارك قصتك | Jhome</title>
+    <meta name="description" content="شارك قصة نجاحك وانضم إلى مجتمع المحترفين السودانيين">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .form-section-title {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .story-preview {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border: 1px dashed var(--glass-border);
+        }
+
+        .preview-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="glass-overlay"></div>
+    </div>
+
+    <header class="glass-header">
+        <nav>
+            <div class="logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
+            <button class="hamburger-btn" aria-label="Toggle navigation">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="nav-overlay">
+        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <ul class="nav-links-overlay">
+            <li><a href="index.html" class="nav-link">الرئيسية</a></li>
+            <li><a href="impact.html" class="nav-link">قصص النجاح</a></li>
+            <li><a href="join.html" class="nav-link active">شارك قصتك</a></li>
+            <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <section class="hero-small">
+            <div class="hero-content">
+                <h1 class="fade-in-up">صوتك يهمنا 🎤</h1>
+                <p class="fade-in-up delay-1">شارك تجربتك لتلهم الآخرين وتكون جزءاً من قصص النجاح</p>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="glass-card fade-on-scroll">
+                <form id="joinForm" class="contact-form">
+                    <h2 class="form-section-title"><i class="fas fa-user-edit"></i> بياناتك المهنية</h2>
+
+                    <div class="contact-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="name">الاسم الكامل <span style="color:red">*</span></label>
+                            <input type="text" id="name" placeholder="محمد أحمد" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">المهنة / التخصص <span style="color:red">*</span></label>
+                            <input type="text" id="role" placeholder="مثال: نجار، مصمم جرافيك، مترجم..." required>
+                        </div>
+                    </div>
+
+                    <div class="contact-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="projects">عدد المشاريع المنجزة (تقريبي)</label>
+                            <input type="number" id="projects" placeholder="مثال: 15">
+                        </div>
+                        <div class="form-group">
+                            <label for="rating">تقييمك الذاتي (من 5)</label>
+                            <select id="rating">
+                                <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                                <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                                <option value="3">⭐⭐⭐ (3/5)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h2 class="form-section-title" style="margin-top: 1.5rem;"><i class="fas fa-quote-right"></i> قصتك
+                        الملهمة</h2>
+                    <div class="form-group">
+                        <label for="story">حدثنا عن تجربتك (كيف ساعدتك التكنولوجيا؟) <span
+                                style="color:red">*</span></label>
+                        <textarea id="story"
+                            placeholder="اكتب هنا باختصار كيف أثر العمل الحر أو التكنولوجيا على دخلك وحياتك..."
+                            required></textarea>
+                    </div>
+
+                    <div class="story-preview">
+                        <span class="preview-title">ستصلنا بياناتك بالشكل التالي:</span>
+                        <p id="previewText" style="color: var(--text-color); font-style: italic;">يرجى تعبئة الحقول
+                            لرؤية المعاينة...</p>
+                    </div>
+
+                    <div class="form-group submit-btn" style="margin-top: 2rem;">
+                        <button type="submit" class="cta-button primary" style="width: 100%;">
+                            <i class="fab fa-whatsapp"></i> إرسال القصة للإدارة
+                        </button>
+                        <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+                            سيتم توجيهك إلى واتساب لإرسال البيانات مباشرة إلى فريق Jhome
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
+            <p class="footer-slogan">التغيير بيدينا</p>
+            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+    <script>
+        // Real-time Preview & WhatsApp Integration
+        const form = document.getElementById('joinForm');
+        const inputs = ['name', 'role', 'story', 'projects', 'rating'];
+
+        // Update preview on input
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updatePreview);
+        });
+
+        function updatePreview() {
+            const name = document.getElementById('name').value || 'الاسم';
+            const role = document.getElementById('role').value || 'المهنة';
+            const story = document.getElementById('story').value || '...';
+
+            document.getElementById('previewText').innerHTML =
+                `أنا <strong>${name}</strong>، أعمل في مجال <strong>${role}</strong>.<br><br>قصتي: "${story}"`;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const role = document.getElementById('role').value;
+            const projects = document.getElementById('projects').value || 'N/A';
+            const rating = document.getElementById('rating').value;
+            const story = document.getElementById('story').value;
+
+            // WhatsApp Phone Number
+            const phoneNumber = "249900578357";
+
+            const message = `
+*🌟 قصة نجاح جديدة - Jhome Impact*
+
+👤 *الاسم:* ${name}
+🛠️ *المهنة:* ${role}
+📊 *عدد المشاريع:* ${projects}
+⭐ *التقييم:* ${rating}/5
+
+💬 *القصة:*
+"${story}"
+
+------------------
+#Jhome_Success_Story
+            `.trim();
+
+            const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        });
+    </script>
+</body>
+
+</html>
