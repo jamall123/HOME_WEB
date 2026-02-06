@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jamal's Portfolio | Developer & Creator</title>
+    <title>Jhome | نحو مجتمع سوداني مُمكّن تقنياً</title>
+    <meta name="description" content="Jhome - منصة سودانية تجمع بين عدالة المهارة وأمان التكنولوجيا لبناء واقع أفضل">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -27,7 +30,9 @@
 
     <header class="glass-header">
         <nav>
-            <div class="logo">JAMAL</div>
+            <div class="logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </div>
             <button class="hamburger-btn" aria-label="Toggle navigation">
                 <span class="bar"></span>
                 <span class="bar"></span>
@@ -40,32 +45,156 @@
     <div class="nav-overlay">
         <button class="close-btn" aria-label="Close navigation">&times;</button>
         <ul class="nav-links-overlay">
-            <li><a href="index.html" class="nav-link">Home</a></li>
-            <li><a href="about.html" class="nav-link">About</a></li>
-            <li><a href="projects.html" class="nav-link">Projects</a></li>
-            <li><a href="ai-tools.html" class="nav-link">AI Tools</a></li>
-            <li><a href="contact.html" class="nav-link">Contact</a></li>
+            <li><a href="index.html" class="nav-link active">الرئيسية</a></li>
+            <li><a href="vision.html" class="nav-link">رؤيتنا</a></li>
+            <li><a href="impact.html" class="nav-link">قصص النجاح</a></li>
+            <li><a href="blog.html" class="nav-link">المدونة</a></li>
+            <li><a href="about.html" class="nav-link">من نحن</a></li>
+            <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
         </ul>
     </div>
 
     <main id="home">
+        <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
-                <h1 class="fade-in-up">Hello, I'm Jamal</h1>
-                <p class="fade-in-up delay-1">Developer | Creator | Tech Enthusiast</p>
-                <div class="hero-btns fade-in-up delay-2">
-                    <a href="projects.html" class="cta-button primary">My Work</a>
-                    <a href="contact.html" class="cta-button secondary">Get in Touch</a>
+                <div class="hero-logo-main fade-in-up">
+                    <span class="hero-j">J</span><span class="hero-home-text">home</span>
+                </div>
+                <h1 class="fade-in-up delay-1">نحو مجتمع سوداني مُمكّن تقنياً</h1>
+                <p class="fade-in-up delay-2">منصتنا تجمع بين عدالة المهارة وأمان التكنولوجيا لبناء واقع أفضل</p>
+                <div class="hero-btns fade-in-up delay-3">
+                    <a href="vision.html" class="cta-button primary">اكتشف رؤيتنا</a>
+                    <a href="#apps-section" class="cta-button secondary">تطبيقاتنا</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured App Section - Sudan Free -->
+        <section id="apps-section" class="section-container">
+            <div class="featured-app-section">
+                <div class="section-header">
+                    <h2 class="section-title">المنتج الرئيسي</h2>
+                    <p class="section-subtitle">تطبيق سودان فري - حيث المهارة هي المدير</p>
+                </div>
+
+                <div class="featured-app glass-card fade-on-scroll">
+                    <div class="featured-app-content">
+                        <div class="app-info">
+                            <div class="app-badge">
+                                <i class="fas fa-star"></i>
+                                <span>المنتج الرائد</span>
+                            </div>
+                            <h3>سودان فري</h3>
+                            <p class="app-tagline">المجتمع الأول للمستقلين في السودان</p>
+                            <p class="app-description">
+                                تطبيق "سودان فري" هو منصة العمل الحر الأولى في السودان، مصممة لربط أصحاب المهارات
+                                بالعملاء مباشرة.
+                                نوفر لكل حرفي ومستقل "معرض أعمال في جيبه" يصل به إلى جمهوره دون واسطة أو محسوبية.
+                            </p>
+                            <ul class="app-features">
+                                <li><i class="fas fa-check-circle"></i> نظام مستويات ثقة متقدم</li>
+                                <li><i class="fas fa-check-circle"></i> حماية من الاحتيال</li>
+                                <li><i class="fas fa-check-circle"></i> معرض أعمال شخصي</li>
+                                <li><i class="fas fa-check-circle"></i> تواصل مباشر وآمن</li>
+                            </ul>
+                            <div class="app-buttons">
+                                <a href="sudan-free.html" class="cta-button primary">
+                                    <i class="fas fa-info-circle"></i> تفاصيل التطبيق
+                                </a>
+                                <a href="assets/downloads/sudan_free.apk" class="cta-button secondary">
+                                    <i class="fas fa-download"></i> تحميل APK
+                                </a>
+                            </div>
+                        </div>
+                        <div class="app-visual">
+                            <div class="phone-mockup">
+                                <div class="phone-screen">
+                                    <div class="app-preview">
+                                        <i class="fas fa-handshake"></i>
+                                        <span>Sudan Free</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="floating-elements">
+                                <div class="float-item float-1"><i class="fas fa-tools"></i></div>
+                                <div class="float-item float-2"><i class="fas fa-paint-brush"></i></div>
+                                <div class="float-item float-3"><i class="fas fa-code"></i></div>
+                                <div class="float-item float-4"><i class="fas fa-camera"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Vision Preview -->
+        <section class="section-container">
+            <div class="vision-preview">
+                <h2 class="section-title">أهدافنا الأساسية</h2>
+                <div class="vision-grid">
+                    <div class="vision-card glass-card fade-on-scroll">
+                        <div class="vision-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>التوعية</h3>
+                        <p>كيف نختار الطريق التقني الصحيح؟</p>
+                        <a href="vision.html#awareness" class="card-link">اقرأ المزيد <i
+                                class="fas fa-arrow-left"></i></a>
+                    </div>
+                    <div class="vision-card glass-card fade-on-scroll delay-1">
+                        <div class="vision-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>الثقة</h3>
+                        <p>بناء أنظمة رقمية تحارب الاحتيال</p>
+                        <a href="vision.html#trust" class="card-link">اقرأ المزيد <i class="fas fa-arrow-left"></i></a>
+                    </div>
+                    <div class="vision-card glass-card fade-on-scroll delay-2">
+                        <div class="vision-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>التمكين</h3>
+                        <p>توفير أدوات العمل الحر للشباب السوداني</p>
+                        <a href="vision.html#empowerment" class="card-link">اقرأ المزيد <i
+                                class="fas fa-arrow-left"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="section-container">
+            <div class="cta-section glass-card fade-on-scroll">
+                <h2>مع بعض نقدر، وبدون بعض ما بنقدر!</h2>
+                <p>انضم إلى مجتمع Jhome وكن جزءاً من التغيير</p>
+                <div class="cta-buttons">
+                    <a href="sudan-free.html" class="cta-button primary">ابدأ الآن</a>
+                    <a href="about.html" class="cta-button secondary">تعرف علينا</a>
                 </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Jamal. All Rights Reserved.</p>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </div>
+            <p class="footer-slogan">التغيير بيدينا</p>
+            <div class="footer-links">
+                <a href="vision.html">رؤيتنا</a>
+                <a href="impact.html">قصص النجاح</a>
+                <a href="blog.html">المدونة</a>
+                <a href="contact.html">تواصل معنا</a>
+            </div>
+            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+        </div>
     </footer>
 
     <script src="js/main.js"></script>
 </body>
 
 </html>
+</CodeContent>
+<parameter name="EmptyFile">false

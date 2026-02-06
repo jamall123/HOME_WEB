@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect With Me | Jamal's Portfolio</title>
+    <title>تواصل معنا | Jhome</title>
+    <meta name="description" content="تواصل مع فريق Jhome - نحن هنا لمساعدتك">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-
     <div class="animated-bg">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -26,11 +25,9 @@
 
     <header class="glass-header">
         <nav>
-            <div class="logo">JAMAL</div>
+            <div class="logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
             <button class="hamburger-btn" aria-label="Toggle navigation">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </button>
         </nav>
     </header>
@@ -38,55 +35,122 @@
     <div class="nav-overlay">
         <button class="close-btn" aria-label="Close navigation">&times;</button>
         <ul class="nav-links-overlay">
-            <li><a href="index.html" class="nav-link">Home</a></li>
-            <li><a href="about.html" class="nav-link">About</a></li>
-            <li><a href="projects.html" class="nav-link">Projects</a></li>
-            <li><a href="ai-tools.html" class="nav-link">AI Tools</a></li>
-            <li><a href="contact.html" class="nav-link active">Contact</a></li>
+            <li><a href="index.html" class="nav-link">الرئيسية</a></li>
+            <li><a href="vision.html" class="nav-link">رؤيتنا</a></li>
+            <li><a href="impact.html" class="nav-link">قصص النجاح</a></li>
+            <li><a href="blog.html" class="nav-link">المدونة</a></li>
+            <li><a href="about.html" class="nav-link">من نحن</a></li>
+            <li><a href="contact.html" class="nav-link active">تواصل معنا</a></li>
         </ul>
     </div>
 
     <main>
         <section class="hero-small">
             <div class="hero-content">
-                <h1 class="fade-in-up">Get In Touch</h1>
-                <p class="fade-in-up delay-1">Let's collaborate on your next project</p>
+                <h1 class="fade-in-up">تواصل معنا 📬</h1>
+                <p class="fade-in-up delay-1">نحن هنا لمساعدتك والإجابة على استفساراتك</p>
             </div>
         </section>
 
         <section class="section-container">
-            <div class="about-content glass-card fade-on-scroll">
-                <h3>Contact Information</h3>
-                <div class="contact-info mt-2">
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <p>ja1827082@gmail.com</p>
+            <div class="contact-grid">
+                <div class="contact-info-section glass-card fade-on-scroll">
+                    <h2>معلومات التواصل</h2>
+                    <div class="contact-items">
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="contact-details">
+                                <h4>البريد الإلكتروني</h4>
+                                <a href="mailto:info@jhome.sd">info@jhome.sd</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+                            <div class="contact-details">
+                                <h4>واتساب</h4>
+                                <a href="https://wa.me/249123456789">+249 123 456 789</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fab fa-telegram"></i></div>
+                            <div class="contact-details">
+                                <h4>تليجرام</h4>
+                                <a href="https://t.me/JamalJhome" target="_blank">@JamalJhome</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="contact-item">
-                        <i class="fas fa-phone"></i>
-                        <p>+249 990 596 880</p>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <p>Sudan, Omdurman</p>
+                    <div class="social-links">
+                        <a href="https://t.me/JamalJhome" class="social-btn" target="_blank"><i
+                                class="fab fa-telegram"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
 
-                <h3 class="mt-2">Follow Me</h3>
-                <div class="social-links mt-2">
-                    <a href="#" class="social-btn"><i class="fab fa-github"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+                <div class="contact-form-section glass-card fade-on-scroll delay-1">
+                    <h2>أرسل رسالة</h2>
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <label for="name">الاسم الكامل</label>
+                            <input type="text" id="name" name="name" required placeholder="اكتب اسمك">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">البريد الإلكتروني</label>
+                            <input type="email" id="email" name="email" required placeholder="بريدك@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">الموضوع</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">اختر الموضوع</option>
+                                <option value="general">استفسار عام</option>
+                                <option value="support">دعم فني</option>
+                                <option value="partnership">شراكة</option>
+                                <option value="suggestion">اقتراح</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">الرسالة</label>
+                            <textarea id="message" name="message" rows="5" required
+                                placeholder="اكتب رسالتك هنا..."></textarea>
+                        </div>
+                        <button type="submit" class="cta-button primary submit-btn">
+                            <i class="fas fa-paper-plane"></i> إرسال الرسالة
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="faq-section glass-card fade-on-scroll">
+                <h2>الأسئلة الشائعة</h2>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <h4><i class="fas fa-question-circle"></i> كيف يمكنني التسجيل في سودان فري؟</h4>
+                        <p>حمّل التطبيق من صفحة التحميل، ثم أنشئ حساباً جديداً باستخدام رقم هاتفك أو بريدك الإلكتروني.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <h4><i class="fas fa-question-circle"></i> هل التطبيق مجاني؟</h4>
+                        <p>نعم، التسجيل والاستخدام مجاني تماماً لجميع المستخدمين.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4><i class="fas fa-question-circle"></i> كيف أرفع مستوى الثقة الخاص بي؟</h4>
+                        <p>من خلال إكمال ملفك الشخصي، إضافة أعمالك، والحصول على تقييمات إيجابية من العملاء.</p>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Jamal. All Rights Reserved.</p>
+        <div class="footer-content">
+            <div class="footer-logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
+            <p class="footer-slogan">التغيير بيدينا</p>
+            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+        </div>
     </footer>
-
     <script src="js/main.js"></script>
 </body>
 
