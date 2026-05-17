@@ -77,6 +77,182 @@
             border-radius: 20px;
             border: 1px solid var(--glass-border);
         }
+
+        .section-desc {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .experience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .experience-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .experience-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .experience-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .experience-card:nth-child(2) .card-icon-wrapper {
+            background: rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.25);
+            color: #a855f7;
+        }
+
+        .experience-card:nth-child(3) .card-icon-wrapper {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.25);
+            color: #3b82f6;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #f8fafc;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .card-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: right;
+        }
+
+        .card-bullets li {
+            position: relative;
+            padding-right: 1.75rem;
+            margin-bottom: 1.25rem;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .card-bullets li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0;
+            top: 2px;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+        }
+
+        .experience-card:nth-child(2) .card-bullets li::before {
+            color: #a855f7;
+        }
+
+        .experience-card:nth-child(3) .card-bullets li::before {
+            color: #3b82f6;
+        }
+
+        .card-bullets li strong {
+            color: #f1f5f9;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 0.25rem;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .impact-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .impact-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .impact-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .impact-icon {
+            font-size: 1.75rem;
+        }
+
+        .impact-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .impact-content {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .impact-content p {
+            margin-bottom: 1rem;
+        }
+        .impact-content p:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
@@ -121,56 +297,116 @@
                 <div class="hero-btns fade-in-up delay-2">
                     <a href="#download-section" class="cta-button primary">تنزيل التطبيق <i
                             class="fas fa-arrow-down"></i></a>
-                    <a href="#whats-new" class="cta-button secondary">ما الجديد؟</a>
+                    <a href="#app-features" class="cta-button secondary">اكتشف التطبيق</a>
                 </div>
             </div>
         </section>
 
-        <section id="whats-new" class="section-container">
-            <h2 class="section-title">🛠️ ما الجديد في هذا الإصدار لتعزيز تجربتك؟</h2>
+        <!-- What is inside SudanFree? -->
+        <section id="app-features" class="section-container">
+            <h2 class="section-title">👥 ماذا سيجد المستخدم في تطبيق سودان فري؟</h2>
+            <p class="section-desc">تم تصميم تطبيق <strong>SudanFree</strong> ليجمع كافة أطراف المجتمع المهني والتجاري في مكان واحد، ويقسم مستخدميه إلى ثلاث فئات رئيسية يجد كل منهم قيمة فريدة ومميزات متكاملة:</p>
+            
+            <div class="experience-grid">
+                <!-- Client Card -->
+                <div class="experience-card fade-on-scroll">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="card-title">🔍 أولاً: الزبون (المواطن الباحث عن خدمة)</h3>
+                    <ul class="card-bullets">
+                        <li><strong>دليل مهني فوري وموثوق:</strong> الوصول إلى مئات الكهربائيين، السباكين، الفنيين، المهندسين، المعلمين، والمصممين القريبين منه جغرافياً.</li>
+                        <li><strong>تغطية شاملة للمتاجر المحلية:</strong> استعراض المتاجر، المغالق، ومحلات قطع الغيار القريبة لمعرفة توفر السلع والأسعار قبل التحرك.</li>
+                        <li><strong>البحث الذكي حسب الولاية والمنطقة:</strong> اختيار الولاية والمنطقة (مثلاً: ولاية الخرطوم، ولاية الجزيرة، ولاية البحر الأحمر) للوصول إلى أقرب مقدم خدمة وتوفير تكاليف النقل والمواصلات.</li>
+                        <li><strong>نظام تقييم حقيقي:</strong> الاطلاع على تقييمات وآراء زبائن سابقين حقيقيين حول جودة عمل المهني ومصداقيته لضمان اختيار الشخص المناسب.</li>
+                        <li><strong>تواصل مباشر وآمن:</strong> دردشة فورية مع مقدم الخدمة، مع القدرة على توثيق الاتفاق وعمل عقد رقمي يحمي حقه المالي ويضمن جودة التنفيذ.</li>
+                    </ul>
+                </div>
 
-            <div class="glass-card fade-on-scroll">
-                <div class="update-item">
-                    <h3>🎯 تركيز كامل على الخدمات الأساسية</h3>
-                    <p>قمنا بتبسيط التطبيق ليركز حصرياً على الخدمات العامة والحرفيين في هذه المرحلة. لا تشتت بعد اليوم؛
-                        ستجد أو تقدم الخدمة التي تبحث عنها مباشرة بمجرد فتح التطبيق! (أما المتاجر والخدمات التقنية
-                        والمجتمع، فجهزنا لها مفاجآت ستأتي قريباً 🤫).</p>
+                <!-- Freelancer Card -->
+                <div class="experience-card fade-on-scroll">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="card-title">🔨 ثانياً: الحرفي ومقدم الخدمة (الفريلانسر)</h3>
+                    <ul class="card-bullets">
+                        <li><strong>سوق عمل مفتوح ومجاني:</strong> منصة لعرض مهاراتهم وجلب زبائن جدد يومياً دون الحاجة لدفع عمولات لأي جهة.</li>
+                        <li><strong>معرض أعمال متكامل (Portfolio):</strong> إمكانية رفع صور وفيديوهات لأعمالهم السابقة (مثل تصاميم ديكور، أعمال سباكة، صيانة سيارات) لإثبات جودة عملهم وجذب الزبائن.</li>
+                        <li><strong>هوية مهنية موثوقة:</strong> الحصول على تقييمات إيجابية تبني سمعتهم وتجعلهم الخيار الأول في منطقتهم.</li>
+                        <li><strong>عقود تضمن مستحقاتهم:</strong> إمكانية إرسال عقد للزبون داخل الدردشة يوضح السعر والمستندات المطلوبة، لضمان عدم التلاعب في المستحقات بعد إنهاء العمل.</li>
+                    </ul>
+                </div>
+
+                <!-- Shop Owner Card -->
+                <div class="experience-card fade-on-scroll">
+                    <div class="card-icon-wrapper">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3 class="card-title">🏪 ثالثاً: صاحب المتجر والمحل (Shop Owner)</h3>
+                    <ul class="card-bullets">
+                        <li><strong>متجر رقمي مصغر:</strong> عرض المنتجات، الخدمات، قطع الغيار، ومواد البناء مع أسعارها وتحديثها بمرونة وسهولة.</li>
+                        <li><strong>جذب زبائن الحي والمدينة:</strong> إظهار المتجر للزبائن الباحثين عن بضائع قريبة، مما يزيد من مبيعات المحل الفعلية على أرض الواقع.</li>
+                        <li><strong>قنوات اتصال مباشرة:</strong> تواصل مباشر وآمن مع الزبائن لتأكيد الطلبات وتنسيق عمليات التوصيل أو الاستلام.</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <section class="section-container">
-            <h2 class="section-title">🌍 رسالة التطبيق</h2>
-            <div class="glass-card fade-on-scroll message-card"
-                style="padding: 2rem; border-radius: 20px; border: 1px solid var(--glass-border); line-height: 1.8; margin-bottom: 2rem; background: rgba(255, 255, 255, 0.05);">
-                <p style="margin-bottom: 1rem;">سودفري تطبيق سوداني مخصص لمساعدة أبناء الوطن داخل الحدود السودانية في
-                    إيجاد فرص عمل وتقديم خدماتهم. سواء كنت حرفياً، تقنياً، أو صاحب متجر — سودفري يربطك بمن يحتاجك.</p>
-                <p>أما إذا كنت خارج السودان، يمكنك الانضمام كـ عميل لتصفح الخدمات وتقديم طلباتك ليخدمك السودانيون
-                    الموجودون في الداخل.</p>
-                <p style="margin-top: 1rem; font-weight: bold; color: var(--primary-color);">معاً نبني، معاً نخدم. 🇸🇩
-                </p>
+        <!-- Social Impact Section -->
+        <section id="social-impact" class="section-container">
+            <h2 class="section-title">🇸🇩 كيف يخدم تطبيق "SudanFree" المجتمع السوداني ويسعده؟</h2>
+            <p class="section-desc">يأتي تطبيق <strong>SudanFree</strong> ليكون أداة تمكين ومساندة حقيقية للمجتمع السوداني في ظل الظروف الراهنة، ويسهم في إسعاده وتخفيف الأعباء اليومية عنه عبر عدة محاور استراتيجية:</p>
+
+            <div class="impact-grid">
+                <!-- Unemployment & Alternative Economy -->
+                <div class="impact-card fade-on-scroll">
+                    <div class="impact-header">
+                        <span class="impact-icon">📈</span>
+                        <h3 class="impact-title">محاربة البطالة ودعم الاقتصاد البديل</h3>
+                    </div>
+                    <div class="impact-content">
+                        <p><strong>خلق فرص عمل ذاتية:</strong> يتيح لأي شاب سوداني يمتلك مهارة (سواء كان خريجاً جامعياً أو حرفياً يدوياً) أن يبدأ فوراً في تقديم خدماته وكسب رزقه دون شروط معقدة أو رأس مال كبير.</p>
+                        <p><strong>دعم الأسر المنتجة:</strong> يوفر للمرأة السودانية وأصحاب الحرف المنزلية منصة لعرض منتجاتهم (أطعمة، مشغولات يدوية، خياطة) للجمهور مباشرة، مما يدعم دخل الأسرة ويعزز استقلالها المالي.</p>
+                    </div>
+                </div>
+
+                <!-- Saving Time & Effort -->
+                <div class="impact-card fade-on-scroll">
+                    <div class="impact-header">
+                        <span class="impact-icon">⏱️</span>
+                        <h3 class="impact-title">توفير الوقت والجهد في الظروف الصعبة</h3>
+                    </div>
+                    <div class="impact-content">
+                        <p>في ظل التحديات الحالية وصعوبة الحركة في بعض المناطق، يغني التطبيق المواطن تماماً عن الخروج والبحث الطويل في الأسواق عن فني صيانة أو كهربائي طوارئ.</p>
+                        <p>بضغطة زر واحدة، يمكن للزبون العثور على الفني المناسب, الاتفاق معه، وحضور المهني مباشرة إلى المنزل، مما يختصر جهداً هائلاً ويوفر تكاليف المواصلات المرتفعة.</p>
+                    </div>
+                </div>
+
+                <!-- Solidary Community -->
+                <div class="impact-card fade-on-scroll">
+                    <div class="impact-header">
+                        <span class="impact-icon">🤝</span>
+                        <h3 class="impact-title">بناء مجتمع مهني متكاتف وموثوق</h3>
+                    </div>
+                    <div class="impact-content">
+                        <p><strong>الثقة والشفافية:</strong> من خلال نظام التقييم والعقود، يقضي التطبيق على العشوائية والخلافات التي تحدث غالباً بين الزبائن والعمال المهنيين حول الأسعار وجودة العمل.</p>
+                        <p><strong>دعم المنتجات والخدمات المحلية:</strong> يشجع المواطنين على الشراء والتعامل مع جيرانهم وأصحاب المحلات المهنية في نفس منطقتهم، مما يبقي الكتلة النقدية داخل المجتمع المحلي ويدعم تماسكه الاقتصادي.</p>
+                    </div>
+                </div>
+
+                <!-- Network and Data Saving -->
+                <div class="impact-card fade-on-scroll">
+                    <div class="impact-header">
+                        <span class="impact-icon">🌐</span>
+                        <h3 class="impact-title">مراعاة لواقع الإنترنت والشبكات في السودان</h3>
+                    </div>
+                    <div class="impact-content">
+                        <p>تم بناء التطبيق وتطوير منطق العمل فيه بعناية ليعمل بأقل استهلاك ممكن لبيانات الهاتف (Data Saver) نظراً لارتفاع تكلفة باقات الإنترنت الحالية في السودان.</p>
+                        <p>يعتمد نظام التخزين المؤقت المحلي للبيانات والصور، ويدعم نظام الإشعارات الذكي الذي يقلل الحاجة للبقاء متصلاً بالإنترنت طوال الوقت لترقب الطلبات الجديدة.</p>
+                    </div>
+                </div>
             </div>
         </section>
-
-        <section class="section-container">
-            <h2 class="section-title">💡 لماذا تختار "سودان فري" لمشروعك؟</h2>
-            <div class="feature-grid">
-                <div class="feature-item glass-card fade-on-scroll">
-                    <i class="fas fa-cut"></i>
-                    <h3>للخياطين والمصممين</h3>
-                    <p>حوّل هاتفك إلى صالة عرض متنقلة، واعرض تصاميمك وآخر أعمالك لآلاف السودانيين.</p>
-                </div>
-                <div class="feature-item glass-card fade-on-scroll delay-1">
-                    <i class="fas fa-tools"></i>
-                    <h3>للمقاولين والحرفيين</h3>
-                    <p>تبغى "حريف"؟ سودان فري هو مكانك لتجد الشخص المناسب أو لتعرض مهاراتك وتزيد دخلك.</p>
-                </div>
-                <div class="feature-item glass-card fade-on-scroll delay-2">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3>للمشترين</h3>
-                    <p>ابحث بالولاية والمحلية، وقارن بين التقييمات، وتواصل مباشرة مع صاحب الخدمة.</p>
-                </div>
-            </div>
 
             <div id="download-section" class="download-section fade-on-scroll mt-2">
                 <h2 class="text-gradient mb-2" style="margin-bottom: 2rem;">📥 حمل النسخة المناسبة لجهازك!</h2>
