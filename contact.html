@@ -116,6 +116,61 @@
                 </aside>
             </div>
         </section>
+
+        <!-- شاركنا قصتك -->
+        <section class="section-container mt-4">
+            <div class="glass-card" style="padding: 2rem;">
+                <h2 style="margin-bottom: 1rem;"><i class="fas fa-bullhorn"></i> شاركنا قصة نجاحك</h2>
+                <p style="margin-bottom: 2rem; color: #cbd5e1;">هل لديك تجربة ملهمة مع العمل الحر أو تطبيق سودان فري؟ شاركنا قصتك ليقرأها الآلاف!</p>
+                <form id="storyForm" class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="storyName">الاسم *</label>
+                            <input type="text" id="storyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="storyEmail">البريد *</label>
+                            <input type="email" id="storyEmail" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileLink">رابط ملفك (مثال: سودان فري) - اختياري</label>
+                        <input type="url" id="profileLink" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="storyContent">القصة *</label>
+                        <textarea id="storyContent" required rows="5"></textarea>
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 10px; align-items: center; margin-bottom: 1.5rem;">
+                        <input type="checkbox" id="storyConsent" required style="width: auto; margin: 0;">
+                        <label for="storyConsent" style="margin: 0; cursor: pointer;">أوافق على نشر قصتي في موقع Jhome</label>
+                    </div>
+                    <button type="submit" class="cta-button secondary" id="storyBtn">
+                        <i class="fas fa-share"></i> إرسال القصة
+                    </button>
+                    <div id="storyMessage" class="form-message"></div>
+                </form>
+            </div>
+        </section>
+
+        <!-- الأسئلة الشائعة -->
+        <section class="section-container mt-4">
+            <h2 class="section-title">❓ الأسئلة الشائعة</h2>
+            <div class="faq-grid" style="display: grid; gap: 1.5rem; max-width: 800px; margin: 0 auto;">
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">هل تطبيق سودان فري مجاني؟</h3>
+                    <p style="color: #cbd5e1;">نعم، التطبيق مجاني بالكامل للحرفيين والزبائن ولا يتم أخذ عمولات على العمليات المنفذة بين الطرفين.</p>
+                </div>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">كيف أضمن حقي كزبون أو حرفي؟</h3>
+                    <p style="color: #cbd5e1;">وفرنا نظام "العقود الرقمية" داخل الدردشة حيث يتم توثيق الاتفاق والسعر مسبقاً، بالإضافة لنظام تقييمات حقيقي لحماية المجتمع.</p>
+                </div>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">لدي فكرة تطبيق تخدم السودان، هل يمكنكم مساعدتي؟</h3>
+                    <p style="color: #cbd5e1;">بالتأكيد! مؤسسة Jhome تدعم الأفكار التقنية. يرجى إرسال رسالة عبر نموذج التواصل (أعلاه) وتحديد الموضوع كـ "شراكة".</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -142,6 +197,7 @@
     <script src="js/api-client.js"></script>
     <script src="js/main.js"></script>
     <script>
+      // Contact Form
       document.getElementById('contactForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('contactBtn');
@@ -168,6 +224,36 @@
           btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال';
         }
       });
+
+      // Story Form
+      const storyForm = document.getElementById('storyForm');
+      if (storyForm) {
+        storyForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById('storyBtn');
+          const msg = document.getElementById('storyMessage');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+          try {
+            await JHomeAPI.submitStory({
+              authorName: document.getElementById('storyName').value.trim(),
+              email: document.getElementById('storyEmail').value.trim(),
+              profileLink: document.getElementById('profileLink').value.trim(),
+              content: document.getElementById('storyContent').value.trim(),
+            });
+            if (window.JHomeAPI) JHomeAPI.trackEvent('story_submit');
+            msg.textContent = '✅ شكراً لك! تم إرسال قصتك للمراجعة.';
+            msg.className = 'form-message success';
+            e.target.reset();
+          } catch (err) {
+            msg.textContent = err.message || 'حدث خطأ في الإرسال';
+            msg.className = 'form-message error';
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-share"></i> إرسال القصة';
+          }
+        });
+      }
     </script>
 </body>
 </html>
