@@ -240,12 +240,20 @@
           btn.disabled = true;
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
           try {
+            const authorName = document.getElementById('storyName').value.trim();
+            const profileLink = document.getElementById('profileLink').value.trim();
+            const storyText = document.getElementById('storyContent').value.trim();
+            
+            const fullStory = profileLink ? storyText + '\n\nرابط الملف الشخصي: ' + profileLink : storyText;
+
             await JHomeAPI.submitStory({
-              authorName: document.getElementById('storyName').value.trim(),
-              email: document.getElementById('storyEmail').value.trim(),
-              profileLink: document.getElementById('profileLink').value.trim(),
-              content: document.getElementById('storyContent').value.trim(),
+              submitterName: authorName,
+              submitterEmail: document.getElementById('storyEmail').value.trim(),
+              title: 'قصة نجاح من ' + authorName,
+              story: fullStory,
+              category: 'مشاركة زائر'
             });
+
             if (window.JHomeAPI) JHomeAPI.trackEvent('story_submit');
             msg.textContent = '✅ شكراً لك! تم إرسال قصتك للمراجعة.';
             msg.className = 'form-message success';
