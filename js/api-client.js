@@ -38,8 +38,10 @@
     let q = db.collection('posts').where('status', '==', 'published');
     if (category) q = q.where('category', '==', category);
     if (featured) q = q.where('isFeatured', '==', true);
-    const snap = await q.orderBy('publishedAt', 'desc').limit(limit).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await q.get();
+    let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a, b) => (b.publishedAt || b.createdAt || 0) - (a.publishedAt || a.createdAt || 0));
+    return docs.slice(0, limit);
   }
 
   async function getPostBySlug(slug) {
@@ -62,8 +64,10 @@
   async function getStories({ limit = 6, category = null } = {}) {
     let q = db.collection('successStories').where('isPublished', '==', true);
     if (category) q = q.where('category', '==', category);
-    const snap = await q.orderBy('publishedAt', 'desc').limit(limit).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await q.get();
+    let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a, b) => (b.publishedAt || b.createdAt || 0) - (a.publishedAt || a.createdAt || 0));
+    return docs.slice(0, limit);
   }
 
   // ============ Page Content (محتوى الصفحات) ============

@@ -90,6 +90,7 @@
         submitterName: document.getElementById('submitterName').value.trim(),
         submitterEmail: document.getElementById('submitterEmail').value.trim(),
         submitterPhone: document.getElementById('submitterPhone').value.trim(),
+        profileLink: document.getElementById('profileLink').value.trim(),
         title: document.getElementById('title').value.trim(),
         story: document.getElementById('story').value.trim(),
         category: document.getElementById('category').value,

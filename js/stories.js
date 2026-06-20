@@ -74,6 +74,7 @@
             ${story.category ? `<span class="story-category">${escapeHtml(story.category)}</span>` : ''}
             ${date ? `<span><i class="fas fa-calendar"></i> ${date}</span>` : ''}
           </div>
+          ${story.profileLink ? `<a href="${encodeURI(story.profileLink)}" target="_blank" class="cta-button secondary" style="margin-top: 15px; text-align: center; font-size: 0.9rem; padding: 0.5rem;"><i class="fas fa-external-link-alt"></i> مشاهدة ملف الحرفي</a>` : ''}
         </div>
       </article>
     `;
