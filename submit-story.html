@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاركنا قصتك | Jhome</title>
+    <meta name="description" content="شاركنا تجربتك مع Jhome أو SudFree — قصتك قد تُلهم غيرك">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/forms.css">
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="glass-overlay"></div>
+    </div>
+
+    <header class="glass-header">
+        <nav>
+            <a href="index.html" class="logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </a>
+            <button class="hamburger-btn" aria-label="Toggle navigation">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </button>
+        </nav>
+    </header>
+
+    <div class="nav-overlay">
+        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <ul class="nav-links-overlay">
+            <li><a href="index.html" class="nav-link">الرئيسية</a></li>
+            <li><a href="blog.html" class="nav-link">المدونة</a></li>
+            <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
+            <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <section class="page-hero">
+            <div class="hero-content">
+                <h1 class="fade-in-up">شاركنا قصتك ✍️</h1>
+                <p class="fade-in-up delay-1">تجربتك قد تُلهم شخصاً آخر ليبدأ رحلته معنا</p>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="form-container glass-card">
+                <form id="storyForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="submitterName">الاسم الكامل *</label>
+                            <input type="text" id="submitterName" required minlength="2" maxlength="80">
+                        </div>
+                        <div class="form-group">
+                            <label for="submitterEmail">البريد الإلكتروني *</label>
+                            <input type="email" id="submitterEmail" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="submitterPhone">رقم الهاتف (اختياري)</label>
+                            <input type="tel" id="submitterPhone" placeholder="+249XXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">الفئة</label>
+                            <select id="category">
+                                <option value="حرفي">حرفي / مستقل</option>
+                                <option value="متجر">صاحب متجر</option>
+                                <option value="عميل">عميل</option>
+                                <option value="موظف">موظف</option>
+                                <option value="عام">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">عنوان القصة *</label>
+                        <input type="text" id="title" required minlength="5" maxlength="120" placeholder="مثلاً: كيف بدأت كسباك وحققت 200 عميل في 3 أشهر">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="story">القصة *</label>
+                        <textarea id="story" required minlength="50" rows="8" placeholder="احكِ لنا تجربتك بالتفصيل — ما المشكلة التي كنت تواجهها؟ كيف ساعدك Jhome/SudFree؟ ما النتيجة؟"></textarea>
+                        <small class="char-counter"><span id="charCount">0</span> / 50 حرف على الأقل</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الصور (اختياري، حتى 3 صور)</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>اضغط هنا أو اسحب الصور</p>
+                            <small>JPG, PNG حتى 5MB لكل صورة</small>
+                            <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                        </div>
+                        <div id="filePreview" class="file-preview"></div>
+                    </div>
+
+                    <div class="form-group form-checkbox">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <label for="agreeTerms">أوافق على نشر قصتي على موقع Jhome بعد مراجعتها من الفريق *</label>
+                    </div>
+
+                    <button type="submit" class="cta-button primary" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> إرسال القصة
+                    </button>
+
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+            </div>
+        </section>
+
+        <section class="section-container">
+            <div class="info-grid">
+                <div class="info-card glass-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>خصوصيتك أولاً</h3>
+                    <p>لا نشارك بياناتك مع أي طرف ثالث. اسمك يظهر فقط بعد موافقتك.</p>
+                </div>
+                <div class="info-card glass-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>مراجعة سريعة</h3>
+                    <p>فريقنا يراجع القصص خلال 48 ساعة من استلامها.</p>
+                </div>
+                <div class="info-card glass-card">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>وصول أوسع</h3>
+                    <p>بعد النشر، نشارك قصتك على السوشيال ميديا لتصل لآلاف الأشخاص.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <a href="index.html" class="footer-logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </a>
+            <p class="footer-slogan">التغيير بيدينا</p>
+            <div class="footer-links">
+                <a href="blog.html">المدونة</a>
+                <a href="stories.html">قصص النجاح</a>
+                <a href="contact.html">تواصل معنا</a>
+            </div>
+            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/submit-story.js"></script>
+</body>
+</html>

@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المدونة | Jhome</title>
-    <meta name="description" content="مقالات وأخبار وآخر تحديثات من Jhome">
+    <title id="pageTitle">مقال | Jhome</title>
+    <meta name="description" id="pageDescription" content="">
+    <meta property="og:title" id="ogTitle" content="">
+    <meta property="og:description" id="ogDescription" content="">
+    <meta property="og:image" id="ogImage" content="">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/blog.css">
+    <link rel="stylesheet" href="css/post.css">
 </head>
 <body>
     <div class="animated-bg">
@@ -40,50 +41,26 @@
             <li><a href="blog.html" class="nav-link active">المدونة</a></li>
             <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="submit-story.html" class="nav-link">شاركنا قصتك</a></li>
         </ul>
     </div>
 
     <main>
-        <section class="page-hero">
-            <div class="hero-content">
-                <h1 class="fade-in-up">المدونة</h1>
-                <p class="fade-in-up delay-1">أفكار، أخبار، ومقالات من فريق Jhome</p>
-            </div>
+        <article class="post-article" id="postContent">
+            <div class="loading-state"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>
+        </article>
+
+        <!-- مقالات ذات صلة -->
+        <section class="section-container" id="relatedSection" style="display:none">
+            <h2 class="section-title">مقالات ذات صلة</h2>
+            <div class="related-grid" id="relatedGrid"></div>
         </section>
 
+        <!-- CTA -->
         <section class="section-container">
-            <!-- فلتر التصنيفات -->
-            <div class="blog-filters" id="blogFilters">
-                <button class="filter-btn active" data-category="all">الكل</button>
-                <button class="filter-btn" data-category="تقنية">تقنية</button>
-                <button class="filter-btn" data-category="أخبار">أخبار</button>
-                <button class="filter-btn" data-category="رؤية">رؤية</button>
-                <button class="filter-btn" data-category="قصص نجاح">قصص نجاح</button>
-            </div>
-
-            <!-- الشبكة -->
-            <div class="blog-grid" id="blogGrid">
-                <div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>
-            </div>
-
-            <!-- زر تحميل المزيد -->
-            <div class="load-more-wrap">
-                <button class="cta-button secondary" id="loadMoreBtn" style="display:none">تحميل المزيد</button>
-            </div>
-        </section>
-
-        <!-- اشتراك في النشرة -->
-        <section class="section-container">
-            <div class="newsletter-card glass-card">
-                <div class="newsletter-icon"><i class="fas fa-envelope"></i></div>
-                <h2>اشترك في نشرتنا البريدية</h2>
-                <p>آخر المقالات والتحديثات تصلك مباشرة في بريدك</p>
-                <form id="newsletterForm" class="newsletter-form">
-                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني" required>
-                    <button type="submit" class="cta-button primary">اشتراك</button>
-                </form>
-                <div id="newsletterMessage" class="form-message"></div>
+            <div class="cta-section glass-card">
+                <h2>عندك فكرة لمشروعك التقني؟</h2>
+                <p>فريق Jhome مستعد لمساعدتك في تحويل فكرتك إلى واقع</p>
+                <a href="contact.html" class="cta-button primary">تواصل معنا</a>
             </div>
         </section>
     </main>
@@ -98,19 +75,17 @@
                 <a href="blog.html">المدونة</a>
                 <a href="stories.html">قصص النجاح</a>
                 <a href="contact.html">تواصل معنا</a>
-                <a href="submit-story.html">شاركنا قصتك</a>
             </div>
             <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/blog.js"></script>
+    <script src="js/post.js"></script>
 </body>
 </html>
