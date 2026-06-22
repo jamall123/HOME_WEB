@@ -77,8 +77,8 @@
                 <div class="hero-logo-main fade-in-up">
                     <span class="hero-j">J</span><span class="hero-home-text">home</span>
                 </div>
-                <h1 class="fade-in-up delay-1">مؤسسة Jhome</h1>
-                <p class="fade-in-up delay-2">نبني الحاضر.. ونبرمج المستقبل</p>
+                <h1 class="fade-in-up delay-1" data-dynamic="heroTitle">مؤسسة Jhome</h1>
+                <p class="fade-in-up delay-2" data-dynamic="heroSubtitle">نبني الحاضر.. ونبرمج المستقبل</p>
                 <div class="hero-btns fade-in-up delay-3">
                     <a href="projects.html" class="cta-button primary">اكتشف مشاريعنا</a>
                 </div>
@@ -88,7 +88,7 @@
         <!-- 2. ماذا نفعل -->
         <section class="section-container">
             <div class="vision-preview">
-                <h2 class="section-title">ماذا نفعل؟</h2>
+                <h2 class="section-title" data-dynamic="servicesTitle">ماذا نفعل؟</h2>
                 <div class="vision-grid">
                     <div class="vision-card glass-card fade-on-scroll">
                         <div class="vision-icon"><i class="fas fa-lightbulb"></i></div>
@@ -184,6 +184,13 @@
         </div>
     </footer>
 
+        <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/dynamic-content.js"></script>
     <script src="js/main.js"></script>
 </body>
 
