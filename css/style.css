@@ -1832,3 +1832,7 @@ footer {
         display: none !important;
     }
 }
+
+main {
+    padding-top: 90px;
+}
