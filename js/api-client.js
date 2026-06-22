@@ -11,7 +11,7 @@
     firebase.initializeApp(window.FIREBASE_CONFIG);
   }
   const db = firebase.firestore();
-  const functions = firebase.functions(window.FUNCTIONS_REGION);
+  const functions = firebase.app().functions(window.FUNCTIONS_REGION);
 
   // ============ Track Event (analytics) ============
   async function trackEvent(eventName, eventData = {}) {
