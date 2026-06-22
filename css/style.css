@@ -1799,3 +1799,36 @@ footer {
     font-size: 0.9rem;
     color: var(--text-muted);
 }
+/* Desktop Navigation */
+.desktop-nav {
+    display: none;
+    list-style: none;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.desktop-nav li a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.desktop-nav li a:hover, .desktop-nav li a.active {
+    color: var(--primary-color);
+}
+
+@media (min-width: 1024px) {
+    .desktop-nav {
+        display: flex;
+    }
+    .hamburger-btn {
+        display: none !important;
+    }
+    .nav-overlay {
+        display: none !important;
+    }
+}
