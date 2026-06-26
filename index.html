@@ -4,48 +4,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jhome | نحو مجتمع سوداني مُمكّن تقنياً</title>
-    <meta name="description" content="Jhome - منصة سودانية تجمع بين عدالة المهارة وأمان التكنولوجيا لبناء واقع أفضل">
+    <title>عن المؤسس | Jhome</title>
+    <meta name="description" content="جمال أحمد إبراهيم — مؤسس Jhome. تعرف على رؤيتنا ومسيرتنا في بناء حلول تقنية للسوق السوداني.">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="css/style.css?v=1782115132328">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css?v=2026062502">
+    <link rel="stylesheet" href="css/founder.css?v=2026062502">
 </head>
 
 <body>
-
-    <!-- Animated Background -->
-    <div class="animated-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="glass-overlay"></div>
-    </div>
-
+    <!-- Header -->
     <header class="glass-header">
         <nav style="display: flex; align-items: center; justify-content: space-between;">
             <a href="index.html" class="logo" style="text-decoration: none;">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            
-        <ul class="desktop-nav">
-            <li><a href="index.html" class="active">الرئيسية</a></li>
-            <li><a href="about.html" class="">من نحن</a></li>
-            <li><a href="founder.html" class="">عن المؤسس</a></li>
-            <li><a href="projects.html" class="">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="">سودان فري</a></li>
-            <li><a href="impact.html" class="">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="">قصص النجاح</a></li>
-            <li><a href="blog.html" class="">المدونة</a></li>
-        </ul>
+            <ul class="desktop-nav">
+                <li><a href="index.html" class="active">الرئيسية</a></li>
+                <li><a href="about.html">من نحن</a></li>
+                <li><a href="projects.html">مشاريعنا</a></li>
+                <li><a href="sudan-free.html">سودان فري</a></li>
+                <li><a href="contact.html">تواصل</a></li>
+                <li><a href="blog.html">المدونة</a></li>
+            </ul>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1rem; font-size: 0.9rem; border-radius: 50px;">حمل التطبيق <i class="fas fa-download"></i></a>
+                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1.2rem; font-size: 0.9rem; border-radius: 50px;">
+                    حمّل التطبيق <i class="fas fa-download"></i>
+                </a>
                 <button class="hamburger-btn" aria-label="Toggle navigation">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -55,146 +43,156 @@
         </nav>
     </header>
 
-    <!-- Navigation Overlay -->
+    <!-- Mobile Nav Overlay -->
     <div class="nav-overlay">
         <button class="close-btn" aria-label="Close navigation">&times;</button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link active">الرئيسية</a></li>
             <li><a href="about.html" class="nav-link">من نحن</a></li>
-            <li><a href="founder.html" class="nav-link">عن المؤسس</a></li>
             <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
             <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
             <li><a href="blog.html" class="nav-link">المدونة</a></li>
-            <li><a href="impact.html" class="nav-link">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
-            <li><a href="join.html" class="nav-link">شارك قصتك كحرفي</a></li>
         </ul>
     </div>
 
-    <main id="home">
-        <!-- 1. Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <div class="hero-logo-main fade-in-up">
-                    <span class="hero-j">J</span><span class="hero-home-text">home</span>
+    <main class="founder-page-container">
+        <!-- 1. Profile Header Section -->
+        <section class="profile-header">
+            <div class="profile-cover"></div>
+            <div class="profile-info-container">
+                <div class="profile-avatar-wrap">
+                    <img src="assets/images/jamal_real.jpg" alt="جمال أحمد إبراهيم" class="profile-avatar">
                 </div>
-                <h1 class="fade-in-up delay-1" data-dynamic="heroTitle">مؤسسة Jhome</h1>
-                <p class="fade-in-up delay-2" data-dynamic="heroSubtitle">نبني الحاضر.. ونبرمج المستقبل</p>
-                <div class="hero-btns fade-in-up delay-3">
-                    <a href="projects.html" class="cta-button primary">اكتشف مشاريعنا</a>
-                    <a href="founder.html" class="cta-button secondary">تعرف على المؤسس</a>
+                
+                <div class="profile-details">
+                    <div class="profile-title-area">
+                        <h1 class="profile-name">جمال أحمد إبراهيم</h1>
+                        <span class="profile-role">Founder & CEO, Jhome</span>
+                    </div>
+                    
+                    <p class="profile-bio">
+                        شغوف بالتقنية والذكاء الاصطناعي وريادة الأعمال. 
+                        أبني حلولاً رقمية ذكية للسوق السوداني تحديداً لتحويل المهارات المحلية إلى قيمة اقتصادية حقيقية.
+                    </p>
+                    
+                    <div class="profile-socials">
+                        <a href="https://www.linkedin.com/in/جمال-احمد-129b4a371" target="_blank" title="LinkedIn" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://x.com/x2URmcyJ1HLKmSH" target="_blank" title="X (Twitter)" class="social-icon"><i class="fab fa-x-twitter"></i></a>
+                        <a href="https://www.instagram.com/jmalahmdabrahym93?igsh=dzJrbnd2ZHBqaDRy" target="_blank" title="Instagram" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/share/1LgLijnTt8/" target="_blank" title="Facebook" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.tiktok.com/@jhome0165?_r=1&_t=ZS-97VhvaxjqZs" target="_blank" title="TikTok" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://t.me/JamalJhome" target="_blank" title="Telegram" class="social-icon"><i class="fab fa-telegram-plane"></i></a>
+                    </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- 2. ماذا نفعل -->
-        <section class="section-container">
-            <div class="vision-preview">
-                <h2 class="section-title" data-dynamic="servicesTitle">ماذا نفعل؟</h2>
-                <div class="vision-grid">
-                    <div class="vision-card glass-card fade-on-scroll">
-                        <div class="vision-icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>التوعية</h3>
-                        <p>تبسيط المفاهيم التقنية للجميع</p>
-                    </div>
-                    <div class="vision-card glass-card fade-on-scroll delay-1">
-                        <div class="vision-icon"><i class="fas fa-shield-alt"></i></div>
-                        <h3>الثقة</h3>
-                        <p>بيئة رقمية آمنة خالية من الاحتيال</p>
-                    </div>
-                    <div class="vision-card glass-card fade-on-scroll delay-2">
-                        <div class="vision-icon"><i class="fas fa-rocket"></i></div>
-                        <h3>التمكين</h3>
-                        <p>أدوات العمل الحر للشباب السوداني</p>
-                    </div>
+                
+                <div class="profile-actions">
+                    <a href="contact.html" class="btn-primary"><i class="fas fa-envelope"></i> تواصل معي</a>
                 </div>
             </div>
         </section>
 
-        <!-- 3. المنتج الرئيسي -->
-        <section id="apps-section" class="section-container">
-            <div class="featured-app-section">
-                <h2 class="section-title">المنتج الرئيسي</h2>
-                <div class="featured-app glass-card fade-on-scroll">
-                    <div class="featured-app-content" style="grid-template-columns: 1fr;">
-                        <div class="app-info" style="text-align: center;">
+        <!-- 2. Main Content Grid -->
+        <div class="founder-content-grid">
+            
+            <!-- Left Column (Main Info) -->
+            <div class="main-column">
+                
+                <!-- About Card -->
+                <section class="content-card">
+                    <h2 class="card-title"><i class="fas fa-user-circle"></i> عني</h2>
+                    <div class="card-body">
+                        <p>
+                            أنا المؤسس والرئيس التنفيذي لـ Jhome. أؤمن بأن التكنولوجيا هي الأداة الأقوى لتسهيل الحياة اليومية في السودان والمنطقة. 
+                            هدفي بناء شركة سودانية تقنية مؤثرة، وتطوير مشاريع قابلة للتوسع داخل السودان أولاً ثم خارجه.
+                        </p>
+                        <p>
+                            في المراحل الأولى، لم أكن مجرد مؤسس، بل المطور الأول الذي بنى الأساسات (باستخدام Flutter و Firebase). 
+                            رؤيتي هي إنشاء منظومة أعمال متكاملة تخدم الناس وتحقق دخلاً مستداماً من المنتجات الرقمية.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Featured Project Card -->
+                <section class="content-card featured-project-card">
+                    <div class="featured-badge">المشروع الرائد</div>
+                    <div class="featured-project-inner">
+                        <div class="featured-icon"><i class="fas fa-handshake"></i></div>
+                        <div class="featured-details">
                             <h3>سودان فري</h3>
-                            <p class="app-tagline">المجتمع الأول للمستقلين في السودان</p>
-                            <div class="app-buttons" style="justify-content: center; margin-top: 2rem;">
-                                <a href="sudan-free.html" class="cta-button primary">حمل التطبيق <i class="fas fa-download"></i></a>
-                            </div>
+                            <p class="tagline">المجتمع الأول للمستقلين في السودان</p>
+                            <p class="desc">
+                                منصة تربط أصحاب العمل والمستقلين ببيئة آمنة تضمن الحقوق وتحارب الاحتيال. 
+                                هي خطوتنا الأولى نحو تحويل المهارات إلى قيمة فعلية.
+                            </p>
+                            <a href="sudan-free.html" class="btn-secondary">اكتشف التطبيق <i class="fas fa-arrow-left"></i></a>
                         </div>
                     </div>
-                </div>
+                </section>
+                
+                <!-- Vision & Mission Card -->
+                <section class="content-card">
+                    <h2 class="card-title"><i class="fas fa-eye"></i> الرؤية والرسالة</h2>
+                    <div class="vision-grid-clean">
+                        <div class="vision-item-clean">
+                            <i class="fas fa-globe-africa"></i>
+                            <h4>الرؤية</h4>
+                            <p>تقديم حلول رقمية ذكية تفتح فرصاً اقتصادية، وتعيد تعريف معنى "العمل المحلي" في العصر الرقمي إقليمياً.</p>
+                        </div>
+                        <div class="vision-item-clean">
+                            <i class="fas fa-bullseye"></i>
+                            <h4>الرسالة</h4>
+                            <p>بناء تطبيقات تخدم المجتمع السوداني بطريقة بسيطة، عملية، وقابلة للتوسع.</p>
+                        </div>
+                    </div>
+                </section>
+                
             </div>
-        </section>
+            
+            <!-- Right Column (Sidebar) -->
+            <div class="sidebar-column">
+                
+                <!-- Core Interests -->
+                <section class="content-card">
+                    <h2 class="card-title"><i class="fas fa-lightbulb"></i> الاهتمامات الأساسية</h2>
+                    <ul class="interests-list">
+                        <li><i class="fas fa-microchip"></i> التقنية والذكاء الاصطناعي</li>
+                        <li><i class="fas fa-rocket"></i> ريادة الأعمال</li>
+                        <li><i class="fas fa-mobile-alt"></i> بناء حلول رقمية للسوق السوداني</li>
+                        <li><i class="fas fa-cubes"></i> إنشاء منظومة أعمال متكاملة</li>
+                    </ul>
+                </section>
 
-        <!-- 4. لماذا نحن -->
-        <section class="section-container">
-            <div class="vision-preview">
-                <h2 class="section-title">لماذا Jhome؟</h2>
-                <div class="vision-grid">
-                    <div class="vision-card glass-card fade-on-scroll">
-                        <div class="vision-icon" style="background: var(--card-bg); color: var(--primary-color);"><i class="fas fa-users"></i></div>
-                        <h3>مجتمع مترابط</h3>
-                        <p>نحن نبني منصات تجمع ولا تفرق</p>
-                    </div>
-                    <div class="vision-card glass-card fade-on-scroll delay-1">
-                        <div class="vision-icon" style="background: var(--card-bg); color: var(--secondary-color);"><i class="fas fa-lock"></i></div>
-                        <h3>أمان عالي</h3>
-                        <p>نضمن لك حقوقك في بيئة آمنة تماماً</p>
-                    </div>
-                    <div class="vision-card glass-card fade-on-scroll delay-2">
-                        <div class="vision-icon" style="background: var(--card-bg); color: var(--accent-color);"><i class="fas fa-bolt"></i></div>
-                        <h3>تقنية متطورة</h3>
-                        <p>أحدث التقنيات بين يديك بسهولة</p>
-                    </div>
-                </div>
+                <!-- Role -->
+                <section class="content-card">
+                    <h2 class="card-title"><i class="fas fa-briefcase"></i> دوري في الشركة</h2>
+                    <ul class="role-list">
+                        <li><span>صانع القرار الأول</span> في الرؤية، الشراكات الاستراتيجية، التوجه التقني العام، والهوية.</li>
+                        <li><span>المسوّق الأول</span> للعلامة الشخصية والمؤسسية (الواجهة الإعلامية).</li>
+                        <li><span>المطور الأول</span> في المراحل الأولى لتطوير منتجاتنا.</li>
+                    </ul>
+                </section>
+                
             </div>
-        </section>
-
-        <!-- 5. انضم إلينا -->
-        <section class="section-container">
-            <div class="cta-section glass-card fade-on-scroll">
-                <h2>جاهز لتكون جزءاً من التغيير؟</h2>
-                <p>تواصل معنا لبناء المستقبل معاً</p>
-                <div class="cta-buttons">
-                    <a href="contact.html" class="cta-button primary">تواصل معنا</a>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </div>
             <p class="footer-slogan">التغيير بيدينا</p>
-            <div class="footer-links">
-                <a href="index.html">الرئيسية</a>
-                <a href="about.html">من نحن</a>
-                <a href="projects.html">مشاريعنا</a>
-                <a href="sudan-free.html">سودان فري</a>
-                <a href="contact.html">تواصل معنا</a>
-                <a href="blog.html">المدونة</a>
-                <a href="impact.html">المجتمع التقني</a>
-                <a href="stories.html">قصص النجاح</a>
-                <a href="join.html">شارك قصتك</a>
-            </div>
-            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+            <p class="copyright">&copy; 2026 Jhome. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-        <!-- Firebase -->
+    <!-- Firebase & Scripts -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-    <script src="js/api-client.js"></script>
-    <script src="js/dynamic-content.js"></script>
     <script src="js/main.js"></script>
 </body>
-
 </html>
