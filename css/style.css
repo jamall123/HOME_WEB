@@ -2,28 +2,29 @@
 
 :root {
     /* Premium Color Palette */
-    --primary-color: #4F46E5; /* Indigo 600 */
-    --secondary-color: #9333EA; /* Purple 600 */
-    --accent-color: #14B8A6; /* Teal 500 */
+    --primary-color: #3B82F6; /* Electric Blue */
+    --secondary-color: #8B5CF6; /* Vivid Purple */
+    --accent-color: #10B981; /* Emerald */
     
     /* Backgrounds & Surfaces */
-    --bg-base: #020617; /* Slate 950 */
-    --bg-surface: #0F172A; /* Slate 900 */
-    --bg-elevated: #1E293B; /* Slate 800 */
+    --bg-base: #03040B; /* OLED Deep Black */
+    --bg-surface: #0A0C14; /* Deep Charcoal */
+    --bg-elevated: #111421; /* Subdued Surface */
     
     /* Text Colors */
-    --text-primary: #F8FAFC; /* Slate 50 */
-    --text-secondary: #94A3B8; /* Slate 400 */
-    --text-tertiary: #64748B; /* Slate 500 */
+    --text-primary: #FFFFFF; /* High Contrast White */
+    --text-secondary: #A1A1AA; /* Muted Zinc */
+    --text-tertiary: #52525B; /* Dim Zinc */
     
     /* Semantic Colors */
-    --success: #10B981; /* Emerald 500 */
-    --warning: #F59E0B; /* Amber 500 */
-    --error: #EF4444; /* Red 500 */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
 
     /* Glass & Borders */
-    --glass-bg: rgba(30, 41, 59, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(17, 20, 33, 0.6); /* Frosty surface */
+    --glass-border: rgba(255, 255, 255, 0.04);
+    --glass-highlight: rgba(255, 255, 255, 0.08); /* Machined top edge */
 
     /* Spacing System */
     --space-2xs: 4px;
@@ -34,13 +35,13 @@
     --space-xl: 48px;
     --space-2xl: 64px;
     --space-3xl: 96px;
-    --section-gap: 120px;
+    --section-gap: 160px; /* Increased breathing room */
 
     /* Shadows & Elevations */
-    --elevation-1: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --elevation-2: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    --elevation-3: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-    --glow-primary: 0 8px 30px rgba(79, 70, 229, 0.3);
+    --elevation-1: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --elevation-2: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --elevation-3: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    --glow-primary: 0 0 20px rgba(59, 130, 246, 0.15); /* Soft, non-cpu intensive glow */
 
     /* Border Radius */
     --radius-sm: 8px;
@@ -82,38 +83,29 @@ body {
 }
 
 /* Background Animations */
-.ambient-bg {
+.cinematic-svg-bg {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     z-index: -1;
     overflow: hidden;
-    background: radial-gradient(circle at top right, var(--bg-surface) 0%, var(--bg-base) 100%);
+    background: var(--bg-base);
 }
 
-.ambient-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.3;
-    animation: slow-drift 40s infinite ease-in-out alternate;
+.cinematic-svg-bg svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.blob-primary { width: 800px; height: 800px; background: var(--primary-color); top: -200px; right: -200px; animation-delay: 0s; }
-.blob-secondary { width: 700px; height: 700px; background: var(--secondary-color); bottom: -100px; left: -100px; animation-delay: -10s; }
-.blob-accent { width: 600px; height: 600px; background: var(--accent-color); top: 30%; left: 30%; transform: translate(-50%, -50%); animation-delay: -20s; }
-
-.ambient-glass {
-    position: absolute;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.6);
-    backdrop-filter: blur(80px);
-    -webkit-backdrop-filter: blur(80px);
+@keyframes pulse-network {
+    0% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 0.8; transform: translateY(-3px); }
+    100% { opacity: 0.3; transform: translateY(0); }
 }
 
-@keyframes slow-drift {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(50px, -80px) scale(1.1); }
-    100% { transform: translate(-40px, 40px) scale(0.9); }
+.network-lines {
+    animation: pulse-network 10s ease-in-out infinite;
+    transform-origin: center bottom;
 }
 
 /* Typography Utilities */
@@ -161,17 +153,18 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.4; color: var(--text-p
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: #fff;
-    box-shadow: var(--glow-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(79, 70, 229, 0.4);
+    opacity: 0.9;
 }
 .btn-secondary {
     background: var(--glass-bg);
     color: var(--text-primary);
     border-color: var(--glass-border);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -184,7 +177,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.4; color: var(--text-p
     border-color: var(--primary-color);
 }
 .btn-outline:hover {
-    background: rgba(79, 70, 229, 0.1);
+    background: rgba(59, 130, 246, 0.1);
     transform: translateY(-2px);
 }
 
@@ -197,13 +190,13 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; line-height: 1.4; color: var(--text-p
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
     transition: var(--transition-smooth);
-    box-shadow: var(--elevation-3);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 20px 40px -10px rgba(0,0,0,0.5);
 }
 .glass-panel:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.15);
-    background: rgba(30, 41, 59, 0.6);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(17, 20, 33, 0.8);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 30px 60px -15px rgba(0,0,0,0.7);
 }
 
 /* Navigation */
@@ -329,4 +322,16 @@ footer {
     :root { --section-gap: 80px; }
     .display-1 { font-size: 3rem; }
     .display-2 { font-size: 2rem; }
+}
+
+/* Responsive Grid Utilities */
+.grid-2-col { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center; }
+.grid-2-col-start { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; }
+@media (min-width: 992px) {
+    .grid-2-col, .grid-2-col-start { grid-template-columns: 1fr 1fr; gap: 4rem; }
+}
+
+.grid-cards { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+@media (min-width: 768px) {
+    .grid-cards { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 }
