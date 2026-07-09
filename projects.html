@@ -1,126 +1,138 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاريعنا | Jhome</title>
-    <meta name="description" content="تطبيقات Jhome - حلول تقنية لخدمة المجتمع السوداني">
+    <title>منتجاتنا | Jhome</title>
+    <meta name="description" content="تعرف على منتجات Jhome التقنية، وعلى رأسها منصة 'سودان فري'.">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css?v=2026062501">
-    <link rel="stylesheet" href="css/founder.css?v=2026062501">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
-
 <body>
-    <div class="animated-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="glass-overlay"></div>
+
+    <div class="page-loader">
+        <div style="font-size: 2rem; font-family: var(--font-en); font-weight: 800; animation: pulse 1.5s infinite alternate;">
+            <span class="logo-j">J</span><span class="logo-home">home</span>
+        </div>
+    </div>
+
+    <div class="ambient-bg">
+        <div class="ambient-blob blob-primary"></div>
+        <div class="ambient-blob blob-secondary"></div>
+        <div class="ambient-blob blob-accent"></div>
+        <div class="ambient-glass"></div>
     </div>
 
     <header class="glass-header">
-        <nav style="display: flex; align-items: center; justify-content: space-between;">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            
             <ul class="desktop-nav">
-                <li><a href="index.html" class="">الرئيسية</a></li>
-                <li><a href="about.html" class="">من نحن</a></li>
-                <li><a href="projects.html" class="active">مشاريعنا</a></li>
-                <li><a href="sudan-free.html" class="">سودان فري</a></li>
-                <li><a href="contact.html" class="">تواصل معنا</a></li>
-                <li><a href="blog.html" class="">المدونة</a></li>
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="projects.html" class="active">المنتجات</a></li>
+                <li><a href="about.html">الشركة</a></li>
+                <li><a href="blog.html">المركز الإعلامي</a></li>
+                <li><a href="contact.html">تواصل معنا</a></li>
             </ul>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1rem; font-size: 0.9rem; border-radius: 50px;">حمل التطبيق <i class="fas fa-download"></i></a>
-                <button class="hamburger-btn" aria-label="Toggle navigation">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-        </nav>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
     </header>
 
-    <!-- Navigation Overlay -->
     <div class="nav-overlay">
-        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link">الرئيسية</a></li>
-            <li><a href="about.html" class="nav-link">من نحن</a></li>
-            <li><a href="projects.html" class="nav-link active">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
+            <li><a href="projects.html" class="nav-link active">المنتجات</a></li>
+            <li><a href="about.html" class="nav-link">الشركة</a></li>
+            <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="blog.html" class="nav-link">المدونة</a></li>
         </ul>
     </div>
 
-    <main>
-        <section class="hero-small">
-            <div class="hero-content">
-                <h1 class="fade-in-up">مشاريعنا 🚀</h1>
-                <p class="fade-in-up delay-1">حلول تقنية مبتكرة صُممت خصيصاً للمجتمع السوداني</p>
-            </div>
-        </section>
+    <main class="container section" style="padding-top: 150px; min-height: 80vh;">
+        <div class="section-title animate-fade-up">
+            <h1 class="display-1">منتجات <span class="text-gradient">Jhome</span></h1>
+            <p class="body-large">نبني منصات قابلة للتوسع لحل مشاكل حقيقية.</p>
+        </div>
 
-        <section class="section-container" style="padding-top: 0;">
-            <div class="projects-grid">
-                <!-- Sudan Free Project Card -->
-                <div class="glass-card project-card fade-in-up">
-                    <div class="project-icon">
-                        <i class="fas fa-handshake"></i>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 3rem; margin-top: 4rem;">
+            
+            <!-- Sudan Free Card -->
+            <div class="glass-panel animate-fade-up delay-100" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(20, 184, 166, 0.1)); padding: 3rem; display: flex; justify-content: center; position: relative;">
+                    <span style="position: absolute; top: 1rem; right: 1rem; background: var(--success); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 600;">مباشر</span>
+                    <div style="width: 150px; height: 300px; background: var(--bg-surface); border: 6px solid #1E293B; border-radius: 20px; box-shadow: var(--elevation-3); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <i class="fas fa-handshake" style="font-size: 2.5rem; color: var(--text-primary); margin-bottom: 1rem;"></i>
                     </div>
-                    <h3>سودان فري <span style="font-size: 0.6em; background: var(--primary-color); padding: 2px 8px; border-radius: 10px; margin-right: 10px;">المشروع الرائد</span></h3>
-                    <p>
-                        أول منصة سودانية متكاملة للعمل الحر، صُممت لتكون حلقة الوصل الآمنة والموثوقة بين أصحاب المشاريع وأمهر المستقلين في السودان. ببيئة خالية من الاحتيال وبدعم كامل للمهارات المحلية.
-                    </p>
-                    <ul style="list-style: none; padding: 0; color: var(--text-muted); margin-bottom: 1.5rem;">
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle" style="color: var(--primary-color); margin-left: 5px;"></i> ضمان الحقوق للطرفين</li>
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check-circle" style="color: var(--primary-color); margin-left: 5px;"></i> توثيق هويات المستقلين</li>
-                        <li><i class="fas fa-check-circle" style="color: var(--primary-color); margin-left: 5px;"></i> طرق دفع ميسرة ومحلية</li>
-                    </ul>
-                    <a href="sudan-free.html" class="project-link">
-                        عرض تفاصيل المشروع <i class="fas fa-arrow-left"></i>
-                    </a>
                 </div>
-            </div>
-        </section>
+                <div style="padding: 2rem; flex: 1; display: flex; flex-direction: column;">
+                    <h2 class="display-2" style="font-size: 2rem; margin-bottom: 0.5rem;">سودان فري</h2>
+                    <p class="text-muted" style="margin-bottom: 1.5rem;">أول منصة رقمية متكاملة لربط المستقلين والحرفيين بالعملاء في السودان عبر عقود ذكية.</p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span class="caption-meta">نسبة الإنجاز</span>
+                            <span class="caption-meta en-text">100%</span>
+                        </div>
+                        <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div style="width: 100%; height: 100%; background: var(--primary-color);"></div>
+                        </div>
+                    </div>
 
-        <section class="section-container">
-            <div class="founder-cta glass-card fade-on-scroll">
-                <div class="fcta-glow"></div>
-                <h2>المزيد من المشاريع قيد البناء...</h2>
-                <p>نحن نركز حالياً بكامل طاقتنا على "سودان فري" ليكون أفضل منصة، لكننا دائماً نخطط للمستقبل.</p>
-                <div class="fcta-btns">
-                    <a href="contact.html" class="cta-button secondary">
-                        <i class="fas fa-lightbulb"></i> شاركنا فكرتك
-                    </a>
+                    <a href="sudan-free.html" class="btn btn-primary" style="margin-top: auto; width: 100%;">استعراض التفاصيل</a>
                 </div>
             </div>
-        </section>
+
+            <!-- Deiony Placeholder -->
+            <div class="glass-panel animate-fade-up delay-200" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; opacity: 0.7;">
+                <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.4)); padding: 3rem; display: flex; justify-content: center; position: relative;">
+                    <span style="position: absolute; top: 1rem; right: 1rem; background: var(--warning); color: #000; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 600;">قيد التطوير</span>
+                    <i class="fas fa-cubes" style="font-size: 8rem; color: var(--text-tertiary); opacity: 0.5;"></i>
+                </div>
+                <div style="padding: 2rem; flex: 1; display: flex; flex-direction: column;">
+                    <h2 class="display-2" style="font-size: 2rem; margin-bottom: 0.5rem;">ديوني</h2>
+                    <p class="text-muted" style="margin-bottom: 1.5rem;">منصة مبتكرة لإدارة الحسابات والتعاملات المالية اليومية للمؤسسات الصغيرة والمتوسطة.</p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span class="caption-meta">نسبة الإنجاز</span>
+                            <span class="caption-meta en-text">65%</span>
+                        </div>
+                        <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div style="width: 65%; height: 100%; background: var(--warning);"></div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" style="margin-top: auto; width: 100%; cursor: not-allowed;" disabled>قريباً</button>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <footer>
         <div class="footer-content">
-            <div class="footer-logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
-            <p class="footer-slogan">We Build the Present, Code the Future</p>
-            <p class="copyright">&copy; 2026 Jhome. جميع الحقوق محفوظة.</p>
+            <a href="index.html" class="footer-logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </a>
+            <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
+            <div class="footer-links">
+                <a href="index.html">الرئيسية</a>
+                <a href="projects.html">المنتجات</a>
+                <a href="about.html">الشركة</a>
+                <a href="blog.html">المركز الإعلامي</a>
+                <a href="contact.html">تواصل معنا</a>
+            </div>
+            <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/founder.js"></script>
+
+    <script src="js/main.js?v=4"></script>
 </body>
 </html>

@@ -1,151 +1,136 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>من نحن | Jhome</title>
-    <meta name="description" content="مؤسسة Jhome - التغيير بيدينا. فكرة ولدت من صميم المجتمع السوداني">
+    <title>الشركة | Jhome</title>
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css?v=1782115132328">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
-
 <body>
-    <div class="animated-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="glass-overlay"></div>
+
+    <div class="page-loader">
+        <div style="font-size: 2rem; font-family: var(--font-en); font-weight: 800; animation: pulse 1.5s infinite alternate;">
+            <span class="logo-j">J</span><span class="logo-home">home</span>
+        </div>
+    </div>
+
+    <div class="ambient-bg">
+        <div class="ambient-blob blob-primary"></div>
+        <div class="ambient-blob blob-secondary"></div>
+        <div class="ambient-glass"></div>
     </div>
 
     <header class="glass-header">
-        <nav style="display: flex; align-items: center; justify-content: space-between;">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            
-        <ul class="desktop-nav">
-            <li><a href="index.html" class="">الرئيسية</a></li>
-            <li><a href="about.html" class="active">من نحن</a></li>
-            <li><a href="projects.html" class="">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="">سودان فري</a></li>
-            <li><a href="impact.html" class="">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="">قصص النجاح</a></li>
-            <li><a href="blog.html" class="">المدونة</a></li>
-        </ul>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1rem; font-size: 0.9rem; border-radius: 50px;">حمل التطبيق <i class="fas fa-download"></i></a>
-                <button class="hamburger-btn" aria-label="Toggle navigation">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-        </nav>
+            <ul class="desktop-nav">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="projects.html">المنتجات</a></li>
+                <li><a href="about.html" class="active">الشركة</a></li>
+                <li><a href="blog.html">المركز الإعلامي</a></li>
+                <li><a href="contact.html">تواصل معنا</a></li>
+            </ul>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
     </header>
 
     <div class="nav-overlay">
-        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link">الرئيسية</a></li>
-            <li><a href="about.html" class="nav-link active">من نحن</a></li>
-            <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
+            <li><a href="projects.html" class="nav-link">المنتجات</a></li>
+            <li><a href="about.html" class="nav-link active">الشركة</a></li>
+            <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="blog.html" class="nav-link">المدونة</a></li>
-            <li><a href="impact.html" class="nav-link">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
-            <li><a href="join.html" class="nav-link">شارك قصتك كحرفي</a></li>
         </ul>
     </div>
 
-    <main>
-        <section class="hero-small">
-            <div class="hero-content">
-                <h1 class="fade-in-up">مؤسسة Jhome 🏠</h1>
-                <p class="fade-in-up delay-1">التغيير بيدينا</p>
+    <main class="container section" style="padding-top: 150px;">
+        <!-- Corporate Identity -->
+        <div class="animate-fade-up text-center" style="text-align: center; max-width: 800px; margin: 0 auto 4rem;">
+            <h1 class="display-1" style="margin-bottom: 1.5rem;">عن <span class="text-gradient">الشركة</span></h1>
+            <p class="body-large">
+                Jhome هي أكثر من مجرد شركة برمجيات. نحن فريق من المهندسين والمفكرين الملتزمين بإحداث نقلة نوعية في البنية التحتية الرقمية، بدءاً من السودان وصولاً إلى الأسواق العالمية.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 6rem;">
+            <div class="glass-panel animate-fade-up delay-100">
+                <i class="fas fa-eye" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+                <h3 class="heading-3" style="margin-bottom: 1rem;">الرؤية</h3>
+                <p class="text-muted">نطمح إلى أن نكون الشركة الرائدة التي تقود التحول الرقمي في المنطقة، وبناء اقتصاد مستدام قائم على التكنولوجيا.</p>
+            </div>
+            
+            <div class="glass-panel animate-fade-up delay-200">
+                <i class="fas fa-bullseye" style="font-size: 2.5rem; color: var(--secondary-color); margin-bottom: 1.5rem;"></i>
+                <h3 class="heading-3" style="margin-bottom: 1rem;">الرسالة</h3>
+                <p class="text-muted">تمكين الأفراد والشركات من خلال أدوات برمجية متطورة، موثوقة، وسهلة الاستخدام.</p>
+            </div>
+
+            <div class="glass-panel animate-fade-up delay-300">
+                <i class="fas fa-gem" style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem;"></i>
+                <h3 class="heading-3" style="margin-bottom: 1rem;">القيم الجوهرية</h3>
+                <p class="text-muted">الابتكار، الشفافية، الجودة، والتزامنا الراسخ بتحقيق أعلى معايير الأمان والثقة لعملائنا.</p>
+            </div>
+        </div>
+
+        <!-- Founder Profile -->
+        <div class="section-title animate-fade-up" style="border-top: 1px solid var(--glass-border); padding-top: 4rem;">
+            <h2 class="display-2">من يقف خلف الرؤية؟</h2>
+        </div>
+
+        <section class="founder-hero" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-top: 2rem;">
+            <div class="animate-fade-up delay-100">
+                <span class="caption-meta" style="background: rgba(79, 70, 229, 0.15); color: #A5B4FC; padding: 0.5rem 1.2rem; border-radius: var(--radius-pill); border: 1px solid rgba(79, 70, 229, 0.3); margin-bottom: 1.5rem; display: inline-block;">المؤسس والمدير التنفيذي</span>
+                <h3 class="display-2" style="margin-bottom: 1rem; font-size: 2.5rem;">جمال أحمد</h3>
+                <p class="body-large" style="margin-bottom: 1.5rem;">
+                    في البدايات لم أكن مجرد مؤسس، بل كنت المطور الأول الذي صاغ الأكواد ووضع الأساسات التقنية باستخدام أحدث أطر العمل. أؤمن بقوة البرمجيات في تبسيط تعقيدات الحياة اليومية، وهذا ما دفعني لتأسيس Jhome.
+                </p>
+                <p class="body-large" style="margin-bottom: 2rem;">
+                    رؤيتي هي بناء شركة تقنية سودانية بمعايير عالمية، تحول المهارات المحلية إلى قيمة اقتصادية مستدامة من خلال منتجات رقمية قابلة للتوسع.
+                </p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://www.linkedin.com/in/جمال-احمد-129b4a371" target="_blank" class="btn btn-secondary" style="border-radius: 50%; width: 50px; height: 50px; padding: 0;"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://x.com/x2URmcyJ1HLKmSH" target="_blank" class="btn btn-secondary" style="border-radius: 50%; width: 50px; height: 50px; padding: 0;"><i class="fab fa-x-twitter"></i></a>
+                    <a href="https://t.me/JamalJhome" target="_blank" class="btn btn-secondary" style="border-radius: 50%; width: 50px; height: 50px; padding: 0;"><i class="fab fa-telegram-plane"></i></a>
+                </div>
+            </div>
+            
+            <div class="animate-fade-up delay-200">
+                <div style="position: relative; max-width: 450px; margin: 0 auto;">
+                    <div style="position: absolute; inset: -20px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: var(--radius-lg); z-index: 0; filter: blur(40px); opacity: 0.5;"></div>
+                    <img src="assets/images/jamal_real.jpg" alt="جمال أحمد إبراهيم" style="position: relative; z-index: 1; width: 100%; border-radius: var(--radius-lg); border: 2px solid var(--glass-border); box-shadow: var(--elevation-3);" onerror="this.src='https://via.placeholder.com/450x550/1E293B/4F46E5?text=Founder'">
+                </div>
             </div>
         </section>
 
-        <!-- 1. قصتنا -->
-        <section class="section-container">
-            <div class="about-content glass-card fade-on-scroll">
-                <h2>قصتنا</h2>
-                <p>Jhome ليست مجرد مؤسسة تقنية، بل هي فكرة ولدت من صميم المجتمع السوداني. انطلقنا برؤية واضحة ترتكز على بناء جسور من الثقة بين كفاءة المبدعين واحتياجات المجتمع. نحن نؤمن بأن التكنولوجيا هي الأداة، ولكن الإنسان السوداني بمهارته وأمانته هو المحرك الحقيقي للتغيير والنهضة.</p>
-            </div>
-        </section>
-
-        <!-- 2. معنى الاسم -->
-        <section class="section-container">
-            <div class="name-meaning glass-card fade-on-scroll">
-                <h2>معنى الاسم</h2>
-                <div class="name-parts">
-                    <div class="name-part">
-                        <span class="letter-j">J</span>
-                        <p>حرف الـ J يمثل <strong>الالتزام الفردي بالقيادة والمبادرة</strong></p>
-                    </div>
-                    <div class="name-part">
-                        <span class="letter-home">home</span>
-                        <p>كلمة Home تعني <strong>الانتماء للسودان</strong> الذي نسعى لبنائه بأيدينا</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. قيمنا -->
-        <section class="section-container">
-            <h2 class="section-title">قيمنا الأساسية</h2>
-            <div class="goals-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                <div class="goal-item glass-card fade-on-scroll">
-                    <div class="goal-icon-small"><i class="fas fa-lightbulb"></i></div>
-                    <h3>التوعية</h3>
-                    <p>تبسيط المفاهيم الرقمية ليكون الذكاء الاصطناعي والتقنية خادماً للجميع.</p>
-                </div>
-                <div class="goal-item glass-card fade-on-scroll delay-1">
-                    <div class="goal-icon-small"><i class="fas fa-shield-alt"></i></div>
-                    <h3>الثقة</h3>
-                    <p>تأسيس بيئة رقمية آمنة تحارب الاحتيال وتضمن حقوق الطرفين.</p>
-                </div>
-                <div class="goal-item glass-card fade-on-scroll delay-2">
-                    <div class="goal-icon-small"><i class="fas fa-rocket"></i></div>
-                    <h3>التمكين</h3>
-                    <p>توفير أدوات العمل الحر للشباب لتطوير مسارهم المهني.</p>
-                </div>
-            </div>
-        </section>
     </main>
 
     <footer>
         <div class="footer-content">
-            <div class="footer-logo"><span class="logo-j">J</span><span class="logo-home">home</span></div>
-            <p class="footer-slogan">التغيير بيدينا</p>
+            <a href="index.html" class="footer-logo">
+                <span class="logo-j">J</span><span class="logo-home">home</span>
+            </a>
+            <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
             <div class="footer-links">
                 <a href="index.html">الرئيسية</a>
-                <a href="about.html">من نحن</a>
-                <a href="projects.html">مشاريعنا</a>
-                <a href="sudan-free.html">سودان فري</a>
+                <a href="projects.html">المنتجات</a>
+                <a href="about.html">الشركة</a>
+                <a href="blog.html">المركز الإعلامي</a>
                 <a href="contact.html">تواصل معنا</a>
-                <a href="blog.html">المدونة</a>
-                <a href="impact.html">المجتمع التقني</a>
-                <a href="stories.html">قصص النجاح</a>
-                <a href="join.html">شارك قصتك</a>
             </div>
-            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+            <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
-        <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/api-client.js"></script>
-    <script src="js/dynamic-content.js"></script>
-    <script src="js/main.js"></script>
-</body>
 
+    <script src="js/main.js?v=4"></script>
+</body>
 </html>

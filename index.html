@@ -1,198 +1,266 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عن المؤسس | Jhome</title>
-    <meta name="description" content="جمال أحمد إبراهيم — مؤسس Jhome. تعرف على رؤيتنا ومسيرتنا في بناء حلول تقنية للسوق السوداني.">
+    <title>Jhome | نبني تقنية اليوم لتمكين الغد</title>
+    <meta name="description" content="Jhome هي شركة تقنية رائدة تبني منتجات رقمية تعيد صياغة المستقبل الاقتصادي في السودان.">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css?v=2026062502">
-    <link rel="stylesheet" href="css/founder.css?v=2026062502">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <style>
+        .story-section { min-height: 100vh; display: flex; align-items: center; position: relative; }
+        .hero-story { justify-content: center; text-align: center; padding-top: 100px; }
+        .narrative-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; color: var(--text-tertiary); font-size: 1.5rem; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); } 40% { transform: translateY(-15px) translateX(-50%); } 60% { transform: translateY(-7px) translateX(-50%); } }
+        .impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center; }
+        .stat-item h3 { font-size: 3.5rem; font-family: var(--font-en); background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .stat-item p { color: var(--text-secondary); font-size: 1.1rem; font-weight: 500; }
+        .tech-showcase { display: flex; flex-wrap: wrap; justify-content: center; gap: 3rem; margin-top: 3rem; }
+        .tech-icon { font-size: 4rem; color: var(--text-tertiary); transition: var(--transition-smooth); }
+        .tech-icon:hover { color: var(--text-primary); transform: translateY(-10px); }
+        .roadmap-timeline { position: relative; max-width: 800px; margin: 4rem auto 0; padding-left: 2rem; border-right: 2px solid var(--glass-border); }
+        .roadmap-item { position: relative; margin-bottom: 3rem; padding-right: 2rem; }
+        .roadmap-item::before { content: ''; position: absolute; right: -11px; top: 5px; width: 20px; height: 20px; border-radius: 50%; background: var(--bg-base); border: 4px solid var(--primary-color); }
+        @media (max-width: 992px) { .narrative-grid { grid-template-columns: 1fr; text-align: center; gap: 2rem; } }
+    </style>
 </head>
-
 <body>
-    <!-- Header -->
+
+    <div class="page-loader">
+        <div style="font-size: 2rem; font-family: var(--font-en); font-weight: 800; animation: pulse 1.5s infinite alternate;">
+            <span class="logo-j">J</span><span class="logo-home">home</span>
+        </div>
+    </div>
+
+    <div class="ambient-bg">
+        <div class="ambient-blob blob-primary"></div>
+        <div class="ambient-blob blob-secondary"></div>
+        <div class="ambient-blob blob-accent"></div>
+        <div class="ambient-glass"></div>
+    </div>
+
     <header class="glass-header">
-        <nav style="display: flex; align-items: center; justify-content: space-between;">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
             <ul class="desktop-nav">
                 <li><a href="index.html" class="active">الرئيسية</a></li>
-                <li><a href="about.html">من نحن</a></li>
-                <li><a href="projects.html">مشاريعنا</a></li>
-                <li><a href="sudan-free.html">سودان فري</a></li>
-                <li><a href="contact.html">تواصل</a></li>
-                <li><a href="blog.html">المدونة</a></li>
+                <li><a href="projects.html">المنتجات</a></li>
+                <li><a href="about.html">الشركة</a></li>
+                <li><a href="blog.html">المركز الإعلامي</a></li>
+                <li><a href="contact.html">تواصل معنا</a></li>
             </ul>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1.2rem; font-size: 0.9rem; border-radius: 50px;">
-                    حمّل التطبيق <i class="fas fa-download"></i>
-                </a>
-                <button class="hamburger-btn" aria-label="Toggle navigation">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-        </nav>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
     </header>
 
-    <!-- Mobile Nav Overlay -->
     <div class="nav-overlay">
-        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link active">الرئيسية</a></li>
-            <li><a href="about.html" class="nav-link">من نحن</a></li>
-            <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
+            <li><a href="projects.html" class="nav-link">المنتجات</a></li>
+            <li><a href="about.html" class="nav-link">الشركة</a></li>
+            <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="blog.html" class="nav-link">المدونة</a></li>
         </ul>
     </div>
 
-    <main class="founder-page-container">
-        <!-- 1. Profile Header Section -->
-        <section class="profile-header">
-            <div class="profile-cover"></div>
-            <div class="profile-info-container">
-                <div class="profile-avatar-wrap">
-                    <img src="assets/images/jamal_real.jpg" alt="جمال أحمد إبراهيم" class="profile-avatar">
+    <main>
+        
+        <!-- 1. Who are we? -->
+        <section class="story-section hero-story container">
+            <div style="z-index: 10; max-width: 900px;">
+                <div class="animate-fade-up">
+                    <span style="display: inline-block; padding: 0.5rem 1.5rem; background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.3); color: #A5B4FC; border-radius: var(--radius-pill); font-weight: 600; margin-bottom: 2rem;">مستقبل الحلول الرقمية</span>
                 </div>
-                
-                <div class="profile-details">
-                    <div class="profile-title-area">
-                        <h1 class="profile-name">جمال أحمد إبراهيم</h1>
-                        <span class="profile-role">Founder & CEO, Jhome</span>
-                    </div>
-                    
-                    <p class="profile-bio">
-                        شغوف بالتقنية والذكاء الاصطناعي وريادة الأعمال. 
-                        أبني حلولاً رقمية ذكية للسوق السوداني تحديداً لتحويل المهارات المحلية إلى قيمة اقتصادية حقيقية.
+                <h1 class="display-1 animate-fade-up delay-100">
+                    نبني <span class="text-gradient">التقنية</span><br>
+                    لنصنع <span class="text-gradient-accent">الفرص</span>
+                </h1>
+                <p class="body-large animate-fade-up delay-200" style="margin: 2rem auto; max-width: 700px;">
+                    نحن Jhome، شركة برمجيات رائدة متخصصة في هندسة منتجات رقمية قابلة للتوسع، مصممة لإحداث تأثير حقيقي وتغيير شكل الاقتصاد المحلي.
+                </p>
+                <div class="animate-fade-up delay-300" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="#why" class="btn btn-primary">اكتشف القصة <i class="fas fa-arrow-down"></i></a>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down scroll-indicator animate-fade-up delay-300"></i>
+        </section>
+
+        <!-- 2. Why do we exist? -->
+        <section id="why" class="story-section section container">
+            <div class="narrative-grid">
+                <div class="animate-fade-up">
+                    <h2 class="display-2" style="margin-bottom: 1.5rem;">لماذا نحن هنا؟</h2>
+                    <p class="body-large" style="margin-bottom: 1.5rem;">
+                        المجتمع السوداني مليء بالكفاءات، ولكنه يفتقر إلى البنية التحتية الرقمية التي تربط هذه الكفاءات بالسوق.
                     </p>
-                    
-                    <div class="profile-socials">
-                        <a href="https://www.linkedin.com/in/جمال-احمد-129b4a371" target="_blank" title="LinkedIn" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://x.com/x2URmcyJ1HLKmSH" target="_blank" title="X (Twitter)" class="social-icon"><i class="fab fa-x-twitter"></i></a>
-                        <a href="https://www.instagram.com/jmalahmdabrahym93?igsh=dzJrbnd2ZHBqaDRy" target="_blank" title="Instagram" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.facebook.com/share/1LgLijnTt8/" target="_blank" title="Facebook" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.tiktok.com/@jhome0165?_r=1&_t=ZS-97VhvaxjqZs" target="_blank" title="TikTok" class="social-icon"><i class="fab fa-tiktok"></i></a>
-                        <a href="https://t.me/JamalJhome" target="_blank" title="Telegram" class="social-icon"><i class="fab fa-telegram-plane"></i></a>
-                    </div>
+                    <p class="body-large">
+                        تأسست Jhome لتسد هذه الفجوة. نحن لسنا مجرد مطورين، نحن مهندسو حلول نسعى لبناء جسر متين بين المبدع والمستهلك.
+                    </p>
                 </div>
-                
-                <div class="profile-actions">
-                    <a href="contact.html" class="btn-primary"><i class="fas fa-envelope"></i> تواصل معي</a>
+                <div class="glass-panel animate-fade-up delay-100" style="display: flex; justify-content: center; align-items: center; min-height: 400px; background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(147,51,234,0.05)); border: none;">
+                    <i class="fas fa-globe-africa" style="font-size: 8rem; color: var(--primary-color); opacity: 0.8;"></i>
                 </div>
             </div>
         </section>
 
-        <!-- 2. Main Content Grid -->
-        <div class="founder-content-grid">
-            
-            <!-- Left Column (Main Info) -->
-            <div class="main-column">
-                
-                <!-- About Card -->
-                <section class="content-card">
-                    <h2 class="card-title"><i class="fas fa-user-circle"></i> عني</h2>
-                    <div class="card-body">
-                        <p>
-                            أنا المؤسس والرئيس التنفيذي لـ Jhome. أؤمن بأن التكنولوجيا هي الأداة الأقوى لتسهيل الحياة اليومية في السودان والمنطقة. 
-                            هدفي بناء شركة سودانية تقنية مؤثرة، وتطوير مشاريع قابلة للتوسع داخل السودان أولاً ثم خارجه.
-                        </p>
-                        <p>
-                            في المراحل الأولى، لم أكن مجرد مؤسس، بل المطور الأول الذي بنى الأساسات (باستخدام Flutter و Firebase). 
-                            رؤيتي هي إنشاء منظومة أعمال متكاملة تخدم الناس وتحقق دخلاً مستداماً من المنتجات الرقمية.
-                        </p>
+        <!-- 3. Why should visitors trust us? (Trust: Impact & Tech) -->
+        <section class="section statistics-section" style="background: rgba(30, 41, 59, 0.2); border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);">
+            <div class="container">
+                <div class="animate-fade-up" style="text-align: center; margin-bottom: 4rem;">
+                    <h2 class="display-2" style="margin-bottom: 1rem;">أرقامنا تتحدث</h2>
+                    <p class="body-large">الأثر الحقيقي يقاس بالجهد الهندسي والنتائج، وليس بالشعارات.</p>
+                </div>
+                <div class="impact-grid animate-fade-up delay-100" style="margin-bottom: 4rem;">
+                    <div class="stat-item">
+                        <h3 class="counter-value" id="stat-loc" data-target="0">0</h3>
+                        <p>سطر برمجي (نظيف)</p>
                     </div>
-                </section>
+                    <div class="stat-item">
+                        <h3 class="counter-value" id="stat-projects" data-target="0">0</h3>
+                        <p>منتجات تقنية</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>+<span class="counter-value" id="stat-users" data-target="0">0</span></h3>
+                        <p>مستخدم مستهدف</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="counter-value" id="stat-uptime" data-target="0">0</h3>
+                        <p>% جهوزية النظام</p>
+                    </div>
+                </div>
 
-                <!-- Featured Project Card -->
-                <section class="content-card featured-project-card">
-                    <div class="featured-badge">المشروع الرائد</div>
-                    <div class="featured-project-inner">
-                        <div class="featured-icon"><i class="fas fa-handshake"></i></div>
-                        <div class="featured-details">
-                            <h3>سودان فري</h3>
-                            <p class="tagline">المجتمع الأول للمستقلين في السودان</p>
-                            <p class="desc">
-                                منصة تربط أصحاب العمل والمستقلين ببيئة آمنة تضمن الحقوق وتحارب الاحتيال. 
-                                هي خطوتنا الأولى نحو تحويل المهارات إلى قيمة فعلية.
-                            </p>
-                            <a href="sudan-free.html" class="btn-secondary">اكتشف التطبيق <i class="fas fa-arrow-left"></i></a>
-                        </div>
+                <div class="animate-fade-up delay-200" style="text-align: center; border-top: 1px solid var(--glass-border); padding-top: 3rem;">
+                    <p class="body-large" style="margin-bottom: 2rem;">مبني على أحدث التقنيات وأكثرها أماناً</p>
+                    <div class="tech-showcase">
+                        <i class="fab fa-js tech-icon" title="JavaScript"></i>
+                        <i class="fab fa-react tech-icon" title="React / Next.js"></i>
+                        <i class="fas fa-mobile-alt tech-icon" title="Flutter"></i>
+                        <i class="fab fa-google tech-icon" title="Firebase"></i>
+                        <i class="fas fa-database tech-icon" title="Cloud Databases"></i>
                     </div>
-                </section>
-                
-                <!-- Vision & Mission Card -->
-                <section class="content-card">
-                    <h2 class="card-title"><i class="fas fa-eye"></i> الرؤية والرسالة</h2>
-                    <div class="vision-grid-clean">
-                        <div class="vision-item-clean">
-                            <i class="fas fa-globe-africa"></i>
-                            <h4>الرؤية</h4>
-                            <p>تقديم حلول رقمية ذكية تفتح فرصاً اقتصادية، وتعيد تعريف معنى "العمل المحلي" في العصر الرقمي إقليمياً.</p>
-                        </div>
-                        <div class="vision-item-clean">
-                            <i class="fas fa-bullseye"></i>
-                            <h4>الرسالة</h4>
-                            <p>بناء تطبيقات تخدم المجتمع السوداني بطريقة بسيطة، عملية، وقابلة للتوسع.</p>
-                        </div>
-                    </div>
-                </section>
-                
+                </div>
             </div>
-            
-            <!-- Right Column (Sidebar) -->
-            <div class="sidebar-column">
-                
-                <!-- Core Interests -->
-                <section class="content-card">
-                    <h2 class="card-title"><i class="fas fa-lightbulb"></i> الاهتمامات الأساسية</h2>
-                    <ul class="interests-list">
-                        <li><i class="fas fa-microchip"></i> التقنية والذكاء الاصطناعي</li>
-                        <li><i class="fas fa-rocket"></i> ريادة الأعمال</li>
-                        <li><i class="fas fa-mobile-alt"></i> بناء حلول رقمية للسوق السوداني</li>
-                        <li><i class="fas fa-cubes"></i> إنشاء منظومة أعمال متكاملة</li>
-                    </ul>
-                </section>
+        </section>
 
-                <!-- Role -->
-                <section class="content-card">
-                    <h2 class="card-title"><i class="fas fa-briefcase"></i> دوري في الشركة</h2>
-                    <ul class="role-list">
-                        <li><span>صانع القرار الأول</span> في الرؤية، الشراكات الاستراتيجية، التوجه التقني العام، والهوية.</li>
-                        <li><span>المسوّق الأول</span> للعلامة الشخصية والمؤسسية (الواجهة الإعلامية).</li>
-                        <li><span>المطور الأول</span> في المراحل الأولى لتطوير منتجاتنا.</li>
-                    </ul>
-                </section>
-                
+        <!-- 4. What products have we built? -->
+        <section class="story-section section container">
+            <div class="narrative-grid">
+                <div class="glass-panel animate-fade-up" style="padding: 0; overflow: hidden;">
+                    <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(20, 184, 166, 0.1)); padding: 4rem; display: flex; justify-content: center;">
+                        <div style="width: 200px; height: 420px; background: var(--bg-surface); border: 8px solid #1E293B; border-radius: 30px; box-shadow: var(--elevation-3); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <i class="fas fa-handshake" style="font-size: 3rem; color: var(--text-primary); margin-bottom: 1rem;"></i>
+                            <h4 class="en-text">SUDAN FREE</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="animate-fade-up delay-100">
+                    <span class="caption-meta" style="color: var(--success); display: block; margin-bottom: 1rem;"><i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> منتجنا الرئيسي</span>
+                    <h2 class="display-2" style="margin-bottom: 1.5rem;">سودان فري</h2>
+                    <p class="body-large" style="margin-bottom: 2rem;">
+                        أول منصة رقمية متكاملة لربط المستقلين والحرفيين بالعملاء في السودان. تطبيق يعيد تعريف سوق العمل الحر ويوفر بيئة موثوقة للجميع.
+                    </p>
+                    <a href="projects.html" class="btn btn-secondary">تصفح كل المنتجات</a>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- 5. Why are they valuable? (Value) -->
+        <section class="section container">
+            <div style="width: 100%;">
+                <div class="animate-fade-up" style="text-align: center; max-width: 800px; margin: 0 auto 4rem;">
+                    <h2 class="display-2" style="margin-bottom: 1.5rem;">قيمة لا تُضاهى</h2>
+                    <p class="body-large">نركز طاقاتنا على تحويل التحديات المعقدة إلى منصات رقمية بسيطة وموثوقة.</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div class="glass-panel animate-fade-up">
+                        <i class="fas fa-handshake" style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem;"></i>
+                        <h3 class="heading-3" style="margin-bottom: 1rem;">عقود رقمية ذكية</h3>
+                        <p class="text-muted">نظام تعاقد إلكتروني يضمن حقوق جميع الأطراف ويقضي على انعدام الثقة في العمل الحر.</p>
+                    </div>
+                    <div class="glass-panel animate-fade-up delay-100">
+                        <i class="fas fa-network-wired" style="font-size: 2.5rem; color: var(--secondary-color); margin-bottom: 1.5rem;"></i>
+                        <h3 class="heading-3" style="margin-bottom: 1rem;">وصول غير محدود</h3>
+                        <p class="text-muted">منصات تتيح للحرفيين والمستقلين عرض خدماتهم لآلاف العملاء في نطاقهم الجغرافي وخارجه.</p>
+                    </div>
+                    <div class="glass-panel animate-fade-up delay-200">
+                        <i class="fas fa-mobile-alt" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+                        <h3 class="heading-3" style="margin-bottom: 1rem;">تجربة مستخدم فائقة</h3>
+                        <p class="text-muted">تصميم واجهات مستخدم (UX/UI) بديهية تناسب جميع شرائح المجتمع لضمان سهولة الاستخدام.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. What is our long-term vision? (Vision) -->
+        <section class="story-section section container">
+            <div style="width: 100%;">
+                <div class="animate-fade-up" style="text-align: center;">
+                    <h2 class="display-2">رؤية المستقبل</h2>
+                    <p class="body-large">نحن لا نقف عند الإطلاق، بل ننظر إلى منظومة اقتصادية رقمية متكاملة.</p>
+                </div>
+                <div class="roadmap-timeline animate-fade-up delay-100">
+                    <div class="roadmap-item">
+                        <div class="caption-meta en-text" style="color: var(--accent-color); margin-bottom: 0.5rem;">Q1 2026</div>
+                        <h4 class="heading-3">تأسيس البنية التحتية</h4>
+                        <p class="text-muted">وضع حجر الأساس وبناء الهوية المؤسسية القوية.</p>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="caption-meta en-text" style="color: var(--accent-color); margin-bottom: 0.5rem;">Q2 2026</div>
+                        <h4 class="heading-3">إطلاق "سودان فري"</h4>
+                        <p class="text-muted">الإطلاق التجريبي وبناء مجتمع المستقلين المتكامل.</p>
+                    </div>
+                    <div class="roadmap-item">
+                        <div class="caption-meta en-text" style="color: var(--accent-color); margin-bottom: 0.5rem;">2027 ومابعدها</div>
+                        <h4 class="heading-3">منظومة اقتصادية شاملة</h4>
+                        <p class="text-muted">إطلاق بوابات الدفع ومنتجات إدارة الأعمال، وتوسيع الابتكار المستمر بلا حدود لخدمة القارة.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. How can someone become part of Jhome? (Connect) -->
+        <section class="section container" style="text-align: center; margin-bottom: 4rem;">
+            <div class="glass-panel animate-fade-up" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(2, 6, 23, 0.9)); padding: 4rem 2rem;">
+                <h2 class="display-2" style="margin-bottom: 1rem;">هل تشاركنا نفس الشغف؟</h2>
+                <p class="body-large" style="margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    سواء كنت مستثمراً، أو مهندساً، أو صاحب فكرة تسعى لتحويلها لواقع.. أبوابنا مفتوحة للشراكات الاستراتيجية.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    <a href="contact.html" class="btn btn-primary">تواصل معنا الآن</a>
+                    <a href="about.html" class="btn btn-secondary">تعرف على الفريق</a>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <div class="footer-logo">
+            <a href="index.html" class="footer-logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
+            </a>
+            <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
+            <div class="footer-links">
+                <a href="index.html">الرئيسية</a>
+                <a href="projects.html">المنتجات</a>
+                <a href="about.html">الشركة</a>
+                <a href="blog.html">المركز الإعلامي</a>
+                <a href="contact.html">تواصل معنا</a>
             </div>
-            <p class="footer-slogan">التغيير بيدينا</p>
-            <p class="copyright">&copy; 2026 Jhome. جميع الحقوق محفوظة.</p>
+            <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-    <!-- Firebase & Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=4"></script>
 </body>
 </html>

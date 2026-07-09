@@ -5,191 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تواصل معنا | Jhome</title>
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1782115132328">
-    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
-    <div class="animated-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="glass-overlay"></div>
+
+    <div class="page-loader">
+        <div style="font-size: 2rem; font-family: var(--font-en); font-weight: 800; animation: pulse 1.5s infinite alternate;">
+            <span class="logo-j">J</span><span class="logo-home">home</span>
+        </div>
+    </div>
+
+    <div class="ambient-bg">
+        <div class="ambient-blob blob-primary"></div>
+        <div class="ambient-blob blob-secondary"></div>
+        <div class="ambient-glass"></div>
     </div>
 
     <header class="glass-header">
-        <nav style="display: flex; align-items: center; justify-content: space-between;">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            
-        <ul class="desktop-nav">
-            <li><a href="index.html" class="">الرئيسية</a></li>
-            <li><a href="about.html" class="">من نحن</a></li>
-            <li><a href="projects.html" class="">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="">سودان فري</a></li>
-            <li><a href="impact.html" class="">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="">قصص النجاح</a></li>
-            <li><a href="blog.html" class="">المدونة</a></li>
-        </ul>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1rem; font-size: 0.9rem; border-radius: 50px;">حمل التطبيق <i class="fas fa-download"></i></a>
-                <button class="hamburger-btn" aria-label="Toggle navigation">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-        </nav>
+            <ul class="desktop-nav">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="projects.html">المنتجات</a></li>
+                <li><a href="about.html">الشركة</a></li>
+                <li><a href="blog.html">المركز الإعلامي</a></li>
+                <li><a href="contact.html" class="active">تواصل معنا</a></li>
+            </ul>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
     </header>
 
     <div class="nav-overlay">
-        <button class="close-btn" aria-label="Close navigation">&times;</button>
+        <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link">الرئيسية</a></li>
-            <li><a href="about.html" class="nav-link">من نحن</a></li>
-            <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
+            <li><a href="projects.html" class="nav-link">المنتجات</a></li>
+            <li><a href="about.html" class="nav-link">الشركة</a></li>
+            <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
             <li><a href="contact.html" class="nav-link active">تواصل معنا</a></li>
-            <li><a href="blog.html" class="nav-link">المدونة</a></li>
-            <li><a href="impact.html" class="nav-link">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
-            <li><a href="join.html" class="nav-link">شارك قصتك كحرفي</a></li>
         </ul>
     </div>
 
-    <main>
-        <section class="page-hero">
-            <div class="hero-content">
-                <h1 class="fade-in-up">تواصل معنا 📬</h1>
-                <p class="fade-in-up delay-1">عندك سؤال، اقتراح، أو شراكة؟ نحن هنا</p>
-            </div>
-        </section>
-
-        <section class="section-container contact-grid-wrap">
-            <div class="contact-grid">
-                <div class="contact-form-wrap">
-                    <form id="contactForm" class="form-container glass-card">
-                        <h2>أرسل لنا رسالة</h2>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">الاسم *</label>
-                                <input type="text" id="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">البريد *</label>
-                                <input type="email" id="email" required>
-                            </div>
+    <main class="container section" style="padding-top: 150px; min-height: 80vh;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;">
+            
+            <div class="animate-fade-up">
+                <h1 class="display-1" style="margin-bottom: 1.5rem;">لنبنِ المستقبل <span class="text-gradient">معاً</span></h1>
+                <p class="body-large" style="margin-bottom: 2rem;">
+                    سواء كان لديك استفسار، أو اقتراح شراكة، أو ترغب في الانضمام إلى فريقنا، يسعدنا تواصلك معنا.
+                </p>
+                
+                <div style="margin-top: 3rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(79,70,229,0.1); display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.2rem;">
+                            <i class="fas fa-envelope"></i>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="phone">الهاتف (اختياري)</label>
-                                <input type="tel" id="phone">
-                            </div>
-                            <div class="form-group">
-                                <label for="subject">الموضوع</label>
-                                <select id="subject">
-                                    <option value="استفسار عام">استفسار عام</option>
-                                    <option value="شراكة">شراكة</option>
-                                    <option value="استثمار">استثمار</option>
-                                    <option value="إعلام">إعلام وصحافة</option>
-                                    <option value="دعم فني">دعم فني</option>
-                                    <option value="شكوى">شكوى</option>
-                                    <option value="أخرى">أخرى</option>
-                                </select>
-                            </div>
+                        <div>
+                            <p class="text-muted" style="font-size: 0.9rem;">البريد الإلكتروني</p>
+                            <a href="mailto:contact@jhome.sd" class="en-text" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">contact@jhome.sd</a>
                         </div>
-                        <div class="form-group">
-                            <label for="message">الرسالة *</label>
-                            <textarea id="message" required rows="6" minlength="10"></textarea>
-                        </div>
-                        <button type="submit" class="cta-button primary" id="contactBtn">
-                            <i class="fas fa-paper-plane"></i> إرسال
-                        </button>
-                        <div id="contactMessage" class="form-message"></div>
-                    </form>
+                    </div>
                 </div>
-
-                <aside class="contact-info">
-                    <div class="info-card glass-card">
-                        <i class="fas fa-envelope"></i>
-                        <h4>البريد الإلكتروني</h4>
-                        <p><a href="mailto:ja1827082@gmail.com">ja1827082@gmail.com</a></p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <i class="fab fa-whatsapp"></i>
-                        <h4>واتساب / هاتف</h4>
-                        <p><a href="https://wa.me/249900578357" target="_blank" dir="ltr">+249900578357</a></p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <h4>المقر</h4>
-                        <p>الخرطوم، السودان</p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <i class="fas fa-clock"></i>
-                        <h4>أوقات الرد</h4>
-                        <p>السبت - الخميس<br>9 صباحاً - 6 مساءً</p>
-                    </div>
-                </aside>
             </div>
-        </section>
 
-        <!-- شاركنا قصتك -->
-        <section class="section-container mt-4">
-            <div class="glass-card" style="padding: 2rem;">
-                <h2 style="margin-bottom: 1rem;"><i class="fas fa-bullhorn"></i> شاركنا قصة نجاحك</h2>
-                <p style="margin-bottom: 2rem; color: #cbd5e1;">هل لديك تجربة ملهمة مع العمل الحر أو تطبيق سودان فري؟ شاركنا قصتك ليقرأها الآلاف!</p>
-                <form id="storyForm" class="form-container">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="storyName">الاسم *</label>
-                            <input type="text" id="storyName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="storyEmail">البريد *</label>
-                            <input type="email" id="storyEmail" required>
-                        </div>
+            <div class="glass-panel animate-fade-up delay-200">
+                <form action="#" method="POST">
+                    <div class="form-group">
+                        <label for="name">الاسم الكامل</label>
+                        <input type="text" id="name" name="name" class="form-control" required placeholder="محمد أحمد">
                     </div>
                     <div class="form-group">
-                        <label for="profileLink">رابط ملفك (مثال: سودان فري) - اختياري</label>
-                        <input type="url" id="profileLink" placeholder="https://...">
+                        <label for="email">البريد الإلكتروني</label>
+                        <input type="email" id="email" name="email" class="form-control" required placeholder="email@example.com" style="text-align: left;" dir="ltr">
                     </div>
                     <div class="form-group">
-                        <label for="storyContent">القصة *</label>
-                        <textarea id="storyContent" required rows="5"></textarea>
+                        <label for="subject">سبب التواصل</label>
+                        <select id="subject" name="subject" class="form-control" required style="appearance: none; padding-right: 1rem;">
+                            <option value="">اختر السبب...</option>
+                            <option value="partnership">شراكات استراتيجية (B2B)</option>
+                            <option value="investment">علاقات المستثمرين</option>
+                            <option value="support">دعم فني واستفسارات عامة</option>
+                            <option value="career">الانضمام لفريق العمل</option>
+                        </select>
                     </div>
-                    <div class="form-group" style="display: flex; gap: 10px; align-items: center; margin-bottom: 1.5rem;">
-                        <input type="checkbox" id="storyConsent" required style="width: auto; margin: 0;">
-                        <label for="storyConsent" style="margin: 0; cursor: pointer;">أوافق على نشر قصتي في موقع Jhome</label>
+                    <div class="form-group">
+                        <label for="message">رسالتك</label>
+                        <textarea id="message" name="message" class="form-control" rows="5" required placeholder="كيف يمكننا مساعدتك؟"></textarea>
                     </div>
-                    <button type="submit" class="cta-button secondary" id="storyBtn">
-                        <i class="fas fa-share"></i> إرسال القصة
-                    </button>
-                    <div id="storyMessage" class="form-message"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">إرسال الرسالة</button>
                 </form>
             </div>
-        </section>
 
-        <!-- الأسئلة الشائعة -->
-        <section class="section-container mt-4">
-            <h2 class="section-title">❓ الأسئلة الشائعة</h2>
-            <div class="faq-grid" style="display: grid; gap: 1.5rem; max-width: 800px; margin: 0 auto;">
-                <div class="glass-card" style="padding: 1.5rem;">
-                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">هل تطبيق سودان فري مجاني؟</h3>
-                    <p style="color: #cbd5e1;">نعم، التطبيق مجاني بالكامل للحرفيين والزبائن ولا يتم أخذ عمولات على العمليات المنفذة بين الطرفين.</p>
-                </div>
-                <div class="glass-card" style="padding: 1.5rem;">
-                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">كيف أضمن حقي كزبون أو حرفي؟</h3>
-                    <p style="color: #cbd5e1;">وفرنا نظام "العقود الرقمية" داخل الدردشة حيث يتم توثيق الاتفاق والسعر مسبقاً، بالإضافة لنظام تقييمات حقيقي لحماية المجتمع.</p>
-                </div>
-                <div class="glass-card" style="padding: 1.5rem;">
-                    <h3 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1.2rem;">لدي فكرة تطبيق تخدم السودان، هل يمكنكم مساعدتي؟</h3>
-                    <p style="color: #cbd5e1;">بالتأكيد! مؤسسة Jhome تدعم الأفكار التقنية. يرجى إرسال رسالة عبر نموذج التواصل (أعلاه) وتحديد الموضوع كـ "شراكة".</p>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
     <footer>
@@ -197,95 +111,18 @@
             <a href="index.html" class="footer-logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            <p class="footer-slogan">التغيير بيدينا</p>
+            <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
             <div class="footer-links">
                 <a href="index.html">الرئيسية</a>
-                <a href="about.html">من نحن</a>
-                <a href="projects.html">مشاريعنا</a>
-                <a href="sudan-free.html">سودان فري</a>
+                <a href="projects.html">المنتجات</a>
+                <a href="about.html">الشركة</a>
+                <a href="blog.html">المركز الإعلامي</a>
                 <a href="contact.html">تواصل معنا</a>
-                <a href="blog.html">المدونة</a>
-                <a href="impact.html">المجتمع التقني</a>
-                <a href="stories.html">قصص النجاح</a>
-                <a href="join.html">شارك قصتك</a>
             </div>
-            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+            <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/api-client.js"></script>
-    <script src="js/dynamic-content.js"></script>
-    <script src="js/main.js"></script>
-    <script>
-      // Contact Form
-      document.getElementById('contactForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('contactBtn');
-        const msg = document.getElementById('contactMessage');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-        try {
-          await JHomeAPI.submitContact({
-            name: document.getElementById('name').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            subject: document.getElementById('subject').value,
-            message: document.getElementById('message').value.trim()
-          });
-          if (window.JHomeAPI) JHomeAPI.trackEvent('contact_form_submit');
-          msg.textContent = '✅ تم إرسال رسالتك، سنرد عليك خلال 24 ساعة';
-          msg.className = 'form-message success';
-          e.target.reset();
-        } catch (err) {
-          msg.textContent = err.message || 'حدث خطأ';
-          msg.className = 'form-message error';
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال';
-        }
-      });
-
-      // Story Form
-      const storyForm = document.getElementById('storyForm');
-      if (storyForm) {
-        storyForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const btn = document.getElementById('storyBtn');
-          const msg = document.getElementById('storyMessage');
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-          try {
-            const authorName = document.getElementById('storyName').value.trim();
-            const profileLink = document.getElementById('profileLink').value.trim();
-            const storyText = document.getElementById('storyContent').value.trim();
-            
-            const fullStory = profileLink ? storyText + '\n\nرابط الملف الشخصي: ' + profileLink : storyText;
-
-            await JHomeAPI.submitStory({
-              submitterName: authorName,
-              submitterEmail: document.getElementById('storyEmail').value.trim(),
-              title: 'قصة نجاح من ' + authorName,
-              story: fullStory,
-              category: 'مشاركة زائر'
-            });
-
-            if (window.JHomeAPI) JHomeAPI.trackEvent('story_submit');
-            msg.textContent = '✅ شكراً لك! تم إرسال قصتك للمراجعة.';
-            msg.className = 'form-message success';
-            e.target.reset();
-          } catch (err) {
-            msg.textContent = err.message || 'حدث خطأ في الإرسال';
-            msg.className = 'form-message error';
-          } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-share"></i> إرسال القصة';
-          }
-        });
-      }
-    </script>
+    <script src="js/main.js?v=4"></script>
 </body>
 </html>
