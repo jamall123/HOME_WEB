@@ -179,4 +179,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ----------------------------------------------------
+    // 4. Mobile Toggles (Sidebar & Chat)
+    // ----------------------------------------------------
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const toggleChatBtn = document.getElementById('toggle-chat');
+    const roomSidebar = document.querySelector('.room-sidebar');
+    const roomChat = document.querySelector('.room-chat');
+
+    if (toggleSidebarBtn && roomSidebar) {
+        toggleSidebarBtn.addEventListener('click', () => {
+            roomSidebar.classList.toggle('open');
+            // If opening sidebar, close chat to avoid overlap
+            if(roomSidebar.classList.contains('open') && roomChat) {
+                roomChat.classList.remove('open');
+            }
+        });
+    }
+
+    if (toggleChatBtn && roomChat) {
+        toggleChatBtn.addEventListener('click', () => {
+            roomChat.classList.toggle('open');
+            // If opening chat, close sidebar to avoid overlap
+            if(roomChat.classList.contains('open') && roomSidebar) {
+                roomSidebar.classList.remove('open');
+            }
+        });
+    }
+
 });
