@@ -307,4 +307,59 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ----------------------------------------------------
+    // 6. Room Entry Gate (Bouncer)
+    // ----------------------------------------------------
+    const roomEntryGate = document.getElementById('room-entry-gate');
+    const entrySelection = document.getElementById('entry-selection');
+    const studentForm = document.getElementById('student-entry-form');
+    const instructorForm = document.getElementById('instructor-entry-form');
+    const instructorTabBtn = document.getElementById('instructor-tab-btn');
+
+    window.showStudentEntry = function() {
+        if(entrySelection && studentForm) {
+            entrySelection.style.display = 'none';
+            studentForm.style.display = 'block';
+        }
+    };
+
+    window.showInstructorEntry = function() {
+        if(entrySelection && instructorForm) {
+            entrySelection.style.display = 'none';
+            instructorForm.style.display = 'block';
+        }
+    };
+
+    window.backToSelection = function() {
+        if(entrySelection && studentForm && instructorForm) {
+            studentForm.style.display = 'none';
+            instructorForm.style.display = 'none';
+            entrySelection.style.display = 'flex';
+        }
+    };
+
+    window.enterRoom = function(role) {
+        if(role === 'instructor') {
+            // Verify mock credentials (in real app, this goes to Firebase Auth)
+            const email = document.getElementById('instructor-email').value;
+            const pass = document.getElementById('instructor-pass').value;
+            if(!email || !pass) {
+                alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+                return;
+            }
+            if(instructorTabBtn) {
+                instructorTabBtn.style.display = 'block'; // Show Instructor Tools
+            }
+        }
+        
+        // Hide Gate, unlock scrolling
+        if(roomEntryGate) {
+            roomEntryGate.style.opacity = '0';
+            setTimeout(() => {
+                roomEntryGate.style.display = 'none';
+                document.body.style.overflow = 'auto'; // allow inner scrolling if needed
+            }, 400);
+        }
+    };
+
 });
