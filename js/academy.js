@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon: 'fa-react',
             color: '#61DAFB',
             cover: 'assets/images/courses/web_dev_cover.png',
-            isPrivate: false
+            isPaid: false
         },
         'public-speaking': {
             id: 'public-speaking',
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon: 'fa-microphone-alt',
             color: '#D8B4FE',
             cover: 'assets/images/courses/public_speaking_cover.png',
-            isPrivate: true
+            isPaid: true
         }
     };
 
@@ -105,14 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         grid.innerHTML = '';
         Object.values(coursesData).forEach(course => {
-            const privateBadge = course.isPrivate ? 
-                `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(239, 68, 68, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-lock"></i> دورة خاصة</span>` 
-                : `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);">مفتوح للتسجيل</span>`;
+            const badge = course.isPaid ? 
+                `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(245, 158, 11, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
+                : `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(16, 185, 129, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
                 
             grid.innerHTML += `
             <div class="glass-panel course-card" data-category="${course.category}" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="background: url('${course.cover}') center/cover no-repeat; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                    ${privateBadge}
+                    ${badge}
                 </div>
                 <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -137,14 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = coursesData[courseId];
         
         if (data) {
-            let actionButtons = `
-                <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">تسجيل الدخول للدورة <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}')">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
-            `;
+            let actionButtons = '';
             
-            if (data.isPrivate) {
+            if (data.isPaid) {
                 actionButtons = `
-                <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">تسجيل الدخول كطالب خاص <i class="fas fa-lock" style="margin-right: 8px;"></i></a>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}')">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
+                <a href="course-room.html?type=paid" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
+                `;
+            } else {
+                actionButtons = `
+                <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">الدخول للدورة مباشرة <i class="fas fa-play" style="margin-right: 8px;"></i></a>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title} (تسجيل مجاني للشهادة)')">تسجيل مجاني للشهادة <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
                 `;
             }
 
