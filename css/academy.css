@@ -244,37 +244,53 @@
 /* Responsive Room */
 @media (max-width: 1024px) {
     .room-layout {
-        grid-template-columns: 250px 1fr;
-    }
-    .room-chat {
-        position: fixed;
-        right: -350px;
-        top: 0;
-        width: 350px;
-        height: 100vh;
-        z-index: 100;
-        transition: right 0.3s ease;
-    }
-    .room-chat.open {
-        right: 0;
-    }
-}
-
-@media (max-width: 768px) {
-    .room-layout {
-        grid-template-columns: 1fr;
+        display: flex;
+        width: 100vw;
+        overflow-x: hidden;
     }
     .room-sidebar {
         position: fixed;
-        left: -300px;
+        right: -300px;
         top: 0;
         width: 300px;
         height: 100vh;
         z-index: 100;
-        transition: left 0.3s ease;
+        transition: right 0.3s ease;
     }
     .room-sidebar.open {
-        left: 0;
+        right: 0;
+    }
+    .room-main {
+        flex: 1;
+        width: 100%;
+        transition: width 0.3s ease;
+    }
+    .room-chat {
+        width: 0;
+        overflow: hidden;
+        transition: width 0.3s ease;
+        border: none;
+    }
+    
+    /* When chat is toggled */
+    .room-layout.chat-active .room-chat {
+        width: 35%; /* جهة الشمال بشكل مصغر */
+        min-width: 250px;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .room-layout.chat-active .room-main {
+        width: 65%; /* إزاحة الفيديو لليمين */
+        flex: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .room-layout.chat-active .room-chat {
+        width: 40%;
+        min-width: 200px;
+    }
+    .room-layout.chat-active .room-main {
+        width: 60%;
     }
 }
 

@@ -316,28 +316,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------------------------------
     // 4. Mobile Toggles (Sidebar & Chat)
-    // ----------------------------------------------------
-    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-    const toggleChatBtn = document.getElementById('toggle-chat');
+    const roomLayout = document.querySelector('.room-layout');
     const roomSidebar = document.querySelector('.room-sidebar');
     const roomChat = document.querySelector('.room-chat');
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const toggleChatBtn = document.getElementById('toggle-chat');
 
+    // Sidebar Toggle
     if (toggleSidebarBtn && roomSidebar) {
         toggleSidebarBtn.addEventListener('click', () => {
             roomSidebar.classList.toggle('open');
-            // If opening sidebar, close chat to avoid overlap
-            if(roomSidebar.classList.contains('open') && roomChat) {
-                roomChat.classList.remove('open');
+            if(roomLayout && roomLayout.classList.contains('chat-active')) {
+                roomLayout.classList.remove('chat-active');
             }
         });
     }
 
-    if (toggleChatBtn && roomChat) {
+    // Chat Toggle (Shrink video, open on left side)
+    if (toggleChatBtn && roomLayout) {
         toggleChatBtn.addEventListener('click', () => {
-            roomChat.classList.toggle('open');
-            // If opening chat, close sidebar to avoid overlap
-            if(roomChat.classList.contains('open') && roomSidebar) {
+            roomLayout.classList.toggle('chat-active');
+            if(roomSidebar && roomSidebar.classList.contains('open')) {
                 roomSidebar.classList.remove('open');
+            }
+        });
+    }
+
+    // 4.5 Fullscreen Button
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const videoContainer = document.getElementById('main-video-container');
+
+    if (fullscreenBtn && videoContainer) {
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.webkitRequestFullscreen) {
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) {
+                    videoContainer.msRequestFullscreen();
+                }
+                
+                // Try to lock orientation to landscape on mobile
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {
+                        console.log('Orientation lock not supported');
+                    });
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> تصغير';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> تكبير الشاشة';
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
             }
         });
     }
