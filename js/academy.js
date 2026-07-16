@@ -323,21 +323,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleChatBtn = document.getElementById('toggle-chat');
 
     // Sidebar Toggle
-    if (toggleSidebarBtn && roomSidebar) {
+    if (toggleSidebarBtn && roomLayout) {
         toggleSidebarBtn.addEventListener('click', () => {
-            roomSidebar.classList.toggle('open');
-            if(roomLayout && roomLayout.classList.contains('chat-active')) {
-                roomLayout.classList.remove('chat-active');
+            roomLayout.classList.toggle('sidebar-toggled');
+            // If chat is open on mobile (or generally), we might want to close it to avoid overlap, 
+            // but since they are distinct columns on desktop, we just let them act independently.
+            // However, on mobile, if opening sidebar, maybe close chat? 
+            if(window.innerWidth <= 1024 && roomLayout.classList.contains('sidebar-toggled')) {
+                roomLayout.classList.remove('chat-toggled');
             }
         });
     }
 
-    // Chat Toggle (Shrink video, open on left side)
+    // Chat Toggle
     if (toggleChatBtn && roomLayout) {
         toggleChatBtn.addEventListener('click', () => {
-            roomLayout.classList.toggle('chat-active');
-            if(roomSidebar && roomSidebar.classList.contains('open')) {
-                roomSidebar.classList.remove('open');
+            roomLayout.classList.toggle('chat-toggled');
+            if(window.innerWidth <= 1024 && roomLayout.classList.contains('chat-toggled')) {
+                roomLayout.classList.remove('sidebar-toggled');
             }
         });
     }

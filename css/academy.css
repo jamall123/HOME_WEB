@@ -170,6 +170,18 @@
     height: 100vh;
     background: var(--bg-dark);
     overflow: hidden;
+    transition: grid-template-columns 0.3s ease;
+}
+
+/* Desktop Toggled States */
+.room-layout.sidebar-toggled {
+    grid-template-columns: 0px 1fr 350px;
+}
+.room-layout.chat-toggled {
+    grid-template-columns: 300px 1fr 0px;
+}
+.room-layout.sidebar-toggled.chat-toggled {
+    grid-template-columns: 0px 1fr 0px;
 }
 
 .room-sidebar {
@@ -178,6 +190,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden; /* For when width is 0 */
 }
 
 .room-main {
@@ -186,6 +199,7 @@
     background: var(--bg-dark);
     overflow-y: auto;
     position: relative;
+    min-width: 0; /* Prevents flex/grid blowouts */
 }
 
 .room-chat {
@@ -193,6 +207,7 @@
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 /* Video Player Area */
@@ -242,19 +257,20 @@
 }
 
 /* Responsive Room */
-.mobile-toggles {
-    display: none !important;
-}
-
 @media (max-width: 1024px) {
-    .mobile-toggles {
-        display: flex !important;
-    }
     .room-layout {
         display: flex;
         width: 100vw;
         overflow-x: hidden;
+        /* Reset grid since we use flex on mobile */
+        grid-template-columns: none;
     }
+    .room-layout.sidebar-toggled,
+    .room-layout.chat-toggled,
+    .room-layout.sidebar-toggled.chat-toggled {
+        grid-template-columns: none;
+    }
+
     .room-sidebar {
         position: fixed;
         right: -300px;
@@ -264,14 +280,18 @@
         z-index: 100;
         transition: right 0.3s ease;
     }
-    .room-sidebar.open {
+    
+    /* When sidebar is toggled on mobile, show it */
+    .room-layout.sidebar-toggled .room-sidebar {
         right: 0;
     }
+
     .room-main {
         flex: 1;
         width: 100%;
         transition: width 0.3s ease;
     }
+
     .room-chat {
         width: 0;
         overflow: hidden;
@@ -279,24 +299,24 @@
         border: none;
     }
     
-    /* When chat is toggled */
-    .room-layout.chat-active .room-chat {
+    /* When chat is toggled on mobile */
+    .room-layout.chat-toggled .room-chat {
         width: 35%; /* جهة الشمال بشكل مصغر */
         min-width: 250px;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .room-layout.chat-active .room-main {
+    .room-layout.chat-toggled .room-main {
         width: 65%; /* إزاحة الفيديو لليمين */
         flex: none;
     }
 }
 
 @media (max-width: 768px) {
-    .room-layout.chat-active .room-chat {
+    .room-layout.chat-toggled .room-chat {
         width: 40%;
         min-width: 200px;
     }
-    .room-layout.chat-active .room-main {
+    .room-layout.chat-toggled .room-main {
         width: 60%;
     }
 }
