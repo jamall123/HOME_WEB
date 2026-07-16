@@ -177,11 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span>المشتركين</span>
                             <strong>${data.students} طالب</strong>
                         </div>
-                        <div class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s;" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.instructorId}')">
+                        <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.instructorId}')">
                             <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>
-                            <span style="color: #A5B4FC;">المقدم (اضغط للتفاصيل)</span>
-                            <strong style="color: white;">${data.instructor}</strong>
-                        </div>
+                            <span style="color: #A5B4FC;">المقدم</span>
+                            <strong style="color: white; margin-top: 0.25rem; display: block;">${data.instructor}</strong>
+                        </button>
                     </div>
                     
                     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
