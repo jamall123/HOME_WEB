@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                         <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">تسجيل الدخول للدورة <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
-                        <button class="btn btn-secondary" style="flex: 1;" onclick="alert('سيتم فتح نافذة دفع / تسجيل هنا قريباً')">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
+                        <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}')">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
                     </div>
                 </div>
             `;
@@ -204,6 +204,106 @@ document.addEventListener('DOMContentLoaded', () => {
             if(roomChat.classList.contains('open') && roomSidebar) {
                 roomSidebar.classList.remove('open');
             }
+        });
+    }
+
+    // ----------------------------------------------------
+    // 5. Enrollment & Payment Flow
+    // ----------------------------------------------------
+    const enrollmentModal = document.getElementById('enrollment-modal');
+    const closeEnrollmentBtn = document.querySelector('.close-enrollment-modal');
+    const enrollmentForm = document.getElementById('enrollment-form');
+    
+    const step1 = document.getElementById('enrollment-step-1');
+    const step2 = document.getElementById('enrollment-step-2');
+    
+    const receiptUpload = document.getElementById('receipt-upload');
+    const uploadZone = document.getElementById('upload-receipt-zone');
+    const receiptPreview = document.getElementById('receipt-preview');
+    const previewContainer = document.getElementById('receipt-preview-container');
+    const courseTitleDisplay = document.getElementById('enrollment-course-title');
+
+    window.openEnrollment = function(courseTitle) {
+        // Close course modal if open
+        if (courseModal) {
+            courseModal.classList.remove('active');
+        }
+        
+        // Reset Steps
+        if(step1 && step2) {
+            step1.classList.add('active-step');
+            step2.classList.remove('active-step');
+        }
+        
+        if (courseTitleDisplay) {
+            courseTitleDisplay.textContent = courseTitle;
+        }
+
+        if (enrollmentModal) {
+            // Small delay to allow previous modal to close smoothly
+            setTimeout(() => {
+                enrollmentModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 300);
+        }
+    };
+
+    function closeEnrollmentModal() {
+        if (enrollmentModal) {
+            enrollmentModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            // Optional: Reset form fields here
+        }
+    }
+
+    if (closeEnrollmentBtn) {
+        closeEnrollmentBtn.addEventListener('click', closeEnrollmentModal);
+    }
+
+    // Handle Form Submit -> Go to Payment Step
+    if (enrollmentForm) {
+        enrollmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Here we would normally collect data, for now we just switch steps
+            step1.classList.remove('active-step');
+            step2.classList.add('active-step');
+        });
+    }
+
+    // Copy Account Number
+    window.copyAccountNumber = function() {
+        const accountNumber = document.getElementById('account-number').innerText;
+        navigator.clipboard.writeText(accountNumber).then(() => {
+            alert('تم نسخ رقم الحساب بنجاح!');
+        });
+    };
+
+    // Receipt Upload Logic
+    if (uploadZone && receiptUpload) {
+        uploadZone.addEventListener('click', () => {
+            receiptUpload.click();
+        });
+
+        receiptUpload.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    receiptPreview.src = e.target.result;
+                    uploadZone.style.display = 'none';
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    const submitFinalBtn = document.getElementById('submit-final-registration');
+    if (submitFinalBtn) {
+        submitFinalBtn.addEventListener('click', () => {
+            alert('جاري إرسال البيانات وتأكيد التسجيل (محاكاة)... سنقوم بربطها بقاعدة البيانات لاحقاً.');
+            closeEnrollmentModal();
         });
     }
 

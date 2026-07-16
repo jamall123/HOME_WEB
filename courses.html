@@ -129,6 +129,100 @@
         </div>
     </div>
 
+    <!-- Enrollment & Payment Modal (Hidden by default) -->
+    <div id="enrollment-modal" class="modal-overlay">
+        <!-- We use a bottom-sheet like structure specifically for this modal to match the screenshot -->
+        <div class="modal-content bottom-sheet glass-panel">
+            <button class="close-enrollment-modal"><i class="fas fa-times"></i></button>
+            
+            <div id="enrollment-step-1" class="enrollment-step active-step">
+                <div class="modal-header-simple">
+                    <h2 class="display-3" style="margin-bottom: 0.5rem; font-size: 1.5rem;">📝 استمارة التسجيل</h2>
+                    <p class="text-muted" id="enrollment-course-title">كورس الذكاء الاصطناعي</p>
+                </div>
+                <div class="modal-details-container form-container">
+                    <form id="enrollment-form">
+                        <div class="form-group">
+                            <label>الاسم الثلاثي</label>
+                            <input type="text" id="reg-name" required placeholder="أدخل اسمك الثلاثي" class="form-input">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label>العمر</label>
+                                <input type="number" id="reg-age" required placeholder="سنة" class="form-input">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>رقم الهاتف (واتساب)</label>
+                                <input type="tel" id="reg-phone" required placeholder="+249..." class="form-input" dir="ltr" style="text-align: right;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>المستوى التعليمي</label>
+                            <select id="reg-education" class="form-input" required>
+                                <option value="" disabled selected>اختر المستوى التعليمي...</option>
+                                <option value="ثانوي">ثانوي</option>
+                                <option value="جامعي">جامعي (بكالوريوس)</option>
+                                <option value="دراسات عليا">دراسات عليا</option>
+                                <option value="أخرى">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>التخصص</label>
+                            <input type="text" id="reg-specialization" required placeholder="مثال: هندسة برمجيات، محاسبة..." class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>المدينة / الولاية</label>
+                            <input type="text" id="reg-city" required placeholder="مثال: الخرطوم، بورتسودان..." class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>سبب رغبتك في الالتحاق بالكورس</label>
+                            <textarea id="reg-reason" rows="3" required placeholder="حدثنا باختصار عن دافعك للتعلم..." class="form-input"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">متابعة لإكمال الدفع <i class="fas fa-arrow-left" style="margin-right: 8px;"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="enrollment-step-2" class="enrollment-step">
+                <div class="payment-bottom-sheet">
+                    <h2 class="payment-title">اختر طريقة الدفع</h2>
+                    
+                    <div class="payment-card">
+                        <div class="payment-card-header">
+                            <span class="bank-details-label">بيانات التحويل:</span>
+                            <button class="change-bank-btn">تغيير البنك</button>
+                        </div>
+                        <div class="bank-info">
+                            <p>البنك: <strong>بنكك</strong></p>
+                            <p>الاسم: <strong>جمال احمد ابراهيم</strong></p>
+                            <div class="account-number-box">
+                                <span class="account-label">رقم الحساب:</span>
+                                <span class="account-number" id="account-number">4373414</span>
+                                <button class="copy-btn" onclick="copyAccountNumber()"><i class="far fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <p class="payment-warning">الرجاء تحويل المبلغ المطلوب ثم إرفاق صورة الإيصال هنا.</p>
+                    </div>
+
+                    <div class="upload-receipt-card" id="upload-receipt-zone">
+                        <input type="file" id="receipt-upload" accept="image/*" style="display: none;">
+                        <div class="upload-content">
+                            <i class="fas fa-image" style="font-size: 2rem; color: var(--text-secondary); margin-bottom: 0.5rem;"></i>
+                            <i class="fas fa-plus upload-plus-icon"></i>
+                            <p>اضغط لإرفاق الإيصال</p>
+                        </div>
+                    </div>
+                    
+                    <div id="receipt-preview-container" style="display: none; margin-top: 1rem; text-align: center;">
+                        <img id="receipt-preview" src="" alt="Receipt Preview" style="max-width: 100%; border-radius: 8px; max-height: 200px; object-fit: contain;">
+                        <button id="submit-final-registration" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">إرسال وتأكيد التسجيل <i class="fas fa-check-circle" style="margin-right: 8px;"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
     <footer>
         <div class="footer-content">
             <a href="index.html" class="footer-logo">

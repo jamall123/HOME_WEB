@@ -277,3 +277,192 @@
         left: 0;
     }
 }
+
+/* 5. Enrollment & Payment Styles */
+.enrollment-step {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.enrollment-step.active-step {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header-simple {
+    text-align: center;
+    padding: 2rem 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-container {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ar);
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Payment Bottom Sheet Specifics */
+.bottom-sheet {
+    max-width: 500px !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin-top: auto;
+    transform: translateY(100%);
+    background: var(--bg-surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-bottom: none;
+}
+
+.modal-overlay.active .bottom-sheet {
+    transform: translateY(0);
+}
+
+.payment-bottom-sheet {
+    padding: 2.5rem 1.5rem;
+}
+
+.payment-title {
+    text-align: right;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.bank-details-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.change-bank-btn {
+    background: none;
+    border: none;
+    color: var(--primary-light);
+    cursor: pointer;
+    font-family: var(--font-ar);
+    font-size: 0.85rem;
+}
+
+.bank-info p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.bank-info strong {
+    color: white;
+}
+
+.account-number-box {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.account-label {
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.account-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-left: auto; /* push to right in RTL */
+    direction: ltr; /* keep numbers LTR */
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+.payment-warning {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.upload-receipt-card {
+    background: rgba(255,255,255,0.01);
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-receipt-card:hover {
+    border-color: var(--primary-light);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.upload-plus-icon {
+    position: absolute;
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    transform: translate(-15px, 15px);
+    background: var(--bg-surface);
+    border-radius: 50%;
+    padding: 2px;
+}
