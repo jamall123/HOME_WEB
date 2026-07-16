@@ -141,13 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.isPaid) {
                 actionButtons = `
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}')">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true)">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
                 <a href="course-room.html?type=paid" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             } else {
                 actionButtons = `
                 <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">الدخول للدورة مباشرة <i class="fas fa-play" style="margin-right: 8px;"></i></a>
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title} (تسجيل مجاني للشهادة)')">تسجيل مجاني للشهادة <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title} (تسجيل مجاني للشهادة)', false)">تسجيل مجاني للشهادة <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
                 `;
             }
 
@@ -358,7 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewContainer = document.getElementById('receipt-preview-container');
     const courseTitleDisplay = document.getElementById('enrollment-course-title');
 
-    window.openEnrollment = function(courseTitle) {
+    let currentEnrollmentIsPaid = true;
+
+    window.openEnrollment = function(courseTitle, isPaid = true) {
+        currentEnrollmentIsPaid = isPaid;
+        
         // Close course modal if open
         if (courseModal) {
             courseModal.classList.remove('active');
@@ -453,9 +457,14 @@ document.addEventListener('DOMContentLoaded', () => {
         enrollmentForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            // Here we would normally collect data, for now we just switch steps
-            step1.classList.remove('active-step');
-            step2.classList.add('active-step');
+            if (currentEnrollmentIsPaid) {
+                // Here we would normally collect data, for now we just switch steps
+                step1.classList.remove('active-step');
+                step2.classList.add('active-step');
+            } else {
+                alert('تم تسجيل بياناتك بنجاح للاستفادة من الشهادة. يمكنك الآن الدخول للدورة مباشرة!');
+                closeEnrollmentModal();
+            }
         });
     }
 
