@@ -242,7 +242,14 @@
 }
 
 /* Responsive Room */
+.mobile-toggles {
+    display: none !important;
+}
+
 @media (max-width: 1024px) {
+    .mobile-toggles {
+        display: flex !important;
+    }
     .room-layout {
         display: flex;
         width: 100vw;
