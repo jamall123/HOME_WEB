@@ -260,6 +260,59 @@ document.addEventListener('DOMContentLoaded', () => {
         closeEnrollmentBtn.addEventListener('click', closeEnrollmentModal);
     }
 
+    // ----------------------------------------------------
+    // Dynamic Bank Accounts Loading
+    // ----------------------------------------------------
+    const bankSelector = document.getElementById('bank-selector');
+    const displayBankName = document.getElementById('display-bank-name');
+    const displayAccountName = document.getElementById('display-account-name');
+    const displayAccountNumber = document.getElementById('account-number');
+    const dynamicBankInfo = document.getElementById('dynamic-bank-info');
+    
+    let loadedAccounts = [];
+
+    function loadBankAccounts() {
+        const stored = localStorage.getItem('jhome_bank_accounts');
+        if (stored) {
+            loadedAccounts = JSON.parse(stored);
+        } else {
+            loadedAccounts = [{ id: 'default', bank: 'بنكك', name: 'جمال احمد ابراهيم', number: '4373414' }];
+        }
+        
+        if (bankSelector) {
+            bankSelector.innerHTML = '';
+            loadedAccounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.id;
+                opt.textContent = acc.bank + ' - ' + acc.name;
+                bankSelector.appendChild(opt);
+            });
+            
+            // Trigger initial selection
+            if(loadedAccounts.length > 0) {
+                updateBankDisplay(loadedAccounts[0].id);
+            }
+        }
+    }
+
+    function updateBankDisplay(id) {
+        const acc = loadedAccounts.find(a => a.id === id);
+        if (acc && displayBankName && displayAccountName && displayAccountNumber) {
+            displayBankName.textContent = acc.bank;
+            displayAccountName.textContent = acc.name;
+            displayAccountNumber.textContent = acc.number;
+        }
+    }
+
+    if (bankSelector) {
+        bankSelector.addEventListener('change', (e) => {
+            updateBankDisplay(e.target.value);
+        });
+        
+        // Load on init
+        loadBankAccounts();
+    }
+
     // Handle Form Submit -> Go to Payment Step
     if (enrollmentForm) {
         enrollmentForm.addEventListener('submit', (e) => {

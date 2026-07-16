@@ -190,14 +190,17 @@
                     <div class="payment-card">
                         <div class="payment-card-header">
                             <span class="bank-details-label">بيانات التحويل:</span>
-                            <button class="change-bank-btn">تغيير البنك</button>
+                            <select id="bank-selector" class="form-input" style="width: auto; padding: 0.2rem; font-size: 0.9rem;">
+                                <!-- Dynamic options here -->
+                            </select>
                         </div>
-                        <div class="bank-info">
-                            <p>البنك: <strong>بنكك</strong></p>
-                            <p>الاسم: <strong>جمال احمد ابراهيم</strong></p>
+                        <div class="bank-info" id="dynamic-bank-info">
+                            <!-- Dynamic content injected via JS -->
+                            <p>البنك: <strong id="display-bank-name">--</strong></p>
+                            <p>الاسم: <strong id="display-account-name">--</strong></p>
                             <div class="account-number-box">
                                 <span class="account-label">رقم الحساب:</span>
-                                <span class="account-number" id="account-number">4373414</span>
+                                <span class="account-number" id="account-number">--</span>
                                 <button class="copy-btn" onclick="copyAccountNumber()"><i class="far fa-copy"></i></button>
                             </div>
                         </div>
