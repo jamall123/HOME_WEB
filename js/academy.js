@@ -414,5 +414,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 400);
         }
     };
+    window.enterRoomUnified = function() {
+        const usernameInput = document.getElementById('unified-username').value.trim().toLowerCase();
+        const passwordInput = document.getElementById('unified-pass').value.trim();
+
+        if(!usernameInput || !passwordInput) {
+            alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
+            return;
+        }
+
+        const storedUsers = localStorage.getItem('jhome_users');
+        if(storedUsers) {
+            const users = JSON.parse(storedUsers);
+            const user = users.find(u => u.username === usernameInput && u.password === passwordInput);
+            
+            if(user) {
+                // Login Success
+                if(user.role === 'instructor' && instructorTabBtn) {
+                    instructorTabBtn.style.display = 'block';
+                }
+                
+                // Hide Gate
+                if(roomEntryGate) {
+                    roomEntryGate.style.opacity = '0';
+                    setTimeout(() => {
+                        roomEntryGate.style.display = 'none';
+                        document.body.style.overflow = 'auto'; 
+                    }, 400);
+                }
+            } else {
+                alert('بيانات الدخول غير صحيحة، أو ليس لديك صلاحية لهذه الدورة.');
+            }
+        } else {
+            alert('لم يتم العثور على أي مستخدمين في النظام.');
+        }
+    };
+
+    // ----------------------------------------------------
+    // 7. Check URL for Course Type (Free vs Paid)
+    // ----------------------------------------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseType = urlParams.get('type');
+    const unifiedForm = document.getElementById('unified-entry-form');
+
+    if(courseType === 'paid') {
+        // It's a paid course, force unified login
+        if(entrySelection) entrySelection.style.display = 'none';
+        if(studentForm) studentForm.style.display = 'none';
+        if(instructorForm) instructorForm.style.display = 'none';
+        if(unifiedForm) unifiedForm.style.display = 'block';
+    }
 
 });
