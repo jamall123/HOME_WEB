@@ -563,15 +563,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const snapshot = await fileRef.put(file);
                 const downloadURL = await snapshot.ref.getDownloadURL();
 
+                const currentCourseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
                 const db = firebase.firestore();
                 await db.collection('enrollmentRequests').add({
-                    fullName,
+                    studentName: fullName, // Admin panel expects studentName
                     phone,
                     education: edu,
                     specialization: spec,
                     city,
                     reason,
                     courseTitle,
+                    courseId: currentCourseId, // Admin panel expects courseId
+                    receiptId: phone, // Admin panel expects receiptId (can be phone for now)
                     receiptUrl: downloadURL,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
