@@ -693,8 +693,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const db = firebase.firestore();
 
-            // Try username as-is first, then lowercase (for compatibility)
-            const attempts = [...new Set([usernameRaw, usernameRaw.toLowerCase()])];
+            // Try all possible username formats for backward compatibility
+            const u = usernameRaw;
+            const uLow = u.toLowerCase();
+            const attempts = [...new Set([
+                u,                           // as typed
+                uLow,                        // lowercase
+                uLow + '@jhome.sd',          // old format with @jhome.sd
+                u + '@jhome.sd',             // old format (original case)
+            ])];
             let doc = null;
 
             for (const attempt of attempts) {
