@@ -65,13 +65,32 @@
                 </button>
             </div>
 
-            <!-- Video Player Area -->
-            <div class="video-container" id="main-video-container">
-                <!-- Video Element -->
-                <video id="live-video" controls autoplay loop playsinline style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;">
-                    <source src="assets/videos/preview.mp4" type="video/mp4">
-                    متصفحك لا يدعم تشغيل الفيديو.
-                </video>
+            <!-- Presentation Area (Modes: Video, Slides, Channel) -->
+            <div class="video-container" id="main-video-container" style="position: relative; overflow: hidden; background: #000; display: flex; flex-direction: column;">
+                
+                <!-- Mode 1 & 2: Video Player (Live or Link) -->
+                <div id="mode-video-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+                    <video id="live-video" controls autoplay loop playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                        <source src="assets/videos/preview.mp4" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>
+
+                <!-- Mode 3: Slideshow Presentation -->
+                <div id="mode-slides-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background: #111; flex-direction: column; align-items: center; justify-content: center;">
+                    <img id="current-slide-img" src="" alt="Slide" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+
+                <!-- Mode 4: Telegram-Style Channel (Only Instructor Posts) -->
+                <div id="mode-channel-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background: #0f172a; flex-direction: column;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 1rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="margin: 0; color: var(--primary-light);"><i class="fas fa-bullhorn"></i> قناة المحاضرة</h3>
+                        <span style="font-size: 0.8rem; color: #aaa;">منطقة مخصصة لشرح المدرب والتسجيلات الصوتية</span>
+                    </div>
+                    <div id="channel-messages" style="flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Instructor posts will appear here -->
+                    </div>
+                </div>
 
                 <!-- Fullscreen Toggle (Overlaid on top) -->
                 <div style="position: absolute; bottom: 1rem; right: 1rem; z-index: 10;">
@@ -81,7 +100,7 @@
                 </div>
                 <!-- Live Badge -->
                 <div style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-en); font-size: 0.9rem; z-index: 10;">
-                    <span style="color: red;">&bull;</span> LIVE (Mock)
+                    <span id="live-badge-text" style="color: red;">&bull;</span> <span id="live-badge-mode">OFFLINE</span>
                 </div>
             </div>
 
@@ -123,12 +142,67 @@
             <!-- Tab Content: Instructor Tools -->
             <div id="tab-instructor" class="room-tab-content">
                 <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
-                    <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث المباشر</h3>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر</button>
-                        <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
-                        <button class="btn btn-secondary">كتم صوت الطلاب</button>
-                        <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة وأرشفتها <i class="fas fa-save"></i></button>
+                    <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث والمحتوى</h3>
+                    
+                    <div class="form-group">
+                        <label>اختر وضع المحاضرة الحالي:</label>
+                        <select id="instructor-mode-select" class="form-input" onchange="changePresentationMode(this.value)">
+                            <option value="video">كاميرا مباشرة (فيديو وصوت)</option>
+                            <option value="link">تشغيل فيديو مسجل (رابط)</option>
+                            <option value="slides">عرض شرائح صور + صوت مباشر</option>
+                            <option value="channel">وضع القناة (نصوص وصوتيات)</option>
+                        </select>
+                    </div>
+
+                    <!-- Mode: Video Live (Current Mode 1) -->
+                    <div id="inst-panel-video" class="mode-panel">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر (كاميرا)</button>
+                            <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
+                            <button class="btn btn-secondary">كتم صوت الطلاب</button>
+                            <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة وأرشفتها <i class="fas fa-save"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Mode: Link (Mode 2) -->
+                    <div id="inst-panel-link" class="mode-panel" style="display: none;">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="flex: 2; margin: 0;">
+                                <label>رابط الفيديو المسجل (MP4 / YouTube)</label>
+                                <input type="text" id="inst-video-link" class="form-input" dir="ltr" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-primary" onclick="setVideoLinkMode()">تشغيل للطلاب الآن</button>
+                        </div>
+                    </div>
+
+                    <!-- Mode: Slides (Mode 3) -->
+                    <div id="inst-panel-slides" class="mode-panel" style="display: none;">
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+                            <div class="form-group" style="flex: 2; margin: 0;">
+                                <label>رابط الصورة (الشريحة) الحالية</label>
+                                <input type="text" id="inst-slide-url" class="form-input" dir="ltr" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-primary" onclick="setSlideMode()">عرض الشريحة للطلاب</button>
+                            <button id="start-audio-btn" class="btn btn-secondary" onclick="startAudioOnlyStream()">بدء بث الصوت المباشر</button>
+                        </div>
+                    </div>
+
+                    <!-- Mode: Channel (Mode 4) -->
+                    <div id="inst-panel-channel" class="mode-panel" style="display: none;">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="flex: 2; margin: 0;">
+                                <label>رسالة / نص للقناة</label>
+                                <input type="text" id="inst-channel-text" class="form-input" placeholder="اكتب رسالة للطلاب...">
+                            </div>
+                            <button class="btn btn-primary" onclick="sendChannelMessage('text')"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; margin-top: 1rem;">
+                            <div class="form-group" style="flex: 2; margin: 0;">
+                                <label>صورة للقناة (رابط)</label>
+                                <input type="text" id="inst-channel-img" class="form-input" dir="ltr" placeholder="https://...">
+                            </div>
+                            <button class="btn btn-secondary" onclick="sendChannelMessage('image')"><i class="fas fa-image"></i> إرسال</button>
+                        </div>
                     </div>
                 </div>
 
@@ -226,8 +300,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     
-    <!-- Agora RTC SDK -->
+    <!-- Agora RTC SDK & Extensions -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.19.3.js"></script>
+    <script src="https://download.agora.io/sdk/release/agora-extension-ai-denoiser-1.0.1.js"></script>
     
     <script src="js/academy.js?v=1"></script>
 </body>

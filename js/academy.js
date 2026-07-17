@@ -1383,3 +1383,215 @@ async function loadCourseRoomData() {
 
     // Call it after a short delay to ensure DB is ready
     setTimeout(initLectureNotifications, 3000);
+
+    // ----------------------------------------------------
+    // 11. Presentation Modes Logic (Video, Link, Slides, Channel)
+    // ----------------------------------------------------
+    let currentPresentationMode = 'video'; // Default mode
+
+    function initModesListener() {
+        if (!currentCourseId || currentCourseId === 'mock-course-id') return;
+
+        firebase.firestore().collection('courses').doc(currentCourseId)
+            .collection('rooms').doc(currentRoomId)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.presentationMode) {
+                        syncPresentationMode(data.presentationMode, data.presentationData);
+                    }
+                }
+            });
+    }
+
+    function syncPresentationMode(mode, data) {
+        currentPresentationMode = mode;
+        
+        // Hide all containers first
+        const videoContainer = document.getElementById('mode-video-container');
+        const slidesContainer = document.getElementById('mode-slides-container');
+        const channelContainer = document.getElementById('mode-channel-container');
+        
+        if(videoContainer) videoContainer.style.display = 'none';
+        if(slidesContainer) slidesContainer.style.display = 'none';
+        if(channelContainer) channelContainer.style.display = 'none';
+
+        const badgeText = document.getElementById('live-badge-text');
+        const badgeMode = document.getElementById('live-badge-mode');
+
+        if (mode === 'video') {
+            if(videoContainer) videoContainer.style.display = 'block';
+            if(badgeMode) badgeMode.textContent = 'بث مباشر';
+            if(badgeText) badgeText.style.color = 'red';
+            // Agora handles the stream naturally inside mode-video-container
+        } else if (mode === 'link') {
+            if(videoContainer) videoContainer.style.display = 'block';
+            if(badgeMode) badgeMode.textContent = 'فيديو مسجل';
+            if(badgeText) badgeText.style.color = '#3b82f6';
+            if (data && data.videoLink) {
+                const videoEl = document.getElementById('live-video');
+                if(videoEl) {
+                    videoEl.src = data.videoLink;
+                    videoEl.play().catch(e => console.error('Auto-play prevented', e));
+                }
+            }
+        } else if (mode === 'slides') {
+            if(slidesContainer) slidesContainer.style.display = 'flex';
+            if(badgeMode) badgeMode.textContent = 'عرض شرائح + صوت';
+            if(badgeText) badgeText.style.color = '#10b981';
+            if (data && data.slideUrl) {
+                const imgEl = document.getElementById('current-slide-img');
+                if(imgEl) imgEl.src = data.slideUrl;
+            }
+        } else if (mode === 'channel') {
+            if(channelContainer) channelContainer.style.display = 'flex';
+            if(badgeMode) badgeMode.textContent = 'قناة المحاضرة';
+            if(badgeText) badgeText.style.color = '#8b5cf6';
+            // Render channel messages
+            renderChannelMessages();
+        }
+    }
+
+    // INSTRUCTOR FUNCTIONS
+    window.changePresentationMode = async function(mode) {
+        if (!window.currentUser || window.currentUser.role !== 'instructor') return;
+        
+        // Switch panels in instructor tab
+        document.querySelectorAll('.mode-panel').forEach(p => p.style.display = 'none');
+        const panel = document.getElementById(`inst-panel-${mode}`);
+        if(panel) panel.style.display = 'block';
+
+        if(mode === 'channel') {
+            // Automatically switch to channel for everyone
+            await setModeInDB('channel', {});
+        } else if (mode === 'video') {
+            await setModeInDB('video', {});
+        }
+    }
+
+    window.setVideoLinkMode = async function() {
+        const link = document.getElementById('inst-video-link').value.trim();
+        if(!link) return alert('أدخل الرابط أولاً');
+        await setModeInDB('link', { videoLink: link });
+        alert('تم تشغيل الفيديو للطلاب');
+    }
+
+    window.setSlideMode = async function() {
+        const slideUrl = document.getElementById('inst-slide-url').value.trim();
+        if(!slideUrl) return alert('أدخل رابط الشريحة أولاً');
+        await setModeInDB('slides', { slideUrl: slideUrl });
+        alert('تم تغيير الشريحة للطلاب');
+    }
+
+    window.startAudioOnlyStream = async function() {
+        try {
+            await initAgoraClient();
+            await rtc.client.join(options.appId, options.channel, options.token, options.uid);
+            
+            rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+                AEC: true, ANS: true, AGC: true
+            });
+            
+            if (typeof AIDenoiserExtension !== 'undefined') {
+                try {
+                    const denoiser = new AIDenoiserExtension({ assetsPath: 'https://download.agora.io/sdk/release' });
+                    AgoraRTC.registerExtension(denoiser);
+                    const processor = denoiser.createProcessor();
+                    await processor.enable();
+                    rtc.localAudioTrack.pipe(processor).pipe(rtc.localAudioTrack.processorDestination);
+                } catch(err) {
+                    console.log("AI Denoiser fallback", err);
+                }
+            }
+
+            await rtc.client.publish([rtc.localAudioTrack]);
+            
+            alert('تم بدء بث الصوت بنجاح (وضع الشرائح).');
+            document.getElementById('start-audio-btn').textContent = 'جاري بث الصوت...';
+            document.getElementById('start-audio-btn').disabled = true;
+        } catch(e) {
+            console.error(e);
+            alert("خطأ أثناء بدء بث الصوت.");
+        }
+    }
+
+    window.sendChannelMessage = async function(type) {
+        const channelText = document.getElementById('inst-channel-text');
+        const channelImg = document.getElementById('inst-channel-img');
+        
+        let content = '';
+        if(type === 'text') {
+            content = channelText.value.trim();
+            channelText.value = '';
+        } else if (type === 'image') {
+            content = channelImg.value.trim();
+            channelImg.value = '';
+        }
+
+        if(!content) return;
+
+        try {
+            await firebase.firestore().collection('courses').doc(window.currentUser.courseId)
+                .collection('rooms').doc(currentRoomId).collection('channel_messages').add({
+                type,
+                content,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch(e) {
+            console.error("Error sending channel message:", e);
+        }
+    }
+
+    async function setModeInDB(mode, data) {
+        try {
+            await firebase.firestore().collection('courses').doc(window.currentUser.courseId)
+                .collection('rooms').doc(currentRoomId).set({
+                presentationMode: mode,
+                presentationData: data
+            }, { merge: true });
+        } catch(e) {
+            console.error('Error changing mode', e);
+        }
+    }
+
+    // CHANNEL LOGIC
+    function renderChannelMessages() {
+        if(!window._channelListenerAttached && window.currentUser && window.currentUser.courseId) {
+            window._channelListenerAttached = true;
+            firebase.firestore().collection('courses').doc(window.currentUser.courseId)
+                .collection('rooms').doc(currentRoomId).collection('channel_messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(snapshot => {
+                    const container = document.getElementById('channel-messages');
+                    if(!container) return;
+                    
+                    container.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        const el = document.createElement('div');
+                        el.style.background = 'rgba(255,255,255,0.05)';
+                        el.style.padding = '1rem';
+                        el.style.borderRadius = '8px';
+                        el.style.marginBottom = '0.5rem';
+                        el.style.alignSelf = 'flex-start';
+                        el.style.width = '100%';
+                        
+                        const timeString = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                        
+                        if(msg.type === 'text') {
+                            el.innerHTML = `<div style="font-size: 1.1rem; margin-bottom: 0.5rem;">${msg.content}</div>
+                                            <div style="font-size: 0.8rem; color: #888;">المدرب &bull; <span class="en-text">${timeString}</span></div>`;
+                        } else if (msg.type === 'image') {
+                            el.innerHTML = `<img src="${msg.content}" style="max-width: 100%; border-radius: 8px; margin-bottom: 0.5rem;">
+                                            <div style="font-size: 0.8rem; color: #888;">المدرب &bull; <span class="en-text">${timeString}</span></div>`;
+                        }
+                        container.appendChild(el);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                });
+        }
+    }
+
+    setTimeout(() => {
+        initModesListener();
+    }, 4000);
