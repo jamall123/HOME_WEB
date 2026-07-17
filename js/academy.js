@@ -620,29 +620,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.enterRoom = function(role) {
+    window.enterRoom = async function(role) {
         if(role === 'instructor') {
-            // Verify mock credentials (in real app, this goes to Firebase Auth)
-            const email = document.getElementById('instructor-email').value;
-            const pass = document.getElementById('instructor-pass').value;
+            const email = document.getElementById('instructor-email').value.trim();
+            const pass = document.getElementById('instructor-pass').value.trim();
+            
             if(!email || !pass) {
                 alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
                 return;
             }
-            if(instructorTabBtn) {
-                instructorTabBtn.style.display = 'block'; // Show Instructor Tools
+
+            try {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'جاري تسجيل الدخول...';
+                btn.disabled = true;
+
+                await firebase.auth().signInWithEmailAndPassword(email, pass);
+                
+                // onAuthStateChanged will handle UI changes
+            } catch(e) {
+                console.error(e);
+                alert('فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.');
+                const btn = event.target;
+                btn.innerHTML = 'تسجيل الدخول الإداري <i class="fas fa-lock"></i>';
+                btn.disabled = false;
+            }
+        } else {
+            // Guest Student (Free courses)
+            const guestName = document.getElementById('guest-name').value.trim() || 'ضيف';
+            window.currentUser = { name: guestName, role: 'student' };
+            if(roomEntryGate) {
+                roomEntryGate.style.opacity = '0';
+                setTimeout(() => {
+                    roomEntryGate.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 400);
             }
         }
-        
-        // Hide Gate, unlock scrolling
-        if(roomEntryGate) {
-            roomEntryGate.style.opacity = '0';
-            setTimeout(() => {
-                roomEntryGate.style.display = 'none';
-                document.body.style.overflow = 'auto'; // allow inner scrolling if needed
-            }, 400);
-        }
     };
+
     window.enterRoomUnified = async function() {
         const usernameInput = document.getElementById('unified-username').value.trim().toLowerCase();
         const passwordInput = document.getElementById('unified-pass').value.trim();
@@ -652,41 +669,167 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        try {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'جاري تسجيل الدخول...';
+            btn.disabled = true;
+
+            const email = usernameInput.includes('@') ? usernameInput : `${usernameInput}@jhome.sd`;
+            await firebase.auth().signInWithEmailAndPassword(email, passwordInput);
+            
+            // onAuthStateChanged will handle UI changes
+        } catch(e) {
+            console.error(e);
+            alert('فشل تسجيل الدخول. تأكد من بيانات الدخول.');
+            const btn = event.target;
+            btn.innerHTML = 'دخول الدورة <i class="fas fa-sign-in-alt"></i>';
+            btn.disabled = false;
+        }
+    };
+
+    // Listen for Auth State Changes
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    window.currentUser = { name: userData.fullname, role: userData.role };
+                    
+                    if (userData.role === 'instructor') {
+                        const instructorTabBtn = document.getElementById('instructor-tab-btn');
+                        if (instructorTabBtn) instructorTabBtn.style.display = 'block';
+                        // Generate Instructor tools inside the tab
+                        generateInstructorTools();
+                    }
+                    
+                    if (roomEntryGate) {
+                        roomEntryGate.style.opacity = '0';
+                        setTimeout(() => {
+                            roomEntryGate.style.display = 'none';
+                            document.body.style.overflow = 'auto';
+                        }, 400);
+                    }
+                }
+            } catch(e) {
+                console.error('Error fetching user role:', e);
+            }
+        }
+    });
+
+    function generateInstructorTools() {
         const urlParams = new URLSearchParams(window.location.search);
-        const currentCourseId = urlParams.get('id') || 'mock-course-id';
+        const courseId = urlParams.get('id');
+        const instructorTab = document.getElementById('tab-instructor');
+        if(!instructorTab) return;
+
+        instructorTab.innerHTML = `
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                <h3 style="margin-bottom: 1.5rem; color: var(--warning);"><i class="fas fa-tools"></i> أدوات إدارة الغرفة الحالية</h3>
+                
+                <div class="form-group">
+                    <label>تحديد وقت بدء الدرس (Start Time)</label>
+                    <input type="datetime-local" id="room-start-time" class="form-input" style="color: black;">
+                </div>
+                
+                <div class="form-group">
+                    <label>إضافة مصادر للغرفة الحالية</label>
+                    <textarea id="room-add-sources" class="form-input" rows="3" placeholder="ضع روابط أو نصوص هنا..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="updateCurrentRoomData()" style="width: 100%; margin-bottom: 2rem;">حفظ التحديثات <i class="fas fa-save"></i></button>
+                
+                <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 2rem;">
+                
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary-light);"><i class="fas fa-plus-circle"></i> إضافة محاضرة جديدة (اليوم التالي)</h3>
+                
+                <div class="form-group">
+                    <label>عنوان المحاضرة الجديدة</label>
+                    <input type="text" id="new-day-title" class="form-input" placeholder="مثال: المحاضرة الثانية">
+                </div>
+                <div class="form-group">
+                    <label>نوع المحاضرة</label>
+                    <select id="new-day-type" class="form-input" style="color: black;" onchange="document.getElementById('new-day-video-wrap').style.display = this.value === 'recorded' ? 'block' : 'none'">
+                        <option value="live">بث مباشر</option>
+                        <option value="recorded">فيديو مسجل</option>
+                    </select>
+                </div>
+                <div class="form-group" id="new-day-video-wrap" style="display:none;">
+                    <label>رابط الفيديو</label>
+                    <input type="text" id="new-day-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." dir="ltr">
+                </div>
+                
+                <button class="btn btn-secondary" onclick="addNewCourseDay()" style="width: 100%;">إنشاء وبدء يوم جديد <i class="fas fa-calendar-plus"></i></button>
+            </div>
+        `;
+    }
+
+    window.updateCurrentRoomData = async function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id');
+        const roomId = urlParams.get('roomId');
+        if(!courseId || !roomId) return alert('الرجاء التأكد من وجودك داخل غرفة محددة');
+
+        const startTime = document.getElementById('room-start-time').value;
+        const newSources = document.getElementById('room-add-sources').value;
 
         try {
-            const snap = await firebase.firestore().collection('users')
-                .where('username', '==', usernameInput)
-                .where('password', '==', passwordInput)
-                .where('courseId', '==', currentCourseId)
-                .get();
-
-            if (!snap.empty) {
-                const user = snap.docs[0].data();
-                
-                // Update current user globally for chat
-                window.currentUser = { name: user.fullname || user.username, role: user.role };
-                
-                // Login Success
-                if(user.role === 'instructor' && instructorTabBtn) {
-                    instructorTabBtn.style.display = 'block';
+            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const doc = await courseRef.get();
+            if(doc.exists) {
+                const course = doc.data();
+                const rooms = course.rooms || [];
+                const rIndex = rooms.findIndex(r => r.id === roomId);
+                if(rIndex > -1) {
+                    if(startTime) rooms[rIndex].startTime = startTime;
+                    if(newSources) rooms[rIndex].sources = (rooms[rIndex].sources ? rooms[rIndex].sources + '\n\n' : '') + newSources;
+                    
+                    await courseRef.update({ rooms });
+                    alert('تم حفظ التحديثات بنجاح!');
+                    location.reload(); // reload to reflect changes
                 }
-                
-                // Hide Gate
-                if(roomEntryGate) {
-                    roomEntryGate.style.opacity = '0';
-                    setTimeout(() => {
-                        roomEntryGate.style.display = 'none';
-                        document.body.style.overflow = 'auto'; 
-                    }, 400);
-                }
-            } else {
-                alert('بيانات الدخول غير صحيحة، أو ليس لديك صلاحية لهذه الدورة.');
             }
-        } catch (e) {
+        } catch(e) {
             console.error(e);
-            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات.');
+            alert('حدث خطأ أثناء الحفظ');
+        }
+    };
+
+    window.addNewCourseDay = async function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id');
+        if(!courseId) return;
+
+        const title = document.getElementById('new-day-title').value.trim();
+        const type = document.getElementById('new-day-type').value;
+        const videoUrl = document.getElementById('new-day-video-url').value.trim();
+
+        if(!title) return alert('الرجاء كتابة عنوان المحاضرة');
+
+        const newRoomId = 'room-' + Date.now();
+        const newRoom = {
+            id: newRoomId,
+            name: title,
+            type: type,
+            videoUrl: type === 'recorded' ? videoUrl : '',
+            sources: ''
+        };
+
+        try {
+            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const doc = await courseRef.get();
+            if(doc.exists) {
+                const course = doc.data();
+                const rooms = course.rooms || [];
+                rooms.push(newRoom);
+                await courseRef.update({ rooms });
+                alert('تم إنشاء الغرفة الجديدة بنجاح! سيتم تحويلك إليها الآن.');
+                window.location.href = `course-room.html?id=${courseId}&roomId=${newRoomId}`;
+            }
+        } catch(e) {
+            console.error(e);
+            alert('حدث خطأ أثناء إضافة المحاضرة');
         }
     };
 
@@ -705,7 +848,150 @@ document.addEventListener('DOMContentLoaded', () => {
         if(unifiedForm) unifiedForm.style.display = 'block';
     }
 
+    if (window.location.pathname.includes('course-room.html')) {
+        loadCourseRoomData();
+    }
 });
+
+async function loadCourseRoomData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    const roomId = urlParams.get('roomId');
+    
+    if (!courseId) return;
+
+    try {
+        const doc = await firebase.firestore().collection('courses').doc(courseId).get();
+        if (doc.exists) {
+            const course = doc.data();
+            const rooms = course.rooms || [];
+            
+            // Render Sidebar rooms list
+            const sidebarContainer = document.querySelector('.room-sidebar-content');
+            if (sidebarContainer) {
+                let html = '<h3 style="padding:1rem; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;">المنهج والدروس</h3><div style="padding:1rem;">';
+                if (rooms.length === 0) {
+                    html += '<p class="text-muted">لا توجد دروس متاحة حالياً.</p>';
+                } else {
+                    rooms.forEach((r, idx) => {
+                        const isActive = r.id === roomId || (!roomId && idx === 0);
+                        const typeIcon = r.type === 'recorded' ? 'fa-play-circle' : 'fa-video';
+                        html += `
+                            <div style="margin-bottom: 1rem;">
+                                <div onclick="window.location.href='course-room.html?id=${courseId}&roomId=${r.id}'" style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; background: ${isActive ? 'var(--primary-color)' : 'rgba(255,255,255,0.02)'}; border-radius: var(--radius-sm); cursor: pointer; transition: 0.3s;">
+                                    <span style="font-weight: 500;">${r.name}</span>
+                                    <i class="fas ${typeIcon} text-muted" style="font-size: 0.8rem; color:${isActive?'white':'inherit'} !important;"></i>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                html += '</div>';
+                sidebarContainer.innerHTML = html;
+            }
+
+            // Load active room details
+            let activeRoom = rooms.find(r => r.id === roomId);
+            if (!activeRoom && rooms.length > 0) activeRoom = rooms[0];
+
+            if (activeRoom) {
+                document.querySelector('#tab-desc h2').innerText = activeRoom.name;
+                
+                // Update Sources Tab
+                const resTab = document.getElementById('tab-resources');
+                if (resTab) {
+                    resTab.innerHTML = `
+                        <h3 style="margin-bottom: 1rem;">المصادر والمرفقات</h3>
+                        <p style="white-space: pre-wrap; line-height: 1.6;">${activeRoom.sources || 'لا توجد مصادر مرفقة مع هذا الدرس.'}</p>
+                    `;
+                }
+
+                // Handle Video vs Live
+                if (activeRoom.type === 'recorded') {
+                    // Hide live tools
+                    const liveBtns = document.getElementById('instructor-tab-btn');
+                    if(liveBtns) liveBtns.style.display = 'none';
+                    
+                    const videoContainer = document.getElementById('main-video-container');
+                    let embedUrl = activeRoom.videoUrl;
+                    
+                    if (embedUrl && (embedUrl.includes('youtube.com/') || embedUrl.includes('youtu.be/'))) {
+                        if (embedUrl.includes('watch?v=')) {
+                            embedUrl = embedUrl.replace('watch?v=', 'embed/');
+                        }
+                        if (embedUrl.includes('youtu.be/')) {
+                            embedUrl = embedUrl.replace('youtu.be/', 'youtube.com/embed/');
+                        }
+                        videoContainer.innerHTML = `
+                            <iframe width="100%" height="100%" src="${embedUrl || ''}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top:0; left:0; width:100%; height:100%;"></iframe>
+                        `;
+                    } else {
+                        // Assume it's an MP4 or direct video link (like from Firebase Storage)
+                        videoContainer.innerHTML = `
+                            <video controls style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit: contain; background: black;">
+                                <source src="${embedUrl || ''}" type="video/mp4">
+                                متصفحك لا يدعم تشغيل الفيديو.
+                            </video>
+                        `;
+                    }
+                } else {
+                    // It's a live room, keep Agora UI
+                    const liveBtns = document.getElementById('instructor-tab-btn');
+                    // Instructors will see this tab when they login via enterRoom
+                    
+                    const videoContainer = document.getElementById('main-video-container');
+                    
+                    if (activeRoom.startTime) {
+                        const startTimeMs = new Date(activeRoom.startTime).getTime();
+                        const nowMs = new Date().getTime();
+                        
+                        if (startTimeMs > nowMs) {
+                            // Show Countdown Overlay
+                            videoContainer.innerHTML = `
+                                <div id="countdown-overlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                                    <i class="fas fa-clock" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                                    <h2 style="margin-bottom: 0.5rem;">تبدأ المحاضرة خلال</h2>
+                                    <div id="countdown-timer" style="font-size: 2.5rem; font-family: monospace; font-weight: bold; color: var(--warning); direction: ltr;">--:--:--</div>
+                                    <p class="text-muted" style="margin-top: 1rem;">يرجى الانتظار، سيتم فتح البث تلقائياً في الموعد المحدد.</p>
+                                </div>
+                                <div id="actual-live-container" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%;"></div>
+                            `;
+                            
+                            const timerEl = document.getElementById('countdown-timer');
+                            const overlay = document.getElementById('countdown-overlay');
+                            const actualContainer = document.getElementById('actual-live-container');
+                            
+                            const interval = setInterval(() => {
+                                const currentMs = new Date().getTime();
+                                const diff = startTimeMs - currentMs;
+                                
+                                if (diff <= 0) {
+                                    clearInterval(interval);
+                                    overlay.style.display = 'none';
+                                    actualContainer.style.display = 'block';
+                                    // Move Agora video wrappers inside the actual container if needed,
+                                    // or just hide the overlay so the normal #main-video-container behind it shows up.
+                                    // In this case, we'll just clear the video container and let the instructor start stream.
+                                    videoContainer.innerHTML = '';
+                                    showToast('حان موعد المحاضرة! يمكنك الانضمام الآن.', 'info');
+                                    return;
+                                }
+                                
+                                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                                
+                                timerEl.innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                            }, 1000);
+                        }
+                    }
+                }
+            }
+        }
+    } catch(err) {
+        console.error('Error fetching course data', err);
+    }
+}
 
     // ----------------------------------------------------
     // 8. Agora Live Stream Integration (Mock UI + SDK logic)
@@ -850,13 +1136,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-messages-container');
     const chatUrlParams = new URLSearchParams(window.location.search);
     const currentCourseId = chatUrlParams.get('id') || 'mock-course-id';
+    const currentRoomId = chatUrlParams.get('roomId') || 'mock-room-id';
     
     // Default user if not logged in
     window.currentUser = { name: 'زائر', role: 'student' }; 
 
     if (chatForm && chatContainer) {
         // Listen to new messages
-        firebase.firestore().collection('courses').doc(currentCourseId).collection('chat')
+        firebase.firestore().collection('courses').doc(currentCourseId)
+            .collection('rooms').doc(currentRoomId).collection('chat')
             .orderBy('timestamp', 'asc')
             .onSnapshot((snapshot) => {
                 chatContainer.innerHTML = '';
@@ -905,7 +1193,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chatInput.value = ''; // clear immediately for UX
             
             try {
-                await firebase.firestore().collection('courses').doc(currentCourseId).collection('chat').add({
+                await firebase.firestore().collection('courses').doc(currentCourseId)
+                    .collection('rooms').doc(currentRoomId).collection('chat').add({
                     text: text,
                     senderName: window.currentUser.name,
                     role: window.currentUser.role,
