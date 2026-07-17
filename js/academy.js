@@ -1083,7 +1083,7 @@ async function loadCourseRoomData() {
     const options = {
         appId: "4400dcdb72bf4dc1bcdcb2fe37fac0ef", 
         channel: "course-test",
-        token: "007eJxTYBBv6F+YuNO/UcRb1uHSjDffvO9kLj+SNP142CF+PY8tDlIKDCYmBgYpySlJ5kZJaSYpyQYJySnJSUZpqcbmaYnJBqlpfjOjshoCGRnmmb9nYmSAQBCfmyE5v7SoOFW3JLW4hIEBAFS0Iy4=",
+        token: "007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj",
         uid: null
     };
 
