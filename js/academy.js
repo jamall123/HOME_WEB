@@ -538,44 +538,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitFinalBtn = document.getElementById('submit-final-registration');
     if (submitFinalBtn) {
         submitFinalBtn.addEventListener('click', async () => {
-            const file = receiptUpload.files[0];
+            const file = receiptUpload ? receiptUpload.files[0] : null;
             if(!file) {
                 alert('الرجاء رفع الإيصال أولاً');
                 return;
             }
 
-            const fullName = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const edu = document.getElementById('reg-education').value;
-            const spec = document.getElementById('reg-specialization').value;
-            const city = document.getElementById('reg-city').value;
-            const reason = document.getElementById('reg-reason').value;
+            const fullName = (document.getElementById('reg-name') || {}).value || '';
+            const phone = (document.getElementById('reg-phone') || {}).value || '';
+            const edu = (document.getElementById('reg-education') || {}).value || '';
+            const spec = (document.getElementById('reg-specialization') || {}).value || '';
+            const city = (document.getElementById('reg-city') || {}).value || '';
+            const reason = (document.getElementById('reg-reason') || {}).value || '';
             const courseTitle = courseTitleDisplay ? courseTitleDisplay.textContent : 'Unknown Course';
 
-            try {
-                submitFinalBtn.disabled = true;
-                submitFinalBtn.innerHTML = 'جاري الرفع... <i class="fas fa-spinner fa-spin"></i>';
+            if (!fullName || !phone) {
+                alert('الرجاء تعبئة الاسم ورقم الهاتف على الأقل');
+                return;
+            }
 
+            submitFinalBtn.disabled = true;
+            submitFinalBtn.innerHTML = 'جاري الإرسال... <i class="fas fa-spinner fa-spin"></i>';
+
+            // Try to upload receipt image, but don't block submission if it fails
+            let downloadURL = null;
+            try {
+                submitFinalBtn.innerHTML = 'جاري رفع الإيصال... <i class="fas fa-spinner fa-spin"></i>';
                 const storageRef = firebase.storage().ref();
                 const fileName = `receipts/${Date.now()}_${file.name}`;
                 const fileRef = storageRef.child(fileName);
-                
                 const snapshot = await fileRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
+                downloadURL = await snapshot.ref.getDownloadURL();
+            } catch (storageErr) {
+                console.warn('Storage upload failed, will save request without image URL:', storageErr);
+                // Continue anyway - the request is more important than the image
+            }
 
-                const currentCourseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
+            // Always save the enrollment request to Firestore
+            try {
+                submitFinalBtn.innerHTML = 'جاري حفظ الطلب... <i class="fas fa-spinner fa-spin"></i>';
+                const currentCourseId = new URLSearchParams(window.location.search).get('id') || 'unknown-course';
                 const db = firebase.firestore();
                 await db.collection('enrollmentRequests').add({
-                    studentName: fullName, // Admin panel expects studentName
+                    studentName: fullName,
                     phone,
                     education: edu,
                     specialization: spec,
                     city,
                     reason,
                     courseTitle,
-                    courseId: currentCourseId, // Admin panel expects courseId
-                    receiptId: phone, // Admin panel expects receiptId (can be phone for now)
-                    receiptUrl: downloadURL,
+                    courseId: currentCourseId,
+                    receiptId: phone,
+                    receiptUrl: downloadURL || null,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -583,8 +597,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('تم إرسال طلبك بنجاح! سيتم مراجعته وإرسال بيانات الدخول إليك.');
                 closeEnrollmentModal();
             } catch (err) {
-                console.error('Error uploading receipt', err);
-                alert('حدث خطأ أثناء رفع البيانات. الرجاء المحاولة مجدداً.');
+                console.error('Error saving enrollment request to Firestore:', err);
+                alert('حدث خطأ أثناء إرسال الطلب: ' + err.message + '\n\nالرجاء المحاولة مجدداً.');
             } finally {
                 submitFinalBtn.disabled = false;
                 submitFinalBtn.innerHTML = 'إرسال وتأكيد التسجيل <i class="fas fa-check-circle" style="margin-right: 8px;"></i>';
@@ -664,60 +678,85 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.enterRoomUnified = async function(event) {
-        const usernameInput = document.getElementById('unified-username').value.trim().toLowerCase();
+        const usernameRaw = document.getElementById('unified-username').value.trim();
         const passwordInput = document.getElementById('unified-pass').value.trim();
 
-        if(!usernameInput || !passwordInput) {
+        if(!usernameRaw || !passwordInput) {
             alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
             return;
         }
 
+        const btn = event ? event.target : document.querySelector('#unified-entry-form button');
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) { btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
+
         try {
-            const btn = event ? event.target : document.querySelector('#unified-entry-form .btn-primary');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'جاري تسجيل الدخول...';
-            btn.disabled = true;
-
-            // Check against courses_credentials
             const db = firebase.firestore();
-            const doc = await db.collection('courses_credentials').doc(usernameInput).get();
-            
-            if (doc.exists && doc.data().password === passwordInput) {
-                // Success
-                const data = doc.data();
-                window.currentUser = { name: usernameInput, role: data.role || 'student', courseId: data.courseId };
-                
-                // Hide bouncer
-                const roomEntryGate = document.getElementById('room-entry-gate');
-                if(roomEntryGate) {
-                    roomEntryGate.style.opacity = '0';
-                    setTimeout(() => {
-                        roomEntryGate.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }, 400);
-                }
 
-                // If instructor, show instructor tab
-                if (window.currentUser.role === 'instructor') {
-                    const instBtn = document.getElementById('instructor-tab-btn');
-                    if (instBtn) instBtn.style.display = 'block';
-                }
+            // Try username as-is first, then lowercase (for compatibility)
+            const attempts = [...new Set([usernameRaw, usernameRaw.toLowerCase()])];
+            let doc = null;
 
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            } else {
-                // Failure
-                alert('فشل تسجيل الدخول. اسم المستخدم أو كلمة المرور غير صحيحة.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            for (const attempt of attempts) {
+                const result = await db.collection('courses_credentials').doc(attempt).get();
+                if (result.exists) {
+                    doc = result;
+                    console.log('Found user with key:', attempt);
+                    break;
+                }
             }
+
+            if (!doc || !doc.exists) {
+                console.warn('User not found in courses_credentials. Tried:', attempts);
+                alert('اسم المستخدم غير موجود. تأكد من البيانات المُرسلة إليك.');
+                if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+                return;
+            }
+
+            const data = doc.data();
+            console.log('User found, role:', data.role, 'courseId:', data.courseId);
+
+            // Compare password
+            if (data.password !== passwordInput) {
+                console.warn('Password mismatch for user:', doc.id);
+                alert('كلمة المرور غير صحيحة. تأكد من النسخ الصحيح.');
+                if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+                return;
+            }
+
+            // ✅ Success
+            window.currentUser = {
+                name: data.fullname || doc.id,
+                username: doc.id,
+                role: data.role || 'student',
+                courseId: data.courseId
+            };
+            console.log('Login successful:', window.currentUser);
+
+            // Hide entry gate
+            const roomEntryGate = document.getElementById('room-entry-gate');
+            if(roomEntryGate) {
+                roomEntryGate.style.opacity = '0';
+                setTimeout(() => {
+                    roomEntryGate.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 400);
+            }
+
+            // Show instructor tools tab if instructor
+            if (window.currentUser.role === 'instructor') {
+                const instBtn = document.getElementById('instructor-tab-btn');
+                if (instBtn) instBtn.style.display = 'block';
+            }
+
+            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+
         } catch(e) {
-            console.error(e);
-            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات.');
-            const btn = event ? event.target : document.querySelector('#unified-entry-form .btn-primary');
-            btn.innerHTML = 'تسجيل الدخول للغرفة <i class="fas fa-sign-in-alt"></i>';
-            btn.disabled = false;
+            console.error('Login error:', e);
+            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات: ' + e.message);
+            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
         }
+
     };
 
     // Listen for Auth State Changes
