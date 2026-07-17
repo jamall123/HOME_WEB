@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const duration = course.duration ? `${course.duration} يوم` : 'غير محدد';
                 const title = course.title || 'دورة بدون عنوان';
                 const description = course.description || 'لا يوجد وصف متاح.';
-                const cover = course.cover || 'assets/images/courses/web_dev_cover.png';
+                const cover = course.cover || 'https://via.placeholder.com/600x400/0B162C/A5B4FC?text=Jhome+Course';
                 
                 const badge = course.isPaid ? 
                     `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(245, 158, 11, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span>المشتركين</span>
                             <strong>${data.students} طالب</strong>
                         </div>
-                        <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.instructorId}')">
+                        <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.id}')">
                             <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>
                             <span style="color: #A5B4FC;">المقدم</span>
                             <strong style="color: white; margin-top: 0.25rem; display: block;">${data.instructor}</strong>
@@ -222,35 +222,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeInstModalBtn = document.querySelector('.close-instructor-modal');
     const instructorModalBody = document.getElementById('instructor-modal-body');
 
-    window.openInstructorModal = function(instId) {
+    window.openInstructorModal = function(courseId) {
         if (!instructorModal || !instructorModalBody) return;
-        const inst = instructorsData[instId];
-        if (inst) {
-            let certsHTML = inst.certificates.map(c => `<li><i class="fas fa-award" style="color:#10B981; margin-left: 8px;"></i> ${c}</li>`).join('');
+        const course = coursesData[courseId];
+        if (course) {
+            const name = course.instructor || 'مقدم الدورة';
+            const photo = course.instructorPhoto || 'https://ui-avatars.com/api/?name=Instructor&background=1E293B&color=A5B4FC';
+            const specialty = course.instructorSpecialty || 'غير محدد';
+            const bio = course.instructorBio || 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
             
             instructorModalBody.innerHTML = `
                 <div style="background: linear-gradient(135deg, #1E293B, #0B162C); border-radius: 20px; overflow: hidden;">
-                    <div style="height: 120px; background: url('${inst.photo}') center/cover; filter: blur(5px) brightness(0.5);"></div>
+                    <div style="height: 120px; background: url('${photo}') center/cover; filter: blur(5px) brightness(0.5);"></div>
                     <div style="padding: 0 2rem 2rem; position: relative;">
-                        <img src="${inst.photo}" alt="${inst.name}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1E293B; margin-top: -50px; position: relative; z-index: 2; object-fit: cover;">
-                        <h3 class="display-3" style="margin-top: 1rem; margin-bottom: 0.2rem;">${inst.name}</h3>
-                        <p style="color: var(--primary-light); font-weight: 600; margin-bottom: 1.5rem;">${inst.specialty}</p>
+                        <img src="${photo}" alt="${name}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1E293B; margin-top: -50px; position: relative; z-index: 2; object-fit: cover;">
+                        <h3 class="display-3" style="margin-top: 1rem; margin-bottom: 0.2rem;">${name}</h3>
+                        <p style="color: var(--primary-light); font-weight: 600; margin-bottom: 1.5rem;">${specialty}</p>
                         
                         <div style="margin-bottom: 1.5rem;">
                             <h4 style="color: #A5B4FC; margin-bottom: 0.5rem; font-size: 1rem;">نبذة تعريفية</h4>
-                            <p class="text-muted" style="line-height: 1.6; font-size: 0.95rem;">${inst.bio}</p>
+                            <p class="text-muted" style="line-height: 1.6; font-size: 0.95rem;">${bio}</p>
                         </div>
-                        
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="color: #A5B4FC; margin-bottom: 0.5rem; font-size: 1rem;">الشهادات والخبرات</h4>
-                            <ul style="list-style: none; padding: 0; margin: 0; color: #E2E8F0; font-size: 0.9rem; line-height: 1.8;">
-                                ${certsHTML}
-                            </ul>
-                        </div>
-                        
-                        <a href="${inst.cvLink}" target="_blank" class="btn btn-secondary" style="width: 100%; display: flex; justify-content: center; gap: 0.5rem;">
-                            <i class="fas fa-file-pdf"></i> تحميل السيرة الذاتية (CV)
-                        </a>
                     </div>
                 </div>
             `;
@@ -1327,7 +1319,7 @@ async function loadCourseRoomData() {
         
         try {
             await firebase.firestore().collection('courses').doc(window.currentUser.courseId).update({
-                instructorPhoto: photo || 'assets/images/courses/instructor.png',
+                instructorPhoto: photo || 'https://ui-avatars.com/api/?name=Instructor&background=1E293B&color=A5B4FC',
                 instructorSpecialty: specialty,
                 instructorBio: bio
             });
