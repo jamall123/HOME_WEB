@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const fullName = document.getElementById('reg-fullname').value;
+            const fullName = document.getElementById('reg-name').value;
             const phone = document.getElementById('reg-phone').value;
             const edu = document.getElementById('reg-education').value;
             const spec = document.getElementById('reg-specialization').value;
