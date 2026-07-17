@@ -140,97 +140,147 @@
             </div>
 
             <!-- Tab Content: Instructor Tools -->
+            <!-- Tab Content: Instructor Tools -->
             <div id="tab-instructor" class="room-tab-content">
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                
+                <!-- Main Header & Mode Tabs -->
+                <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
                     <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث والمحتوى</h3>
                     
-                    <div class="form-group">
-                        <label>اختر وضع المحاضرة الحالي:</label>
-                        <select id="instructor-mode-select" class="form-input" onchange="changePresentationMode(this.value)">
-                            <option value="video">كاميرا مباشرة (فيديو وصوت)</option>
-                            <option value="link">تشغيل فيديو مسجل (رابط)</option>
-                            <option value="slides">عرض شرائح صور + صوت مباشر</option>
-                            <option value="channel">وضع القناة (نصوص وصوتيات)</option>
-                        </select>
+                    <!-- Tabs for Modes -->
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <button class="btn inst-mode-btn active" style="flex: 1; min-width: 200px; justify-content: center; background: var(--primary-color);" onclick="changePresentationMode('video', this)">
+                            <i class="fas fa-video" style="margin-left: 8px;"></i> كاميرا مباشرة
+                        </button>
+                        <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('link', this)">
+                            <i class="fas fa-play-circle" style="margin-left: 8px;"></i> فيديو مسجل
+                        </button>
+                        <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('slides', this)">
+                            <i class="fas fa-images" style="margin-left: 8px;"></i> شرائح + صوت
+                        </button>
+                        <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('channel', this)">
+                            <i class="fas fa-chalkboard" style="margin-left: 8px;"></i> وضع القناة
+                        </button>
                     </div>
 
-                    <!-- Mode: Video Live (Current Mode 1) -->
-                    <div id="inst-panel-video" class="mode-panel">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر (كاميرا)</button>
-                            <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
-                            <button class="btn btn-secondary">كتم صوت الطلاب</button>
-                            <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة وأرشفتها <i class="fas fa-save"></i></button>
+                    <!-- Mode Panels Wrapper -->
+                    <div style="background: rgba(11, 22, 44, 0.5); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                        <!-- Mode: Video Live (Current Mode 1) -->
+                        <div id="inst-panel-video" class="mode-panel">
+                            <h4 style="margin-bottom: 1rem; color: #E2E8F0;">بث الكاميرا والصوت مباشرة</h4>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر (كاميرا)</button>
+                                <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
+                                <button class="btn btn-secondary">كتم صوت الطلاب</button>
+                                <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة وأرشفتها <i class="fas fa-save"></i></button>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Mode: Link (Mode 2) -->
-                    <div id="inst-panel-link" class="mode-panel" style="display: none;">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-                            <div class="form-group" style="flex: 2; margin: 0;">
-                                <label>رابط الفيديو المسجل (MP4 / YouTube)</label>
-                                <input type="text" id="inst-video-link" class="form-input" dir="ltr" placeholder="https://...">
+                        <!-- Mode: Link (Mode 2) -->
+                        <div id="inst-panel-link" class="mode-panel" style="display: none;">
+                            <h4 style="margin-bottom: 1rem; color: #E2E8F0;">تشغيل فيديو مسجل للطلاب</h4>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label>ارفع الفيديو مباشرة أو ضع رابط خارجي</label>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                        <input type="text" id="inst-video-link" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                        <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                        <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                            <input type="file" id="inst-video-file" class="form-input" accept="video/mp4,video/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-video-link')">
+                                            <span id="upload-status-inst-video-link" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-primary" onclick="setVideoLinkMode()">تشغيل للطلاب الآن <i class="fas fa-play" style="margin-right: 8px;"></i></button>
+                                </div>
                             </div>
-                            <button class="btn btn-primary" onclick="setVideoLinkMode()">تشغيل للطلاب الآن</button>
                         </div>
-                    </div>
 
-                    <!-- Mode: Slides (Mode 3) -->
-                    <div id="inst-panel-slides" class="mode-panel" style="display: none;">
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
-                            <div class="form-group" style="flex: 2; margin: 0;">
-                                <label>رابط الصورة (الشريحة) الحالية</label>
-                                <input type="text" id="inst-slide-url" class="form-input" dir="ltr" placeholder="https://...">
+                        <!-- Mode: Slides (Mode 3) -->
+                        <div id="inst-panel-slides" class="mode-panel" style="display: none;">
+                            <h4 style="margin-bottom: 1rem; color: #E2E8F0;">عرض شريحة/صورة مع بث صوتي</h4>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div class="form-group" style="margin: 0;">
+                                    <label>ارفع صورة الشريحة أو ضع رابطها</label>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                        <input type="text" id="inst-slide-url" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                        <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                        <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                            <input type="file" id="inst-slide-file" class="form-input" accept="image/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-slide-url')">
+                                            <span id="upload-status-inst-slide-url" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1rem;">
+                                    <button class="btn btn-primary" onclick="setSlideMode()">عرض الشريحة للطلاب <i class="fas fa-image" style="margin-right: 8px;"></i></button>
+                                    <button id="start-audio-btn" class="btn btn-secondary" onclick="startAudioOnlyStream()">بدء بث الصوت المباشر <i class="fas fa-microphone" style="margin-right: 8px;"></i></button>
+                                </div>
                             </div>
-                            <button class="btn btn-primary" onclick="setSlideMode()">عرض الشريحة للطلاب</button>
-                            <button id="start-audio-btn" class="btn btn-secondary" onclick="startAudioOnlyStream()">بدء بث الصوت المباشر</button>
                         </div>
-                    </div>
 
-                    <!-- Mode: Channel (Mode 4) -->
-                    <div id="inst-panel-channel" class="mode-panel" style="display: none;">
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end;">
-                            <div class="form-group" style="flex: 2; margin: 0;">
-                                <label>رسالة / نص للقناة</label>
-                                <input type="text" id="inst-channel-text" class="form-input" placeholder="اكتب رسالة للطلاب...">
+                        <!-- Mode: Channel (Mode 4) -->
+                        <div id="inst-panel-channel" class="mode-panel" style="display: none;">
+                            <h4 style="margin-bottom: 1rem; color: #E2E8F0;">إرسال رسائل وصور لقناة الدرس</h4>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 2; margin: 0;">
+                                    <label>رسالة / نص للقناة</label>
+                                    <input type="text" id="inst-channel-text" class="form-input" placeholder="اكتب رسالة للطلاب...">
+                                </div>
+                                <button class="btn btn-primary" onclick="sendChannelMessage('text')"><i class="fas fa-paper-plane"></i> إرسال النص</button>
                             </div>
-                            <button class="btn btn-primary" onclick="sendChannelMessage('text')"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; margin-top: 1rem;">
-                            <div class="form-group" style="flex: 2; margin: 0;">
-                                <label>صورة للقناة (رابط)</label>
-                                <input type="text" id="inst-channel-img" class="form-input" dir="ltr" placeholder="https://...">
+                            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>ارفع صورة للقناة أو ضع رابطها</label>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                    <input type="text" id="inst-channel-img" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                    <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="file" id="inst-channel-file" class="form-input" accept="image/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-channel-img')">
+                                        <span id="upload-status-inst-channel-img" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                    </div>
+                                </div>
                             </div>
-                            <button class="btn btn-secondary" onclick="sendChannelMessage('image')"><i class="fas fa-image"></i> إرسال</button>
+                            <div style="margin-top: 1rem;">
+                                <button class="btn btn-secondary" onclick="sendChannelMessage('image')"><i class="fas fa-image" style="margin-right: 8px;"></i> إرسال الصورة للمجموعة</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
                     <!-- Profile Update -->
                     <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
-                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-user-edit"></i> تحديث الملف الشخصي</h4>
+                        <h4 style="margin-bottom: 1.5rem; color: #A5B4FC; border-bottom: 1px solid rgba(165, 180, 252, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-user-edit"></i> تحديث الملف الشخصي للمدرب</h4>
                         <div class="form-group">
-                            <label>صورة المدرب (رابط)</label>
-                            <input type="text" id="inst-update-photo" class="form-input" dir="ltr" placeholder="https://...">
+                            <label>ارفع صورة المدرب الشخصية أو ضع رابط</label>
+                            <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="text" id="inst-update-photo" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2;">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="file" class="form-input" accept="image/*" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-update-photo')">
+                                    <span id="upload-status-inst-update-photo" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> رفع...</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>التخصص</label>
-                            <input type="text" id="inst-update-specialty" class="form-input" placeholder="مثال: مهندس برمجيات">
+                            <input type="text" id="inst-update-specialty" class="form-input" placeholder="مثال: مهندس برمجيات وذكاء اصطناعي">
                         </div>
                         <div class="form-group">
-                            <label>نبذة عنك</label>
-                            <textarea id="inst-update-bio" class="form-input" rows="3"></textarea>
+                            <label>نبذة تعريفية شاملة عنك</label>
+                            <textarea id="inst-update-bio" class="form-input" rows="4" placeholder="اكتب نبذة تظهر للطلاب في تفاصيل الدورة..."></textarea>
                         </div>
-                        <button class="btn btn-primary" style="width: 100%;" onclick="updateInstructorProfile()">حفظ التحديثات</button>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="updateInstructorProfile()"><i class="fas fa-save" style="margin-right: 8px;"></i> حفظ التحديثات</button>
                     </div>
 
                     <!-- Scheduling -->
                     <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
-                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-calendar-alt"></i> جدولة المحاضرة القادمة</h4>
+                        <h4 style="margin-bottom: 1.5rem; color: #A5B4FC; border-bottom: 1px solid rgba(165, 180, 252, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-calendar-alt"></i> جدولة المحاضرة القادمة</h4>
                         <div class="form-group">
                             <label>عنوان المحاضرة</label>
-                            <input type="text" id="schedule-title" class="form-input" placeholder="مثال: الدرس الثاني">
+                            <input type="text" id="schedule-title" class="form-input" placeholder="مثال: الدرس الثاني: مقدمة في لغة البرمجة">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div class="form-group">
@@ -242,23 +292,29 @@
                                 <input type="datetime-local" id="schedule-end" class="form-input">
                             </div>
                         </div>
-                        <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary-light); color: var(--primary-light);" onclick="scheduleLecture()">حفظ الجدولة وإشعار الطلاب</button>
+                        <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary-light); color: var(--primary-light); margin-top: 1rem;" onclick="scheduleLecture()"><i class="fas fa-bell" style="margin-right: 8px;"></i> حفظ الجدولة وإشعار الطلاب</button>
                     </div>
                 </div>
 
                 <!-- Resources Upload -->
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 1.5rem;">
-                    <h4 style="margin-bottom: 1rem;"><i class="fas fa-file-upload"></i> رفع ملفات وموارد للمحاضرة</h4>
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <div class="form-group" style="flex: 2; margin: 0;">
-                            <label>اسم الملف</label>
-                            <input type="text" id="resource-name" class="form-input" placeholder="مثال: عرض تقديمي PDF">
+                    <h4 style="margin-bottom: 1.5rem; color: #10B981; border-bottom: 1px solid rgba(16, 185, 129, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-file-upload"></i> ملحقات وموارد الدرس (كتب، ملفات PDF، إلخ)</h4>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                        <div class="form-group" style="flex: 2; min-width: 200px; margin: 0;">
+                            <label>اسم الملف (كما يظهر للطلاب)</label>
+                            <input type="text" id="resource-name" class="form-input" placeholder="مثال: عرض تقديمي بصيغة PDF">
                         </div>
-                        <div class="form-group" style="flex: 2; margin: 0;">
-                            <label>رابط الملف</label>
-                            <input type="text" id="resource-url" class="form-input" dir="ltr" placeholder="https://...">
+                        <div class="form-group" style="flex: 3; min-width: 250px; margin: 0;">
+                            <label>الرابط أو ارفع الملف مباشرة</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="text" id="resource-url" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2;">
+                                <div style="flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="file" id="resource-file" class="form-input" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'resource-url')">
+                                    <span id="upload-status-resource-url" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> رفع...</span>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn btn-primary" style="flex: 1;" onclick="addResource()"><i class="fas fa-plus"></i> إضافة للملحقات</button>
+                        <button class="btn btn-primary" style="flex: 1; min-width: 150px;" onclick="addResource()"><i class="fas fa-plus"></i> إضافة للملحقات</button>
                     </div>
                 </div>
             </div>

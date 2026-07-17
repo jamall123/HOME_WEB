@@ -1526,9 +1526,21 @@ async function loadCourseRoomData() {
     }
 
     // INSTRUCTOR FUNCTIONS
-    window.changePresentationMode = async function(mode) {
+    window.changePresentationMode = async function(mode, btnElement) {
         if (!window.currentUser || window.currentUser.role !== 'instructor') return;
         
+        // Update tab buttons if element is provided
+        if (btnElement) {
+            document.querySelectorAll('.inst-mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(255,255,255,0.05)';
+                btn.style.color = 'inherit';
+            });
+            btnElement.classList.add('active');
+            btnElement.style.background = 'var(--primary-color)';
+            btnElement.style.color = 'white';
+        }
+
         // Switch panels in instructor tab
         document.querySelectorAll('.mode-panel').forEach(p => p.style.display = 'none');
         const panel = document.getElementById(`inst-panel-${mode}`);
@@ -1542,9 +1554,51 @@ async function loadCourseRoomData() {
         }
     }
 
+    window.uploadInstructorMedia = async function(fileInput, targetInputId) {
+        if (!fileInput.files || fileInput.files.length === 0) return;
+        const file = fileInput.files[0];
+        
+        const statusSpan = document.getElementById(`upload-status-${targetInputId}`);
+        if (statusSpan) {
+            statusSpan.style.display = 'inline';
+            statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+            statusSpan.style.color = '#10B981';
+        }
+
+        try {
+            // Check if user is authenticated and authorized
+            if(!window.currentUser || !window.currentUser.courseId) {
+                throw new Error("غير مصرح لك برفع الملفات.");
+            }
+            
+            const storageRef = firebase.storage().ref();
+            const fileRef = storageRef.child(`courses_media/${window.currentUser.courseId}/${Date.now()}_${file.name}`);
+            
+            await fileRef.put(file);
+            const downloadUrl = await fileRef.getDownloadURL();
+            
+            const targetInput = document.getElementById(targetInputId);
+            if (targetInput) {
+                targetInput.value = downloadUrl;
+            }
+            
+            if (statusSpan) {
+                statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> تم الرفع!';
+                setTimeout(() => { statusSpan.style.display = 'none'; }, 3000);
+            }
+        } catch (error) {
+            console.error("Upload Error:", error);
+            if (statusSpan) {
+                statusSpan.innerHTML = '<i class="fas fa-times-circle"></i> فشل الرفع';
+                statusSpan.style.color = '#EF4444';
+            }
+            alert("حدث خطأ أثناء رفع الملف. يرجى المحاولة مرة أخرى.");
+        }
+    };
+
     window.setVideoLinkMode = async function() {
         const link = document.getElementById('inst-video-link').value.trim();
-        if(!link) return alert('أدخل الرابط أولاً');
+        if(!link) return alert('أدخل الرابط أولاً أو قم برفع فيديو');
         await setModeInDB('link', { videoLink: link });
         alert('تم تشغيل الفيديو للطلاب');
     }
