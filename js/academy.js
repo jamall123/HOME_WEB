@@ -1082,8 +1082,8 @@ async function loadCourseRoomData() {
 
     const options = {
         appId: "4400dcdb72bf4dc1bcdcb2fe37fac0ef", 
-        channel: "jhome-course-123",
-        token: null, // If using testing mode, token can be null
+        channel: "course-test",
+        token: "007eJxTYBBv6F+YuNO/UcRb1uHSjDffvO9kLj+SNP142CF+PY8tDlIKDCYmBgYpySlJ5kZJaSYpyQYJySnJSUZpqcbmaYnJBqlpfjOjshoCGRnmmb9nYmSAQBCfmyE5v7SoOFW3JLW4hIEBAFS0Iy4=",
         uid: null
     };
 
@@ -1128,9 +1128,8 @@ async function loadCourseRoomData() {
 
             await initAgoraClient();
 
-            // Use courseId as channel name for uniqueness
+            // channel is set in options and bound to the token
             const courseId = new URLSearchParams(window.location.search).get('id') || 'jhome-default';
-            options.channel = 'course-' + courseId;
             options.uid = Math.floor(Math.random() * 100000);
 
             console.log('Joining Agora channel:', options.channel, 'appId:', options.appId);
