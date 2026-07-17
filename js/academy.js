@@ -1122,34 +1122,67 @@ async function loadCourseRoomData() {
 
     window.startLiveStream = async function() {
         try {
+            // Get the mode from the dropdown
+            const modeSelect = document.getElementById('lecture-mode-select');
+            const selectedMode = modeSelect ? modeSelect.value : 'camera';
+
             await initAgoraClient();
+
+            // Use courseId as channel name for uniqueness
+            const courseId = new URLSearchParams(window.location.search).get('id') || 'jhome-default';
+            options.channel = 'course-' + courseId;
+            options.uid = Math.floor(Math.random() * 100000);
+
+            console.log('Joining Agora channel:', options.channel, 'appId:', options.appId);
+
             await rtc.client.join(options.appId, options.channel, options.token, options.uid);
-            rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+
+            if (selectedMode === 'screen') {
+                // Screen share mode
+                rtc.localVideoTrack = await AgoraRTC.createScreenVideoTrack();
+                rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            } else {
+                // Camera mode
+                rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+            }
             
             const videoContainer = document.getElementById("main-video-container");
-            videoContainer.innerHTML = '';
+            if (videoContainer) videoContainer.innerHTML = '';
             
             await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack]);
             
             const localPlayerContainer = document.createElement("div");
-            localPlayerContainer.id = options.uid || "local-uid";
+            localPlayerContainer.id = 'local-' + options.uid;
             localPlayerContainer.style.width = "100%";
             localPlayerContainer.style.height = "100%";
-            videoContainer.append(localPlayerContainer);
-            rtc.localVideoTrack.play(localPlayerContainer.id);
+            if (videoContainer) {
+                videoContainer.append(localPlayerContainer);
+                rtc.localVideoTrack.play(localPlayerContainer.id);
+            }
 
-            document.getElementById('start-live-btn').style.display = 'none';
-            document.getElementById('leave-live-btn').style.display = 'block';
+            const startBtn = document.getElementById('start-live-btn');
+            const leaveBtn = document.getElementById('leave-live-btn');
+            if (startBtn) startBtn.style.display = 'none';
+            if (leaveBtn) leaveBtn.style.display = 'block';
 
-            // Simulate notifying students (In real app, update Firestore document `isLive: true`)
-            const courseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
-            firebase.firestore().collection('courses').doc(courseId).update({ isLive: true }).catch(console.warn);
+            firebase.firestore().collection('courses').doc(courseId).update({ 
+                isLive: true,
+                liveChannel: options.channel
+            }).catch(console.warn);
 
-            alert('تم بدء البث المباشر بنجاح!');
+            alert('✅ تم بدء البث المباشر بنجاح!');
         } catch (err) {
-            console.error('Error starting live stream', err);
-            alert('حدث خطأ أثناء بدء البث. تأكد من صلاحيات الكاميرا والمايكروفون.');
+            console.error('Error starting live stream:', err.code, err.message, err);
+            let msg = 'حدث خطأ أثناء بدء البث.\n\n';
+            if (err.code === 'PERMISSION_DENIED' || err.name === 'NotAllowedError') {
+                msg += 'السبب: لم تُسمح صلاحيات الكاميرا أو المايكروفون.\nالرجاء السماح للمتصفح باستخدام الكاميرا والمايكروفون.';
+            } else if (err.code === 'INVALID_OPERATION') {
+                msg += 'السبب: خطأ في إعداد Agora (INVALID_OPERATION).\nتأكد من أن التطبيق في وضع Testing (No Token) في Agora Console.';
+            } else {
+                msg += 'الخطأ: ' + (err.message || err.code || 'غير معروف');
+            }
+            alert(msg);
         }
     };
 
