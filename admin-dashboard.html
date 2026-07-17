@@ -34,6 +34,7 @@
             <nav class="admin-nav">
                 <a href="#" id="nav-payments" class="active" onclick="switchAdminTab('payments')"><i class="fas fa-university"></i> حسابات الدفع</a>
                 <a href="#" id="nav-users" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> إدارة المستخدمين</a>
+                <a href="#" id="nav-requests" onclick="switchAdminTab('requests')"><i class="fas fa-file-invoice"></i> طلبات التسجيل</a>
                 <a href="#" onclick="alert('قريباً')"><i class="fas fa-book"></i> إدارة الدورات</a>
                 <a href="index.html"><i class="fas fa-home"></i> العودة للموقع</a>
             </nav>
@@ -123,11 +124,37 @@
                         </tbody>
                     </table>
                 </div>
+            <!-- Tab: Enrollment Requests -->
+            <div id="section-requests" class="admin-section" style="display: none;">
+                <div class="admin-card">
+                    <h3>طلبات التسجيل (الإيصالات)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>الهاتف</th>
+                                <th>الكورس</th>
+                                <th>الإيصال</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requests-list">
+                            <!-- Populated by JS from Firestore -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </main>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

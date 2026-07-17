@@ -20,3 +20,8 @@ window.FUNCTIONS_REGION = "us-central1";
 
 // API Base URL (يُملأ تلقائياً من Firebase Hosting)
 window.API_BASE = "";
+
+// Initialize Firebase if not already initialized
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+}

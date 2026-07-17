@@ -204,30 +204,114 @@ document.addEventListener('DOMContentLoaded', () => {
     renderUsers();
 
     // ----------------------------------------------------
-    // Tab Switching Logic
-    // ----------------------------------------------------
     window.switchAdminTab = function(tabName) {
         const secPayments = document.getElementById('section-payments');
         const secUsers = document.getElementById('section-users');
+        const secRequests = document.getElementById('section-requests');
         const navPayments = document.getElementById('nav-payments');
         const navUsers = document.getElementById('nav-users');
+        const navRequests = document.getElementById('nav-requests');
         const pageTitle = document.getElementById('admin-page-title');
         const pageSubtitle = document.getElementById('admin-page-subtitle');
 
+        secPayments.style.display = 'none';
+        secUsers.style.display = 'none';
+        secRequests.style.display = 'none';
+        navPayments.classList.remove('active');
+        navUsers.classList.remove('active');
+        navRequests.classList.remove('active');
+
         if (tabName === 'payments') {
             secPayments.style.display = 'block';
-            secUsers.style.display = 'none';
             navPayments.classList.add('active');
-            navUsers.classList.remove('active');
             pageTitle.textContent = 'إدارة حسابات الدفع';
             pageSubtitle.textContent = 'تحكم في الحسابات البنكية التي تظهر للطلاب في شاشة الدفع';
         } else if (tabName === 'users') {
-            secPayments.style.display = 'none';
             secUsers.style.display = 'block';
             navUsers.classList.add('active');
-            navPayments.classList.remove('active');
             pageTitle.textContent = 'إدارة المستخدمين';
             pageSubtitle.textContent = 'إنشاء وإدارة صلاحيات دخول المستخدمين للدورات المدفوعة';
+        } else if (tabName === 'requests') {
+            secRequests.style.display = 'block';
+            navRequests.classList.add('active');
+            pageTitle.textContent = 'طلبات التسجيل';
+            pageSubtitle.textContent = 'مراجعة طلبات التسجيل وإيصالات الدفع';
+            loadEnrollmentRequests();
+        }
+    };
+
+    // ----------------------------------------------------
+    // Load Enrollment Requests from Firestore
+    // ----------------------------------------------------
+    async function loadEnrollmentRequests() {
+        const requestsList = document.getElementById('requests-list');
+        if (!requestsList) return;
+
+        requestsList.innerHTML = '<tr><td colspan="6" style="text-align: center;">جاري تحميل الطلبات... <i class="fas fa-spinner fa-spin"></i></td></tr>';
+
+        try {
+            const db = firebase.firestore();
+            const snap = await db.collection('enrollmentRequests').orderBy('createdAt', 'desc').get();
+            
+            requestsList.innerHTML = '';
+            if (snap.empty) {
+                requestsList.innerHTML = '<tr><td colspan="6" style="text-align: center;">لا توجد طلبات تسجيل حالياً</td></tr>';
+                return;
+            }
+
+            snap.forEach(doc => {
+                const req = doc.data();
+                const tr = document.createElement('tr');
+                const statusBadge = req.status === 'pending' ? 
+                    '<span style="background: var(--warning); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">قيد الانتظار</span>' :
+                    '<span style="background: var(--primary-color); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">مكتمل</span>';
+
+                tr.innerHTML = `
+                    <td>${req.fullName || '-'}</td>
+                    <td dir="ltr" style="text-align: right;">${req.phone || '-'}</td>
+                    <td>${req.courseTitle || '-'}</td>
+                    <td><a href="${req.receiptUrl}" target="_blank" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fas fa-eye"></i> عرض</a></td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${req.status === 'pending' ? `<button class="action-btn" style="color: var(--primary-color);" onclick="approveRequest('${doc.id}', '${req.fullName}')" title="موافقة وإنشاء حساب"><i class="fas fa-check-circle"></i></button>` : ''}
+                        <button class="action-btn delete-req-btn" onclick="deleteRequest('${doc.id}')" title="حذف"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                requestsList.appendChild(tr);
+            });
+        } catch (err) {
+            console.error(err);
+            requestsList.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">حدث خطأ في تحميل الطلبات</td></tr>';
+        }
+    }
+
+    window.deleteRequest = async function(id) {
+        if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+            try {
+                await firebase.firestore().collection('enrollmentRequests').doc(id).delete();
+                loadEnrollmentRequests();
+            } catch (err) {
+                console.error(err);
+                alert('فشل الحذف!');
+            }
+        }
+    };
+
+    window.approveRequest = async function(id, fullName) {
+        if (confirm(`هل أنت متأكد من الموافقة على طلب: ${fullName}؟ سيطلب منك النظام إنشاء حساب له الآن.`)) {
+            try {
+                await firebase.firestore().collection('enrollmentRequests').doc(id).update({ status: 'approved' });
+                // Switch to users tab and fill name
+                switchAdminTab('users');
+                const nameInput = document.getElementById('new-user-fullname');
+                if (nameInput) {
+                    nameInput.value = fullName;
+                    nameInput.focus();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('فشل التحديث!');
+            }
         }
     };
 });

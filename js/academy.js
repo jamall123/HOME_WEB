@@ -50,39 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const openModalBtns = document.querySelectorAll('.open-course-modal');
     const modalBody = document.getElementById('course-modal-body');
 
-    // Mock Data for Courses (In a real scenario, fetch this from Firestore)
-    const coursesData = {
-        'web-dev': {
-            id: 'web-dev',
-            category: 'engineering',
-            title: 'تطوير تطبيقات الويب الحديثة',
-            duration: '12 أسبوع',
-            level: 'متوسط إلى متقدم',
-            students: 120,
-            instructorId: 'eng-jamal',
-            instructor: 'م. جمال - مهندس برمجيات',
-            description: 'معسكر تدريبي مكثف يعلمك بناء تطبيقات ويب سريعة وقابلة للتوسع باستخدام React و Node.js. ستتخرج وأنت تمتلك تطبيقك الحقيقي الأول.',
-            icon: 'fa-react',
-            color: '#61DAFB',
-            cover: 'assets/images/courses/web_dev_cover.png',
-            isPaid: false
-        },
-        'public-speaking': {
-            id: 'public-speaking',
-            category: 'design',
-            title: 'تعلم طريقة الإلقاء والوقوف أمام الجماهير',
-            duration: '4 أسابيع',
-            level: 'مبتدئ إلى متوسط',
-            students: 45,
-            instructorId: 'eng-jamal',
-            instructor: 'م. جمال - خبير تواصل وإلقاء',
-            description: 'دورة احترافية مخصصة لتطوير مهارات التحدث أمام الجمهور، التخلص من التوتر، وبناء الثقة بالنفس للتأثير في المستمعين باحترافية.',
-            icon: 'fa-microphone-alt',
-            color: '#D8B4FE',
-            cover: 'assets/images/courses/public_speaking_cover.png',
-            isPaid: true
-        }
-    };
+    // We'll store fetched courses here for modal usage
+    let coursesData = {};
 
     const instructorsData = {
         'eng-jamal': {
@@ -99,33 +68,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function renderCourses() {
+    async function renderCourses() {
         const grid = document.getElementById('courses-grid');
         if(!grid) return;
         
-        grid.innerHTML = '';
-        Object.values(coursesData).forEach(course => {
-            const badge = course.isPaid ? 
-                `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(245, 158, 11, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
-                : `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(16, 185, 129, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
+        grid.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-muted); grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 1rem;">جاري تحميل الدورات...</p></div>';
+        
+        try {
+            const snap = await firebase.firestore().collection('courses').orderBy('createdAt', 'desc').get();
+            grid.innerHTML = '';
+            coursesData = {}; // Clear old data
+            
+            if (snap.empty) {
+                grid.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-muted); grid-column: 1 / -1;"><p>لا توجد دورات متاحة حالياً.</p></div>';
+                return;
+            }
+
+            snap.docs.forEach(doc => {
+                const course = doc.data();
+                course.id = doc.id;
+                coursesData[course.id] = course;
                 
-            grid.innerHTML += `
-            <div class="glass-panel course-card" data-category="${course.category}" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="background: url('${course.cover}') center/cover no-repeat; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                    ${badge}
-                </div>
-                <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <span class="caption-meta" style="color: var(--primary-light);">${course.level}</span>
-                        <span class="caption-meta en-text" style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">${course.duration}</span>
+                // Fallbacks for UI if missing in DB
+                const category = course.category || 'all';
+                const level = course.level || 'عام';
+                const duration = course.duration ? `${course.duration} يوم` : 'غير محدد';
+                const title = course.title || 'دورة بدون عنوان';
+                const description = course.description || 'لا يوجد وصف متاح.';
+                const cover = course.cover || 'assets/images/courses/web_dev_cover.png';
+                
+                const badge = course.isPaid ? 
+                    `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(245, 158, 11, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
+                    : `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(16, 185, 129, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
+                    
+                grid.innerHTML += `
+                <div class="glass-panel course-card" data-category="${category}" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                    <div style="background: url('${cover}') center/cover no-repeat; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                        ${badge}
                     </div>
-                    <h3 class="display-3" style="font-size: 1.5rem; margin-bottom: 0.5rem;">${course.title}</h3>
-                    <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.6;">${course.description.substring(0, 80)}...</p>
-                    <button class="btn btn-secondary open-course-modal" onclick="openModal('${course.id}')" style="margin-top: auto; width: 100%;">التفاصيل</button>
+                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span class="caption-meta" style="color: var(--primary-light);">${level}</span>
+                            <span class="caption-meta en-text" style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">${duration}</span>
+                        </div>
+                        <h3 class="display-3" style="font-size: 1.5rem; margin-bottom: 0.5rem;">${title}</h3>
+                        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.6;">${description.substring(0, 80)}...</p>
+                        <button class="btn btn-secondary open-course-modal" onclick="openModal('${course.id}')" style="margin-top: auto; width: 100%;">التفاصيل</button>
+                    </div>
                 </div>
-            </div>
-            `;
-        });
+                `;
+            });
+        } catch(e) {
+            console.error(e);
+            grid.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--danger); grid-column: 1 / -1;"><p>حدث خطأ أثناء جلب الدورات.</p></div>';
+        }
     }
 
     // Call render on load
@@ -142,11 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.isPaid) {
                 actionButtons = `
                 <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true)">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
-                <a href="course-room.html?type=paid" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
+                <a href="course-room.html?type=paid&id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             } else {
                 actionButtons = `
-                <a href="course-room.html" class="btn btn-primary" style="flex: 1; text-align: center;">الدخول للدورة مباشرة <i class="fas fa-play" style="margin-right: 8px;"></i></a>
+                <a href="course-room.html?id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">الدخول للدورة مباشرة <i class="fas fa-play" style="margin-right: 8px;"></i></a>
                 <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title} (تسجيل مجاني للشهادة)', false)">تسجيل مجاني للشهادة <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
                 `;
             }
@@ -541,9 +537,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const submitFinalBtn = document.getElementById('submit-final-registration');
     if (submitFinalBtn) {
-        submitFinalBtn.addEventListener('click', () => {
-            alert('جاري إرسال البيانات وتأكيد التسجيل (محاكاة)... سنقوم بربطها بقاعدة البيانات لاحقاً.');
-            closeEnrollmentModal();
+        submitFinalBtn.addEventListener('click', async () => {
+            const file = receiptUpload.files[0];
+            if(!file) {
+                alert('الرجاء رفع الإيصال أولاً');
+                return;
+            }
+
+            const fullName = document.getElementById('reg-fullname').value;
+            const phone = document.getElementById('reg-phone').value;
+            const edu = document.getElementById('reg-education').value;
+            const spec = document.getElementById('reg-specialization').value;
+            const city = document.getElementById('reg-city').value;
+            const reason = document.getElementById('reg-reason').value;
+            const courseTitle = courseTitleDisplay ? courseTitleDisplay.textContent : 'Unknown Course';
+
+            try {
+                submitFinalBtn.disabled = true;
+                submitFinalBtn.innerHTML = 'جاري الرفع... <i class="fas fa-spinner fa-spin"></i>';
+
+                const storageRef = firebase.storage().ref();
+                const fileName = `receipts/${Date.now()}_${file.name}`;
+                const fileRef = storageRef.child(fileName);
+                
+                const snapshot = await fileRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+
+                const db = firebase.firestore();
+                await db.collection('enrollmentRequests').add({
+                    fullName,
+                    phone,
+                    education: edu,
+                    specialization: spec,
+                    city,
+                    reason,
+                    courseTitle,
+                    receiptUrl: downloadURL,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('تم إرسال طلبك بنجاح! سيتم مراجعته وإرسال بيانات الدخول إليك.');
+                closeEnrollmentModal();
+            } catch (err) {
+                console.error('Error uploading receipt', err);
+                alert('حدث خطأ أثناء رفع البيانات. الرجاء المحاولة مجدداً.');
+            } finally {
+                submitFinalBtn.disabled = false;
+                submitFinalBtn.innerHTML = 'إرسال وتأكيد التسجيل <i class="fas fa-check-circle" style="margin-right: 8px;"></i>';
+            }
         });
     }
 
@@ -601,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 400);
         }
     };
-    window.enterRoomUnified = function() {
+    window.enterRoomUnified = async function() {
         const usernameInput = document.getElementById('unified-username').value.trim().toLowerCase();
         const passwordInput = document.getElementById('unified-pass').value.trim();
 
@@ -610,12 +652,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const storedUsers = localStorage.getItem('jhome_users');
-        if(storedUsers) {
-            const users = JSON.parse(storedUsers);
-            const user = users.find(u => u.username === usernameInput && u.password === passwordInput);
-            
-            if(user) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentCourseId = urlParams.get('id') || 'mock-course-id';
+
+        try {
+            const snap = await firebase.firestore().collection('users')
+                .where('username', '==', usernameInput)
+                .where('password', '==', passwordInput)
+                .where('courseId', '==', currentCourseId)
+                .get();
+
+            if (!snap.empty) {
+                const user = snap.docs[0].data();
+                
+                // Update current user globally for chat
+                window.currentUser = { name: user.fullname || user.username, role: user.role };
+                
                 // Login Success
                 if(user.role === 'instructor' && instructorTabBtn) {
                     instructorTabBtn.style.display = 'block';
@@ -632,8 +684,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alert('بيانات الدخول غير صحيحة، أو ليس لديك صلاحية لهذه الدورة.');
             }
-        } else {
-            alert('لم يتم العثور على أي مستخدمين في النظام.');
+        } catch (e) {
+            console.error(e);
+            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات.');
         }
     };
 
@@ -653,3 +706,204 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+    // ----------------------------------------------------
+    // 8. Agora Live Stream Integration (Mock UI + SDK logic)
+    // ----------------------------------------------------
+    let rtc = {
+        localAudioTrack: null,
+        localVideoTrack: null,
+        client: null
+    };
+
+    const options = {
+        appId: "4400dcdb72bf4dc1bcdcb2fe37fac0ef", 
+        channel: "jhome-course-123",
+        token: null, // If using testing mode, token can be null
+        uid: null
+    };
+
+    async function initAgoraClient() {
+        if (!rtc.client && typeof AgoraRTC !== 'undefined') {
+            rtc.client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+            
+            rtc.client.on("user-published", async (user, mediaType) => {
+                await rtc.client.subscribe(user, mediaType);
+                if (mediaType === "video") {
+                    const remoteVideoTrack = user.videoTrack;
+                    const videoContainer = document.getElementById("main-video-container");
+                    // Clear placeholder video
+                    videoContainer.innerHTML = '';
+                    const playerDiv = document.createElement("div");
+                    playerDiv.id = user.uid.toString();
+                    playerDiv.style.width = "100%";
+                    playerDiv.style.height = "100%";
+                    videoContainer.append(playerDiv);
+                    remoteVideoTrack.play(playerDiv.id);
+                }
+                if (mediaType === "audio") {
+                    const remoteAudioTrack = user.audioTrack;
+                    remoteAudioTrack.play();
+                }
+            });
+
+            rtc.client.on("user-unpublished", user => {
+                const playerContainer = document.getElementById(user.uid.toString());
+                if (playerContainer) {
+                    playerContainer.remove();
+                }
+            });
+        }
+    }
+
+    window.startLiveStream = async function() {
+        try {
+            await initAgoraClient();
+            await rtc.client.join(options.appId, options.channel, options.token, options.uid);
+            rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+            
+            const videoContainer = document.getElementById("main-video-container");
+            videoContainer.innerHTML = '';
+            
+            await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack]);
+            
+            const localPlayerContainer = document.createElement("div");
+            localPlayerContainer.id = options.uid || "local-uid";
+            localPlayerContainer.style.width = "100%";
+            localPlayerContainer.style.height = "100%";
+            videoContainer.append(localPlayerContainer);
+            rtc.localVideoTrack.play(localPlayerContainer.id);
+
+            document.getElementById('start-live-btn').style.display = 'none';
+            document.getElementById('leave-live-btn').style.display = 'block';
+
+            // Simulate notifying students (In real app, update Firestore document `isLive: true`)
+            firebase.firestore().collection('courses').doc('mock-course-id').update({ isLive: true }).catch(console.warn);
+
+            alert('تم بدء البث المباشر بنجاح!');
+        } catch (err) {
+            console.error('Error starting live stream', err);
+            alert('حدث خطأ أثناء بدء البث. تأكد من صلاحيات الكاميرا والمايكروفون.');
+        }
+    };
+
+    window.leaveLiveStream = async function() {
+        try {
+            if (rtc.localAudioTrack) {
+                rtc.localAudioTrack.close();
+            }
+            if (rtc.localVideoTrack) {
+                rtc.localVideoTrack.close();
+            }
+            if (rtc.client) {
+                await rtc.client.leave();
+            }
+            document.getElementById('start-live-btn').style.display = 'block';
+            document.getElementById('leave-live-btn').style.display = 'none';
+            document.getElementById("main-video-container").innerHTML = '<div style="color:white; display:flex; align-items:center; justify-content:center; height:100%;">تم إنهاء البث</div>';
+            
+            firebase.firestore().collection('courses').doc('mock-course-id').update({ isLive: false }).catch(console.warn);
+            
+            alert('تم إنهاء البث المباشر.');
+        } catch (err) {
+            console.error('Error leaving live stream', err);
+        }
+    };
+
+    window.joinLiveStream = async function() {
+        try {
+            await initAgoraClient();
+            await rtc.client.join(options.appId, options.channel, options.token, options.uid);
+            document.getElementById('student-join-overlay').style.display = 'none';
+            alert('أنت الآن تشاهد البث المباشر.');
+        } catch (err) {
+            console.error('Error joining stream', err);
+            alert('حدث خطأ أثناء الانضمام للبث.');
+        }
+    };
+
+    // Simulate listening to Live status for students
+    setTimeout(() => {
+        // If student is in room, show join button if stream is active
+        const overlay = document.getElementById('student-join-overlay');
+        if (overlay) {
+            // overlay.style.display = 'block'; // Un-comment when testing with actual live state
+        }
+    }, 5000);
+
+    // ----------------------------------------------------
+    // 9. Realtime Chat Integration (Firestore)
+    // ----------------------------------------------------
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatContainer = document.getElementById('chat-messages-container');
+    const chatUrlParams = new URLSearchParams(window.location.search);
+    const currentCourseId = chatUrlParams.get('id') || 'mock-course-id';
+    
+    // Default user if not logged in
+    window.currentUser = { name: 'زائر', role: 'student' }; 
+
+    if (chatForm && chatContainer) {
+        // Listen to new messages
+        firebase.firestore().collection('courses').doc(currentCourseId).collection('chat')
+            .orderBy('timestamp', 'asc')
+            .onSnapshot((snapshot) => {
+                chatContainer.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    const isMe = msg.senderName === window.currentUser.name;
+                    
+                    const timeString = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.style.display = 'flex';
+                    wrapper.style.flexDirection = 'column';
+                    wrapper.style.gap = '0.25rem';
+                    
+                    if (isMe) {
+                        wrapper.style.alignItems = 'flex-end';
+                        wrapper.innerHTML = `
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">أنت <span class="en-text">${timeString}</span></span>
+                            <div style="background: var(--primary-color); color: white; padding: 0.8rem; border-radius: 8px 8px 8px 0; font-size: 0.9rem;">
+                                ${msg.text}
+                            </div>
+                        `;
+                    } else {
+                        wrapper.style.alignItems = 'flex-start';
+                        wrapper.innerHTML = `
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">${msg.senderName} <span class="en-text">${timeString}</span></span>
+                            <div style="background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px 8px 0 8px; font-size: 0.9rem;">
+                                ${msg.text}
+                            </div>
+                        `;
+                    }
+                    
+                    chatContainer.appendChild(wrapper);
+                });
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+
+        // Send message
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            chatInput.value = ''; // clear immediately for UX
+            
+            try {
+                await firebase.firestore().collection('courses').doc(currentCourseId).collection('chat').add({
+                    text: text,
+                    senderName: window.currentUser.name,
+                    role: window.currentUser.role,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch(err) {
+                console.error("Error sending message", err);
+                alert("حدث خطأ أثناء إرسال الرسالة.");
+            }
+        });
+    }
