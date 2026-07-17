@@ -1,137 +1,109 @@
-/**
- * blog.js — صفحة المدونة
- * تحميل وعرض المقالات + فلترة + تحميل المزيد + اشتراك
- */
+// blog.js - Logic for Media Center (Unified Feed for Blog and Success Stories)
 
-(function () {
-  'use strict';
+document.addEventListener('DOMContentLoaded', () => {
+    loadMediaContent();
+});
 
-  const PAGE_SIZE = 9;
-  let currentCategory = 'all';
-  let lastVisible = null;
-  let loading = false;
-  let noMore = false;
-
-  async function loadPosts(reset = false) {
-    if (loading) return;
-    loading = true;
-
-    const grid = document.getElementById('blogGrid');
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-
-    if (reset) {
-      grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>';
-      lastVisible = null;
-      noMore = false;
-    }
+async function loadMediaContent() {
+    const grid = document.getElementById('media-grid');
+    const db = firebase.firestore();
 
     try {
-      let q = firebase.firestore().collection('posts').where('status', '==', 'published');
-      if (currentCategory !== 'all') q = q.where('category', '==', currentCategory);
-      q = q.orderBy('publishedAt', 'desc').limit(PAGE_SIZE);
-      if (lastVisible) q = q.startAfter(lastVisible);
+        // Fetch both posts and success stories in parallel
+        const [postsSnap, storiesSnap] = await Promise.all([
+            db.collection('posts').where('status', '==', 'published').get(),
+            db.collection('successStories').where('isPublished', '==', true).get()
+        ]);
 
-      const snap = await q.get();
+        let allContent = [];
 
-      if (reset) grid.innerHTML = '';
+        // Parse posts
+        postsSnap.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.publishedAt?.toDate ? data.publishedAt.toDate() : new Date(0);
+            allContent.push({
+                type: 'post',
+                date: dateObj,
+                data: data
+            });
+        });
 
-      if (snap.empty && reset) {
-        grid.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مقالات بعد في هذا التصنيف.</p></div>';
-        loadMoreBtn.style.display = 'none';
-        return;
-      }
+        // Parse stories
+        storiesSnap.forEach(doc => {
+            const data = doc.data();
+            const dateObj = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(0);
+            allContent.push({
+                type: 'story',
+                date: dateObj,
+                data: data
+            });
+        });
 
-      if (snap.empty) {
-        noMore = true;
-        loadMoreBtn.style.display = 'none';
-        return;
-      }
+        // Sort by date descending (newest first)
+        allContent.sort((a, b) => b.date - a.date);
 
-      lastVisible = snap.docs[snap.docs.length - 1];
+        if (allContent.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 2rem;"><p class="text-muted">لا يوجد محتوى متاح حالياً.</p></div>';
+            return;
+        }
 
-      snap.docs.forEach(doc => {
-        const post = { id: doc.id, ...doc.data() };
-        grid.insertAdjacentHTML('beforeend', renderPostCard(post));
-      });
+        let html = '';
+        allContent.forEach(item => {
+            const dateStr = item.date.getTime() > 0 ? item.date.toLocaleDateString('ar-EG') : '';
 
-      loadMoreBtn.style.display = snap.docs.length < PAGE_SIZE ? 'none' : 'inline-block';
-    } catch (err) {
-      console.error(err);
-      grid.innerHTML = '<div class="error-state">حدث خطأ في تحميل المقالات.</div>';
-    } finally {
-      loading = false;
+            if (item.type === 'post') {
+                const data = item.data;
+                const excerpt = data.excerpt || (data.content ? data.content.substring(0, 100) + '...' : '');
+                
+                html += `
+                    <div class="glass-panel course-card" style="display: flex; flex-direction: column;">
+                        <img src="${data.coverImage || data.image || 'assets/images/blog-placeholder.jpg'}" alt="${data.title}" class="course-img" style="object-fit: cover; height: 200px;">
+                        <div class="course-info" style="display: flex; flex-direction: column; flex: 1;">
+                            <h3 style="margin-bottom: 10px;">${data.title}</h3>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">مقال - ${data.category || 'عام'}</span>
+                                <span class="text-muted" style="font-size: 0.85rem;"><i class="fas fa-calendar"></i> ${dateStr}</span>
+                            </div>
+                            <p style="margin-bottom: 1.5rem; flex: 1; line-height: 1.6;">${excerpt}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'story') {
+                const data = item.data;
+                
+                let linkBtn = '';
+                if (data.freelancerLink) {
+                    linkBtn = `<a href="${data.freelancerLink}" target="_blank" class="btn btn-primary btn-full" style="margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    زيارة ملف الحرفي <span class="material-icons-outlined" style="font-size: 18px;">open_in_new</span>
+                               </a>`;
+                }
+
+                html += `
+                    <div class="glass-panel course-card" style="display: flex; flex-direction: column;">
+                        <img src="${data.coverImage || data.personAvatar || 'assets/images/default-avatar.png'}" alt="${data.personName}" class="course-img" style="object-fit: cover; height: 250px;">
+                        <div class="course-info" style="display: flex; flex-direction: column; flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
+                                <h3 style="margin: 0;">${data.personName}</h3>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap;">قصة نجاح</span>
+                            </div>
+                            <p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${data.personRole || ''}</p>
+                            <div style="background: var(--bg-body); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 15px; border-right: 3px solid var(--primary);">
+                                <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
+                                    <strong>أهم إنجاز:</strong> ${data.keyAchievement || ''}
+                                </p>
+                            </div>
+                            <p style="margin-bottom: 1.5rem; line-height: 1.6; flex: 1;">${data.story}</p>
+                            ${linkBtn}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        grid.innerHTML = html;
+
+    } catch (e) {
+        console.error('Error loading media content:', e);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 2rem;"><p class="text-muted">حدث خطأ أثناء تحميل المحتوى. يرجى المحاولة لاحقاً.</p></div>';
     }
-  }
-
-  function renderPostCard(post) {
-    const date = post.publishedAt ? new Date(post.publishedAt.seconds * 1000).toLocaleDateString('ar-SD', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    }) : '';
-    const excerpt = post.excerpt || (post.content || '').replace(/<[^>]*>/g, '').slice(0, 150) + '…';
-    const cover = post.coverImage || 'assets/images/blog-placeholder.jpg';
-    const category = post.category || 'عام';
-
-    return `
-      <article class="blog-card glass-card">
-        <a href="post.html?slug=${encodeURIComponent(post.slug)}" class="blog-card-link">
-          <div class="blog-card-image">
-            <img src="${cover}" alt="${escapeHtml(post.title)}" loading="lazy"
-                 onerror="this.src='assets/images/blog-placeholder.jpg'">
-            <span class="blog-category">${escapeHtml(category)}</span>
-          </div>
-          <div class="blog-card-body">
-            <h3 class="blog-card-title">${escapeHtml(post.title)}</h3>
-            <p class="blog-card-excerpt">${escapeHtml(excerpt)}</p>
-            <div class="blog-card-meta">
-              <span><i class="fas fa-calendar"></i> ${date}</span>
-              ${post.readingTime ? `<span><i class="fas fa-clock"></i> ${post.readingTime} د</span>` : ''}
-              <span><i class="fas fa-eye"></i> ${post.views || 0}</span>
-            </div>
-          </div>
-        </a>
-      </article>
-    `;
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  // ====== الفلاتر ======
-  document.getElementById('blogFilters').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCategory = btn.dataset.category;
-    loadPosts(true);
-  });
-
-  // ====== تحميل المزيد ======
-  document.getElementById('loadMoreBtn').addEventListener('click', () => loadPosts(false));
-
-  // ====== اشتراك النشرة ======
-  const newsletterForm = document.getElementById('newsletterForm');
-  const newsletterMessage = document.getElementById('newsletterMessage');
-  newsletterForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('newsletterEmail').value.trim();
-    if (!email) return;
-    try {
-      const result = await JHomeAPI.subscribeNewsletter({ email, source: 'blog' });
-      newsletterMessage.textContent = result.data.message;
-      newsletterMessage.className = 'form-message success';
-      newsletterForm.reset();
-      if (window.JHomeAPI) JHomeAPI.trackEvent('newsletter_subscribe', { source: 'blog' });
-    } catch (err) {
-      newsletterMessage.textContent = err.message || 'حدث خطأ';
-      newsletterMessage.className = 'form-message error';
-    }
-  });
-
-  // تشغيل
-  loadPosts(true);
-})();
+}

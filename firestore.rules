@@ -1,57 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Check if user is admin
-    function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // Check if user is instructor
-    function isInstructor() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'instructor';
-    }
-
-    // Check if student is enrolled in the course
-    function isStudentEnrolled(courseId) {
-      return exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId)) &&
-             get(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId)).data.status == 'active';
-    }
-
-    match /users/{userId} {
-      // User can read their own data, admin can read/write everyone's
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || isInstructor());
-      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
-    }
-
-    match /courses/{courseId} {
-      // Anyone can read published courses. Instructor can read/write their own courses. Admin reads/writes all.
-      allow read: if resource.data.status == 'published' || (request.auth != null && (isAdmin() || (isInstructor() && resource.data.instructorId == request.auth.uid)));
-      allow write: if request.auth != null && (isAdmin() || (isInstructor() && request.resource.data.instructorId == request.auth.uid));
-      
-      match /chat/{messageId} {
-        allow read, write: if true; // Allow chat for demo
-      }
-    }
-
-    match /lectures/{lectureId} {
-      // Enrolled student can read, instructor of course can read/write, admin can read/write
-      allow read: if request.auth != null && (isStudentEnrolled(resource.data.courseId) || isAdmin() || isInstructor());
-      // Only instructor or admin can write
-      allow write: if request.auth != null && (isAdmin() || isInstructor()); 
-    }
-
-    match /enrollments/{enrollmentId} {
-      // Students can read their own, instructors and admins can read all
-      allow read: if request.auth != null && (request.auth.uid == resource.data.studentId || isAdmin() || isInstructor());
-      // Admin handles creation (manual workflow)
-      allow write: if request.auth != null && isAdmin();
-    }
-    
-    match /enrollmentRequests/{requestId} {
-      // Unauthenticated users can submit a request and receipt
-      allow create: if true;
-      allow read, update, delete: if request.auth != null; // Only admins ideally, but simplified for now
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

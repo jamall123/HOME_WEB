@@ -779,7 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('leave-live-btn').style.display = 'block';
 
             // Simulate notifying students (In real app, update Firestore document `isLive: true`)
-            firebase.firestore().collection('courses').doc('mock-course-id').update({ isLive: true }).catch(console.warn);
+            const courseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
+            firebase.firestore().collection('courses').doc(courseId).update({ isLive: true }).catch(console.warn);
 
             alert('تم بدء البث المباشر بنجاح!');
         } catch (err) {
@@ -803,7 +804,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('leave-live-btn').style.display = 'none';
             document.getElementById("main-video-container").innerHTML = '<div style="color:white; display:flex; align-items:center; justify-content:center; height:100%;">تم إنهاء البث</div>';
             
-            firebase.firestore().collection('courses').doc('mock-course-id').update({ isLive: false }).catch(console.warn);
+            const courseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
+            firebase.firestore().collection('courses').doc(courseId).update({ isLive: false }).catch(console.warn);
             
             alert('تم إنهاء البث المباشر.');
         } catch (err) {
@@ -823,14 +825,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Simulate listening to Live status for students
-    setTimeout(() => {
-        // If student is in room, show join button if stream is active
-        const overlay = document.getElementById('student-join-overlay');
-        if (overlay) {
-            // overlay.style.display = 'block'; // Un-comment when testing with actual live state
+    // Real-time listener for Live status for students
+    const liveCourseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
+    firebase.firestore().collection('courses').doc(liveCourseId).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            const overlay = document.getElementById('student-join-overlay');
+            if (overlay) {
+                // If the stream is active, and the current user is a student (not instructor who started it)
+                if (data.isLive) {
+                    overlay.style.display = 'block';
+                } else {
+                    overlay.style.display = 'none';
+                }
+            }
         }
-    }, 5000);
+    });
 
     // ----------------------------------------------------
     // 9. Realtime Chat Integration (Firestore)

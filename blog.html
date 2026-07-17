@@ -62,37 +62,9 @@
             <p class="body-large">تابع أحدث إنجازاتنا والمقالات التقنية.</p>
         </div>
 
-        <div class="grid-cards">
-            
-            <!-- Skeleton Empty State representing upcoming content -->
-            <div class="glass-panel animate-fade-up delay-100" style="padding: 1rem;">
-                <div class="skeleton" style="width: 100%; height: 200px; margin-bottom: 1rem; border-radius: var(--radius-sm);"></div>
-                <div class="skeleton" style="width: 30%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 80%; height: 30px; margin-bottom: 0.5rem;"></div>
-                <div class="skeleton" style="width: 100%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 40%; height: 40px; border-radius: var(--radius-pill);"></div>
-            </div>
-
-            <div class="glass-panel animate-fade-up delay-200" style="padding: 1rem;">
-                <div class="skeleton" style="width: 100%; height: 200px; margin-bottom: 1rem; border-radius: var(--radius-sm);"></div>
-                <div class="skeleton" style="width: 30%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 80%; height: 30px; margin-bottom: 0.5rem;"></div>
-                <div class="skeleton" style="width: 100%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 40%; height: 40px; border-radius: var(--radius-pill);"></div>
-            </div>
-
-            <div class="glass-panel animate-fade-up delay-300" style="padding: 1rem;">
-                <div class="skeleton" style="width: 100%; height: 200px; margin-bottom: 1rem; border-radius: var(--radius-sm);"></div>
-                <div class="skeleton" style="width: 30%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 80%; height: 30px; margin-bottom: 0.5rem;"></div>
-                <div class="skeleton" style="width: 100%; height: 20px; margin-bottom: 1rem;"></div>
-                <div class="skeleton" style="width: 40%; height: 40px; border-radius: var(--radius-pill);"></div>
-            </div>
-
-        </div>
-
-        <div class="animate-fade-up delay-300" style="text-align: center; margin-top: 4rem;">
-            <p class="text-muted">نحن نجهز مقالات تقنية شيقة، انتظرونا قريباً.</p>
+        <!-- Unified Media Container -->
+        <div class="grid-cards" id="media-grid">
+            <div style="grid-column: 1/-1; text-align:center; padding: 2rem;"><p class="text-muted">جاري تحميل المحتوى...</p></div>
         </div>
     </main>
 
@@ -114,6 +86,12 @@
         </div>
     </footer>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
     <script src="js/main.js?v=6"></script>
+    <script src="js/blog.js?v=1"></script>
 </body>
 </html>
