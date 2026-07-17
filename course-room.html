@@ -17,48 +17,15 @@
             <div style="margin-bottom: 2rem;">
                 <i class="fas fa-door-open" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
                 <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة</h2>
-                <p class="text-muted">الرجاء اختيار صفتك للدخول إلى هذه الغرفة المفتوحة.</p>
+                <p class="text-muted">الرجاء تسجيل الدخول لدخول الغرفة.</p>
             </div>
             
-            <!-- Selection Buttons -->
-            <div id="entry-selection" style="display: flex; flex-direction: column; gap: 1rem;">
-                <button class="btn btn-primary" onclick="showStudentEntry()" style="padding: 1rem; font-size: 1.1rem;">
-                    دخول كطالب (زائر) <i class="fas fa-user-graduate" style="margin-right: 10px;"></i>
-                </button>
-                <button class="btn btn-secondary" onclick="showInstructorEntry()" style="padding: 1rem; font-size: 1.1rem;">
-                    دخول كمدرب / مشرف <i class="fas fa-chalkboard-teacher" style="margin-right: 10px;"></i>
-                </button>
-            </div>
-
-            <!-- Student Form -->
-            <div id="student-entry-form" style="display: none; text-align: right;">
-                <button class="btn btn-secondary" onclick="backToSelection()" style="margin-bottom: 1rem; padding: 0.5rem 1rem;"><i class="fas fa-arrow-right"></i> رجوع</button>
-                <div class="form-group">
-                    <label>اسمك للظهور في الغرفة</label>
-                    <input type="text" id="guest-name" class="form-input" placeholder="مثال: أحمد محمد">
-                </div>
-                <button class="btn btn-primary" onclick="enterRoom('student')" style="width: 100%;">دخول الغرفة <i class="fas fa-sign-in-alt"></i></button>
-            </div>
-
-            <!-- Instructor Form -->
-            <div id="instructor-entry-form" style="display: none; text-align: right;">
-                <button class="btn btn-secondary" onclick="backToSelection()" style="margin-bottom: 1rem; padding: 0.5rem 1rem;"><i class="fas fa-arrow-right"></i> رجوع</button>
-                <div class="form-group">
-                    <label>اسم المستخدم / البريد الإلكتروني</label>
-                    <input type="text" id="instructor-email" class="form-input" placeholder="admin@jhome.com" dir="ltr">
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="instructor-pass" class="form-input" dir="ltr">
-                </div>
-                <button class="btn btn-primary" onclick="enterRoom('instructor')" style="width: 100%; background: var(--warning); border-color: var(--warning);">تسجيل الدخول الإداري <i class="fas fa-lock"></i></button>
-            </div>
-            <!-- Unified Form for Paid Courses -->
-            <div id="unified-entry-form" style="display: none; text-align: right;">
-                <p class="text-muted" style="text-align: center; margin-bottom: 1.5rem;">هذه الدورة خاصة (مدفوعة). يرجى إدخال بيانات الدخول الخاصة بك.</p>
+            <!-- Unified Form for All Courses -->
+            <div id="unified-entry-form" style="display: block; text-align: right;">
+                <p class="text-muted" style="text-align: center; margin-bottom: 1.5rem;">يرجى إدخال بيانات الدخول الخاصة بك (اسم المستخدم وكلمة المرور).</p>
                 <div class="form-group">
                     <label>اسم المستخدم</label>
-                    <input type="text" id="unified-username" class="form-input" dir="ltr">
+                    <input type="text" id="unified-username" class="form-input" dir="ltr" placeholder="مثال: user123">
                 </div>
                 <div class="form-group">
                     <label>كلمة المرور</label>
@@ -153,15 +120,71 @@
                 </a>
             </div>
 
-            <!-- Tab Content: Instructor Tools (Mock) -->
+            <!-- Tab Content: Instructor Tools -->
             <div id="tab-instructor" class="room-tab-content">
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1.5rem; border-radius: var(--radius-md);">
-                    <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> لوحة تحكم المدرب</h3>
-                    <p class="text-muted" style="margin-bottom: 1.5rem;">هذه التبويبة تظهر فقط إذا كان حساب المستخدم يحمل صلاحية "Instructor" أو "Admin" في Firebase Firestore.</p>
-                    <div style="display: flex; gap: 1rem;">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث المباشر</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر</button>
                         <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
                         <button class="btn btn-secondary">كتم صوت الطلاب</button>
+                        <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة وأرشفتها <i class="fas fa-save"></i></button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <!-- Profile Update -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-user-edit"></i> تحديث الملف الشخصي</h4>
+                        <div class="form-group">
+                            <label>صورة المدرب (رابط)</label>
+                            <input type="text" id="inst-update-photo" class="form-input" dir="ltr" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label>التخصص</label>
+                            <input type="text" id="inst-update-specialty" class="form-input" placeholder="مثال: مهندس برمجيات">
+                        </div>
+                        <div class="form-group">
+                            <label>نبذة عنك</label>
+                            <textarea id="inst-update-bio" class="form-input" rows="3"></textarea>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="updateInstructorProfile()">حفظ التحديثات</button>
+                    </div>
+
+                    <!-- Scheduling -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-calendar-alt"></i> جدولة المحاضرة القادمة</h4>
+                        <div class="form-group">
+                            <label>عنوان المحاضرة</label>
+                            <input type="text" id="schedule-title" class="form-input" placeholder="مثال: الدرس الثاني">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>وقت البداية</label>
+                                <input type="datetime-local" id="schedule-start" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>وقت النهاية</label>
+                                <input type="datetime-local" id="schedule-end" class="form-input">
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary-light); color: var(--primary-light);" onclick="scheduleLecture()">حفظ الجدولة وإشعار الطلاب</button>
+                    </div>
+                </div>
+
+                <!-- Resources Upload -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem;"><i class="fas fa-file-upload"></i> رفع ملفات وموارد للمحاضرة</h4>
+                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                        <div class="form-group" style="flex: 2; margin: 0;">
+                            <label>اسم الملف</label>
+                            <input type="text" id="resource-name" class="form-input" placeholder="مثال: عرض تقديمي PDF">
+                        </div>
+                        <div class="form-group" style="flex: 2; margin: 0;">
+                            <label>رابط الملف</label>
+                            <input type="text" id="resource-url" class="form-input" dir="ltr" placeholder="https://...">
+                        </div>
+                        <button class="btn btn-primary" style="flex: 1;" onclick="addResource()"><i class="fas fa-plus"></i> إضافة للملحقات</button>
                     </div>
                 </div>
             </div>

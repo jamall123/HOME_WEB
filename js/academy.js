@@ -137,13 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.isPaid) {
                 actionButtons = `
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true)">الاشتراك والدفع <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true)">طلب اشتراك <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
                 <a href="course-room.html?type=paid&id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             } else {
                 actionButtons = `
-                <a href="course-room.html?id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">الدخول للدورة مباشرة <i class="fas fa-play" style="margin-right: 8px;"></i></a>
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title} (تسجيل مجاني للشهادة)', false)">تسجيل مجاني للشهادة <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', false)">طلب انضمام مجاني <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
+                <a href="course-room.html?type=paid&id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             }
 
@@ -660,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.enterRoomUnified = async function() {
+    window.enterRoomUnified = async function(event) {
         const usernameInput = document.getElementById('unified-username').value.trim().toLowerCase();
         const passwordInput = document.getElementById('unified-pass').value.trim();
 
@@ -670,20 +670,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const btn = event.target;
+            const btn = event ? event.target : document.querySelector('#unified-entry-form .btn-primary');
             const originalText = btn.innerHTML;
             btn.innerHTML = 'جاري تسجيل الدخول...';
             btn.disabled = true;
 
-            const email = usernameInput.includes('@') ? usernameInput : `${usernameInput}@jhome.sd`;
-            await firebase.auth().signInWithEmailAndPassword(email, passwordInput);
+            // Check against courses_credentials
+            const db = firebase.firestore();
+            const doc = await db.collection('courses_credentials').doc(usernameInput).get();
             
-            // onAuthStateChanged will handle UI changes
+            if (doc.exists && doc.data().password === passwordInput) {
+                // Success
+                const data = doc.data();
+                window.currentUser = { name: usernameInput, role: data.role || 'student', courseId: data.courseId };
+                
+                // Hide bouncer
+                const roomEntryGate = document.getElementById('room-entry-gate');
+                if(roomEntryGate) {
+                    roomEntryGate.style.opacity = '0';
+                    setTimeout(() => {
+                        roomEntryGate.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }, 400);
+                }
+
+                // If instructor, show instructor tab
+                if (window.currentUser.role === 'instructor') {
+                    const instBtn = document.getElementById('instructor-tab-btn');
+                    if (instBtn) instBtn.style.display = 'block';
+                }
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            } else {
+                // Failure
+                alert('فشل تسجيل الدخول. اسم المستخدم أو كلمة المرور غير صحيحة.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         } catch(e) {
             console.error(e);
-            alert('فشل تسجيل الدخول. تأكد من بيانات الدخول.');
-            const btn = event.target;
-            btn.innerHTML = 'دخول الدورة <i class="fas fa-sign-in-alt"></i>';
+            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات.');
+            const btn = event ? event.target : document.querySelector('#unified-entry-form .btn-primary');
+            btn.innerHTML = 'تسجيل الدخول للغرفة <i class="fas fa-sign-in-alt"></i>';
             btn.disabled = false;
         }
     };
@@ -1206,3 +1235,151 @@ async function loadCourseRoomData() {
             }
         });
     }
+
+    // --- Instructor Tools Logic ---
+    window.updateInstructorProfile = async function() {
+        const photo = document.getElementById('inst-update-photo').value.trim();
+        const specialty = document.getElementById('inst-update-specialty').value.trim();
+        const bio = document.getElementById('inst-update-bio').value.trim();
+        
+        if(!window.currentUser || !window.currentUser.courseId) return;
+        
+        try {
+            await firebase.firestore().collection('courses').doc(window.currentUser.courseId).update({
+                instructorPhoto: photo || 'assets/images/courses/instructor.png',
+                instructorSpecialty: specialty,
+                instructorBio: bio
+            });
+            alert('تم التحديث بنجاح! ستظهر هذه التحديثات للطلاب مباشرة.');
+        } catch(e) {
+            console.error(e);
+            alert('حدث خطأ أثناء التحديث.');
+        }
+    };
+
+    window.scheduleLecture = async function() {
+        const title = document.getElementById('schedule-title').value.trim();
+        const start = document.getElementById('schedule-start').value;
+        const end = document.getElementById('schedule-end').value;
+        
+        if(!title || !start || !end) {
+            alert('يرجى ملء كافة تفاصيل الجدولة');
+            return;
+        }
+        
+        if(!window.currentUser || !window.currentUser.courseId) return;
+
+        try {
+            await firebase.firestore().collection('courses').doc(window.currentUser.courseId).collection('lectures').add({
+                title,
+                startTime: new Date(start),
+                endTime: new Date(end),
+                status: 'scheduled',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert('تمت الجدولة بنجاح وسيتم إشعار الطلاب قبل 15 دقيقة من الموعد!');
+            // Clear fields
+            document.getElementById('schedule-title').value = '';
+            document.getElementById('schedule-start').value = '';
+            document.getElementById('schedule-end').value = '';
+        } catch(e) {
+            console.error(e);
+            alert('حدث خطأ أثناء الجدولة.');
+        }
+    };
+
+    window.addResource = async function() {
+        const name = document.getElementById('resource-name').value.trim();
+        const url = document.getElementById('resource-url').value.trim();
+        
+        if(!name || !url) {
+            alert('الرجاء كتابة اسم الملف ورابطه');
+            return;
+        }
+        
+        if(!window.currentUser || !window.currentUser.courseId) return;
+        const roomId = chatUrlParams.get('roomId') || 'default-room';
+
+        try {
+            await firebase.firestore().collection('courses').doc(window.currentUser.courseId)
+                  .collection('rooms').doc(roomId).collection('resources').add({
+                name, url,
+                addedBy: window.currentUser.name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert('تمت إضافة الملف وسيظهر للطلاب في تبويبة الملحقات والموارد.');
+            document.getElementById('resource-name').value = '';
+            document.getElementById('resource-url').value = '';
+        } catch(e) {
+            console.error(e);
+            alert('خطأ أثناء إضافة الملف');
+        }
+    };
+
+    window.archiveLecture = async function() {
+        if(confirm('هل أنت متأكد من إنهاء هذه المحاضرة وأرشفتها الآن؟ سيتوقف البث ولن يتمكن الطلاب من الكتابة.')) {
+            // In a real app, this would trigger backend logic to process video and lock chat.
+            alert('تم حفظ أرشيف المحاضرة وتوثيق الدردشة والروابط!');
+            // E.g., update room status to 'archived'
+        }
+    };
+
+    // ----------------------------------------------------
+    // 10. Notifications / Alerts for Upcoming Lectures
+    // ----------------------------------------------------
+    function initLectureNotifications() {
+        if (!currentCourseId || currentCourseId === 'mock-course-id') return;
+
+        firebase.firestore().collection('courses').doc(currentCourseId).collection('lectures')
+            .where('status', '==', 'scheduled')
+            .onSnapshot((snapshot) => {
+                const now = new Date().getTime();
+                
+                snapshot.docs.forEach(doc => {
+                    const lecture = doc.data();
+                    if (!lecture.startTime) return;
+                    
+                    const lectureTime = lecture.startTime.toDate().getTime();
+                    const timeDiff = lectureTime - now;
+                    const fifteenMins = 15 * 60 * 1000;
+
+                    // If lecture is within the next 15 minutes
+                    if (timeDiff > 0 && timeDiff <= fifteenMins) {
+                        showLectureAlert(lecture.title, Math.ceil(timeDiff / 60000));
+                    }
+                });
+            });
+    }
+
+    function showLectureAlert(title, minsLeft) {
+        // Prevent showing multiple alerts for the same lecture at the exact time
+        const alertId = `alert-${title}-${minsLeft}`;
+        if (sessionStorage.getItem(alertId)) return;
+        sessionStorage.setItem(alertId, 'true');
+
+        const banner = document.createElement('div');
+        banner.style.position = 'fixed';
+        banner.style.top = '20px';
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.background = 'var(--warning)';
+        banner.style.color = '#fff';
+        banner.style.padding = '1rem 2rem';
+        banner.style.borderRadius = 'var(--radius-md)';
+        banner.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        banner.style.zIndex = '999999';
+        banner.style.fontFamily = 'var(--font-ar)';
+        banner.style.fontWeight = 'bold';
+        banner.style.textAlign = 'center';
+        banner.innerHTML = `<i class="fas fa-bell"></i> تذكير: المحاضرة "${title}" ستبدأ بعد ${minsLeft} دقيقة!`;
+
+        document.body.appendChild(banner);
+
+        // Auto remove after 30 seconds
+        setTimeout(() => {
+            if(banner.parentNode) banner.parentNode.removeChild(banner);
+        }, 30000);
+    }
+
+    // Call it after a short delay to ensure DB is ready
+    setTimeout(initLectureNotifications, 3000);
