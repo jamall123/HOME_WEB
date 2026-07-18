@@ -2,7 +2,19 @@
  * Jhome CMS Logic - Handles content management for Courses, Media, Projects, and Settings
  */
 
-const db = firebase.firestore();
+// Firebase is initialized by firebase-config.js before this script loads.
+// Use a lazy getter so db is always fresh when first accessed.
+let _db = null;
+function getDb() {
+    if (!_db) _db = firebase.firestore();
+    return _db;
+}
+// Alias for backward compatibility with all existing db.collection(...) calls
+const db = new Proxy({}, {
+    get(_, prop) {
+        return (...args) => getDb()[prop](...args);
+    }
+});
 
 // ----------------------------------------------------
 // Modal Helpers
@@ -79,12 +91,13 @@ window.editCourse = async function(id) {
             document.getElementById('cms-course-id').value = id;
             document.getElementById('cms-course-title').value = data.title;
             document.getElementById('cms-course-desc').value = data.description;
-            document.getElementById('cms-course-instructor').value = data.instructor;
+            document.getElementById('cms-course-instructor').value = typeof data.instructor === 'object' ? (data.instructor.name || '') : (data.instructor || '');
             document.getElementById('cms-course-category').value = data.category;
             document.getElementById('cms-course-level').value = data.level;
             document.getElementById('cms-course-duration').value = data.duration;
             document.getElementById('cms-course-price').value = data.price > 0 ? data.price : 'مجاني';
-            document.getElementById('cms-course-image').value = data.coverImage;
+            // Support both 'coverImage' and 'cover' field names
+            document.getElementById('cms-course-image').value = data.coverImage || data.cover || '';
             openModal('cms-course-modal', 'تعديل دورة');
         }
     } catch(e) { console.error(e); alert('خطأ في جلب بيانات الدورة'); }
@@ -105,7 +118,9 @@ document.getElementById('cms-course-form')?.addEventListener('submit', async (e)
         duration: document.getElementById('cms-course-duration').value,
         price: isFree ? 0 : Number(priceVal),
         isPaid: !isFree,
+        // Save as BOTH 'coverImage' and 'cover' for backward compatibility with academy.js
         coverImage: document.getElementById('cms-course-image').value,
+        cover: document.getElementById('cms-course-image').value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -136,7 +151,13 @@ async function loadPosts() {
     if(!tbody) return;
     tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">جاري التحميل...</td></tr>';
     try {
-        const snap = await db.collection('posts').orderBy('publishedAt', 'desc').get();
+        let snap;
+        try {
+            snap = await db.collection('posts').orderBy('publishedAt', 'desc').get();
+        } catch(indexErr) {
+            // Fallback if index not yet created
+            snap = await db.collection('posts').get();
+        }
         tbody.innerHTML = '';
         if(snap.empty) { tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">لا توجد مقالات</td></tr>'; return; }
         
@@ -159,7 +180,8 @@ async function loadPosts() {
 }
 
 window.showPostModal = function() {
-    document.getElementById('cms-post-form').reset();
+    const form = document.getElementById('cms-post-form');
+    if (form) form.reset();
     document.getElementById('cms-post-id').value = '';
     openModal('cms-post-modal', 'إضافة مقال جديد');
 }
@@ -170,10 +192,18 @@ window.editPost = async function(id) {
         if(doc.exists) {
             const data = doc.data();
             document.getElementById('cms-post-id').value = id;
-            document.getElementById('cms-post-title').value = data.title;
-            document.getElementById('cms-post-category').value = data.category;
-            document.getElementById('cms-post-content').value = data.content;
-            document.getElementById('cms-post-image').value = data.coverImage;
+            document.getElementById('cms-post-title').value = data.title || '';
+            document.getElementById('cms-post-category').value = data.category || '';
+            document.getElementById('cms-post-author').value = data.authorName || '';
+            document.getElementById('cms-post-excerpt').value = data.excerpt || '';
+            document.getElementById('cms-post-content').value = data.content || '';
+            document.getElementById('cms-post-image').value = data.coverImage || '';
+            document.getElementById('cms-post-reading-time').value = data.readingTime || '';
+            document.getElementById('cms-post-tags').value = (data.tags || []).join(', ');
+            const statusEl = document.getElementById('cms-post-status');
+            if (statusEl) statusEl.value = data.status || 'published';
+            const featuredEl = document.getElementById('cms-post-featured');
+            if (featuredEl) featuredEl.value = data.isFeatured ? 'true' : 'false';
             openModal('cms-post-modal', 'تعديل المقال');
         }
     } catch(e) { console.error(e); }
@@ -182,19 +212,44 @@ window.editPost = async function(id) {
 document.getElementById('cms-post-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('cms-post-id').value;
+    const title = document.getElementById('cms-post-title').value.trim();
+    const tagsRaw = (document.getElementById('cms-post-tags')?.value || '').trim();
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const statusEl = document.getElementById('cms-post-status');
+    const featuredEl = document.getElementById('cms-post-featured');
+
+    // Generate URL-safe slug from title
+    function generateSlug(str) {
+        return str
+            .replace(/\s+/g, '-')
+            .replace(/[^\u0600-\u06FFa-zA-Z0-9-]/g, '')
+            .toLowerCase()
+            .slice(0, 80);
+    }
+
     const postData = {
-        title: document.getElementById('cms-post-title').value,
-        category: document.getElementById('cms-post-category').value,
+        title,
+        category: document.getElementById('cms-post-category').value.trim(),
+        authorName: (document.getElementById('cms-post-author')?.value || '').trim(),
+        excerpt: (document.getElementById('cms-post-excerpt')?.value || '').trim(),
         content: document.getElementById('cms-post-content').value,
-        coverImage: document.getElementById('cms-post-image').value,
-        status: 'published'
+        coverImage: (document.getElementById('cms-post-image')?.value || '').trim() || null,
+        readingTime: parseInt(document.getElementById('cms-post-reading-time')?.value) || null,
+        tags,
+        status: statusEl ? statusEl.value : 'published',
+        isFeatured: featuredEl ? featuredEl.value === 'true' : false
     };
 
     try {
         if(id) {
+            // On edit, only update slug if title changed (keep existing slug intact)
             await db.collection('posts').doc(id).update(postData);
         } else {
+            // New post: generate slug + set timestamps
+            postData.slug = generateSlug(title) + '-' + Date.now().toString(36);
             postData.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
+            postData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            postData.views = 0;
             await db.collection('posts').add(postData);
         }
         closeCMSModal('cms-post-modal');
@@ -329,15 +384,15 @@ window.editProject = async function(id) {
         if(doc.exists) {
             const data = doc.data();
             document.getElementById('cms-project-id').value = id;
-            document.getElementById('cms-project-title').value = data.title;
-            document.getElementById('cms-project-desc').value = data.description;
-            document.getElementById('cms-project-status').value = data.status;
-            document.getElementById('cms-project-progress').value = data.progress;
-            document.getElementById('cms-project-icon').value = data.icon;
-            document.getElementById('cms-project-link').value = data.link;
+            document.getElementById('cms-project-title').value = data.title || '';
+            document.getElementById('cms-project-desc').value = data.description || '';
+            document.getElementById('cms-project-status').value = data.status || 'قيد التطوير';
+            document.getElementById('cms-project-progress').value = data.progress || 0;
+            document.getElementById('cms-project-icon').value = data.icon || '';
+            document.getElementById('cms-project-link').value = data.link || '';
             openModal('cms-project-modal', 'تعديل منتج');
         }
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error(e); alert('خطأ في جلب بيانات المنتج'); }
 }
 
 document.getElementById('cms-project-form')?.addEventListener('submit', async (e) => {

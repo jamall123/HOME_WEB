@@ -137,12 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.isPaid) {
                 actionButtons = `
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true)">طلب اشتراك <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', true, '${data.id}')">طلب اشتراك <i class="fas fa-credit-card" style="margin-right: 8px;"></i></button>
                 <a href="course-room.html?type=paid&id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             } else {
                 actionButtons = `
-                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', false)">طلب انضمام مجاني <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="openEnrollment('${data.title}', false, '${data.id}')">طلب انضمام مجاني <i class="fas fa-certificate" style="margin-right: 8px;"></i></button>
                 <a href="course-room.html?type=paid&id=${data.id}" class="btn btn-primary" style="flex: 1; text-align: center;">دخول المشتركين <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i></a>
                 `;
             }
@@ -226,15 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!instructorModal || !instructorModalBody) return;
         const course = coursesData[courseId];
         if (course) {
-            const name = course.instructor || 'مقدم الدورة';
-            let photo = course.instructorPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
-            if (photo.includes('instructor.png')) photo = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            let instObj = course.instructor;
+            const name = (typeof instObj === 'object' && instObj !== null) ? (instObj.name || 'مقدم الدورة') : (instObj || 'مقدم الدورة');
+            let photo = (typeof instObj === 'object' && instObj !== null && instObj.photo) ? instObj.photo : course.instructorPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            if (photo && typeof photo === 'string' && photo.includes('instructor.png')) photo = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
             
-            let specialty = course.instructorSpecialty || 'غير محدد';
-            if (specialty.includes("مبرمج تطبيقات")) specialty = 'غير محدد';
+            let specialty = (typeof instObj === 'object' && instObj !== null && instObj.specialty) ? instObj.specialty : course.instructorSpecialty || 'غير محدد';
+            if (specialty && typeof specialty === 'string' && specialty.includes("مبرمج تطبيقات")) specialty = 'غير محدد';
             
-            let bio = course.instructorBio || 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
-            if (bio.includes("جمال مؤسس jhome") || bio.includes("مهندس برمجيات ذو خبرة")) bio = 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
+            let bio = (typeof instObj === 'object' && instObj !== null && instObj.bio) ? instObj.bio : course.instructorBio || 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
+            if (bio && typeof bio === 'string' && (bio.includes("جمال مؤسس jhome") || bio.includes("مهندس برمجيات ذو خبرة"))) bio = 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
             
             instructorModalBody.innerHTML = `
                 <div style="background: linear-gradient(135deg, #1E293B, #0B162C); border-radius: 20px; overflow: hidden;">
@@ -430,8 +431,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentEnrollmentIsPaid = true;
 
-    window.openEnrollment = function(courseTitle, isPaid = true) {
+    window.currentEnrollCourseId = null;
+
+    window.openEnrollment = function(courseTitle, isPaid = true, courseId = null) {
         currentEnrollmentIsPaid = isPaid;
+        window.currentEnrollCourseId = courseId;
         
         // Close course modal if open
         if (courseModal) {
@@ -627,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Always save the enrollment request to Firestore
             try {
                 submitFinalBtn.innerHTML = 'جاري حفظ الطلب... <i class="fas fa-spinner fa-spin"></i>';
-                const currentCourseId = new URLSearchParams(window.location.search).get('id') || 'unknown-course';
+                const currentCourseId = window.currentEnrollCourseId || new URLSearchParams(window.location.search).get('id') || 'unknown-course';
                 const db = firebase.firestore();
                 await db.collection('enrollmentRequests').add({
                     studentName: fullName,
@@ -1649,13 +1653,13 @@ async function loadCourseRoomData() {
         }
 
         try {
-            // Check if user is authenticated and authorized
-            if(!window.currentUser || !window.currentUser.courseId) {
-                throw new Error("غير مصرح لك برفع الملفات.");
+            const courseIdFolder = window.currentRoomCourseId || window.currentUser.courseId;
+            if (!courseIdFolder) {
+                throw new Error("غير مصرح لك برفع الملفات. تعذر تحديد الدورة.");
             }
             
             const storageRef = firebase.storage().ref();
-            const fileRef = storageRef.child(`courses_media/${window.currentUser.courseId}/${Date.now()}_${file.name}`);
+            const fileRef = storageRef.child(`courses_media/${courseIdFolder}/${Date.now()}_${file.name}`);
             
             await fileRef.put(file);
             const downloadUrl = await fileRef.getDownloadURL();

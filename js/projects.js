@@ -18,9 +18,11 @@ async function loadProjects() {
         }
 
         let html = '';
-        snap.forEach((doc, index) => {
+        let index = 0;
+        snap.forEach((doc) => {
             const data = doc.data();
             const delay = (index + 1) * 100;
+            index++;
             const isLive = data.status === 'مباشر';
             
             // Badge color

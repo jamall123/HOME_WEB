@@ -4,9 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تواصل معنا | Jhome</title>
+    <meta name="description" content="تواصل مع فريق Jhome للشراكات والاستفسارات والدعم الفني. نحن هنا لمساعدتك في بناء مستقبل تقني أفضل.">
+    <meta name="robots" content="index, follow">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=7">
+    <style>
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-elevated);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .toast-notification.show { transform: translateX(-50%) translateY(0); }
+        .toast-notification.success { border-color: var(--success); }
+        .toast-notification.error { border-color: var(--error); }
+        .toast-notification i.success { color: var(--success); }
+        .toast-notification i.error { color: var(--error); }
+    </style>
 </head>
 <body>
 
@@ -29,8 +55,7 @@
             </a>
             <ul class="desktop-nav">
                 <li><a href="index.html">الرئيسية</a></li>
-                <li><a href="projects.html">المنتجات</a>
-                <a href="courses.html">الأكاديمية</a></li>
+                <li><a href="projects.html">المنتجات</a></li>
                 <li><a href="courses.html">الأكاديمية</a></li>
                 <li><a href="about.html">الشركة</a></li>
                 <li><a href="blog.html">المركز الإعلامي</a></li>
@@ -79,18 +104,18 @@
             </div>
 
             <div class="glass-panel animate-fade-up delay-200">
-                <form action="#" method="POST">
+                <form id="contact-form">
                     <div class="form-group">
                         <label for="name">الاسم الكامل</label>
-                        <input type="text" id="name" name="name" class="form-control" required placeholder="محمد أحمد">
+                        <input type="text" id="contact-name" name="name" class="form-control" required placeholder="محمد أحمد">
                     </div>
                     <div class="form-group">
                         <label for="email">البريد الإلكتروني</label>
-                        <input type="email" id="email" name="email" class="form-control" required placeholder="email@example.com" style="text-align: left;" dir="ltr">
+                        <input type="email" id="contact-email" name="email" class="form-control" required placeholder="email@example.com" style="text-align: left;" dir="ltr">
                     </div>
                     <div class="form-group">
                         <label for="subject">سبب التواصل</label>
-                        <select id="subject" name="subject" class="form-control" required style="appearance: none; padding-right: 1rem;">
+                        <select id="contact-subject" name="subject" class="form-control" required style="appearance: none; padding-right: 1rem;">
                             <option value="">اختر السبب...</option>
                             <option value="partnership">شراكات استراتيجية (B2B)</option>
                             <option value="investment">علاقات المستثمرين</option>
@@ -100,9 +125,11 @@
                     </div>
                     <div class="form-group">
                         <label for="message">رسالتك</label>
-                        <textarea id="message" name="message" class="form-control" rows="5" required placeholder="كيف يمكننا مساعدتك؟"></textarea>
+                        <textarea id="contact-message" name="message" class="form-control" rows="5" required placeholder="كيف يمكننا مساعدتك؟"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">إرسال الرسالة</button>
+                    <button type="submit" id="contact-submit-btn" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>إرسال الرسالة
+                    </button>
                 </form>
             </div>
 
@@ -127,6 +154,67 @@
         </div>
     </footer>
 
-    <script src="js/main.js?v=6"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js?v=7"></script>
+    <script>
+        // Toast notification system
+        function showToast(message, type = 'success') {
+            let toast = document.getElementById('global-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'global-toast';
+                toast.className = 'toast-notification';
+                toast.innerHTML = '<i id="toast-icon" class="fas"></i><span id="toast-msg"></span>';
+                document.body.appendChild(toast);
+            }
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-msg');
+            toast.className = `toast-notification ${type}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle success' : 'fa-exclamation-circle error'}`;
+            msg.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Contact form handler
+        document.getElementById('contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('contact-submit-btn');
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const subject = document.getElementById('contact-subject').value;
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (!name || !email || !subject || !message) {
+                showToast('يرجى تعبئة جميع الحقول المطلوبة', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left:8px;"></i>جاري الإرسال...';
+
+            try {
+                const db = firebase.firestore();
+                await db.collection('contactMessages').add({
+                    name,
+                    email,
+                    subject,
+                    message,
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.', 'success');
+                this.reset();
+            } catch (err) {
+                console.error('Contact form error:', err);
+                showToast('حدث خطأ في الإرسال. يرجى المحاولة مرة أخرى.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-left:8px;"></i>إرسال الرسالة';
+            }
+        });
+    </script>
 </body>
 </html>

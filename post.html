@@ -10,8 +10,8 @@
     <meta property="og:image" id="ogImage" content="">
     <link rel="icon" type="image/png" href="assets/images/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=1782115132328">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=7">
     <link rel="stylesheet" href="css/post.css">
 </head>
 <body>
@@ -23,43 +23,35 @@
     </div>
 
     <header class="glass-header">
-        <nav style="display: flex; align-items: center; justify-content: space-between;">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            
-        <ul class="desktop-nav">
-            <li><a href="index.html" class="">الرئيسية</a></li>
-            <li><a href="about.html" class="">من نحن</a></li>
-            <li><a href="projects.html" class="">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="">سودان فري</a></li>
-            <li><a href="impact.html" class="">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="">قصص النجاح</a></li>
-            <li><a href="blog.html" class="">المدونة</a></li>
-        </ul>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="sudan-free.html#download-section" class="cta-button primary" style="padding: 0.4rem 1rem; font-size: 0.9rem; border-radius: 50px;">حمل التطبيق <i class="fas fa-download"></i></a>
-                <button class="hamburger-btn" aria-label="Toggle navigation">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
-            </div>
-        </nav>
+            <ul class="desktop-nav">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="projects.html">المنتجات</a></li>
+                <li><a href="courses.html">الأكاديمية</a></li>
+                <li><a href="about.html">الشركة</a></li>
+                <li><a href="blog.html" class="active">المركز الإعلامي</a></li>
+                <li><a href="contact.html">تواصل معنا</a></li>
+            </ul>
+            <button class="hamburger-btn" aria-label="Toggle Navigation">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
     </header>
 
     <div class="nav-overlay">
-        <button class="close-btn" aria-label="Close navigation"><i class="fas fa-times"></i></button>
+        <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link">الرئيسية</a></li>
-            <li><a href="about.html" class="nav-link">من نحن</a></li>
-            <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
-            <li><a href="sudan-free.html" class="nav-link">سودان فري</a></li>
+            <li><a href="projects.html" class="nav-link">المنتجات</a></li>
+            <li><a href="courses.html" class="nav-link">الأكاديمية</a></li>
+            <li><a href="about.html" class="nav-link">الشركة</a></li>
+            <li><a href="blog.html" class="nav-link active">المركز الإعلامي</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="blog.html" class="nav-link">المدونة</a></li>
-            <li><a href="impact.html" class="nav-link">المجتمع التقني</a></li>
-            <li><a href="stories.html" class="nav-link">قصص النجاح</a></li>
-            <li><a href="join.html" class="nav-link">شارك قصتك كحرفي</a></li>
         </ul>
     </div>
 
@@ -89,19 +81,16 @@
             <a href="index.html" class="footer-logo">
                 <span class="logo-j">J</span><span class="logo-home">home</span>
             </a>
-            <p class="footer-slogan">التغيير بيدينا</p>
+            <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
             <div class="footer-links">
                 <a href="index.html">الرئيسية</a>
-                <a href="about.html">من نحن</a>
-                <a href="projects.html">مشاريعنا</a>
-                <a href="sudan-free.html">سودان فري</a>
+                <a href="projects.html">المنتجات</a>
+                <a href="courses.html">الأكاديمية</a>
+                <a href="about.html">الشركة</a>
+                <a href="blog.html">المركز الإعلامي</a>
                 <a href="contact.html">تواصل معنا</a>
-                <a href="blog.html">المدونة</a>
-                <a href="impact.html">المجتمع التقني</a>
-                <a href="stories.html">قصص النجاح</a>
-                <a href="join.html">شارك قصتك</a>
             </div>
-            <p class="copyright">&copy; 2025 Jhome. جميع الحقوق محفوظة.</p>
+            <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
@@ -111,7 +100,7 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/dynamic-content.js"></script>
-    <script src="js/main.js?v=6"></script>
+    <script src="js/main.js?v=7"></script>
     <script src="js/post.js"></script>
 </body>
 </html>

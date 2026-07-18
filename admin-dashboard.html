@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم | Jhome Admin</title>
+    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>J</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=7">
     <style>
         body { background: var(--bg-dark); }
         .admin-layout { display: flex; min-height: 100vh; }
@@ -38,6 +40,7 @@
                 <a href="#" id="nav-courses" onclick="switchAdminTab('courses')"><i class="fas fa-graduation-cap"></i> إدارة الأكاديمية</a>
                 <a href="#" id="nav-media" onclick="switchAdminTab('media')"><i class="fas fa-bullhorn"></i> المركز الإعلامي</a>
                 <a href="#" id="nav-projects" onclick="switchAdminTab('projects')"><i class="fas fa-project-diagram"></i> إدارة المنتجات</a>
+                <a href="#" id="nav-messages" onclick="switchAdminTab('messages')"><i class="fas fa-envelope"></i> رسائل التواصل</a>
                 <a href="#" id="nav-settings" onclick="switchAdminTab('settings')"><i class="fas fa-cog"></i> إعدادات الموقع</a>
                 <a href="index.html" style="margin-top: auto;"><i class="fas fa-home"></i> العودة للموقع</a>
             </nav>
@@ -132,6 +135,7 @@
                         </tbody>
                     </table>
                 </div>
+            </div><!-- end section-users -->
             <!-- Tab: Enrollment Requests -->
             <div id="section-requests" class="admin-section" style="display: none;">
                 <div class="admin-card">
@@ -209,6 +213,29 @@
                 </div>
             </div>
 
+            <div id="section-messages" class="admin-section" style="display: none;">
+                <div class="admin-card">
+                    <h3>رسائل التواصل</h3>
+                    <p class="text-muted" style="margin-bottom: 1rem;">الرسائل المُرسلة من صفحة تواصل معنا</p>
+                    <table style="margin-top: 1rem;">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>الموضوع</th>
+                                <th>الرسالة</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="section-settings" class="admin-section" style="display: none;">
                 <div class="admin-card">
                     <h3>إعدادات وتفاصيل الشركة</h3>
@@ -281,17 +308,46 @@
 
     <!-- Post Modal -->
     <div id="cms-post-modal" class="modal-overlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-        <div class="modal-content" style="background: var(--bg-surface); padding: 2rem; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-content" style="background: var(--bg-surface); padding: 2rem; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
             <h3 id="cms-post-modal-title">إضافة مقال جديد</h3>
             <form id="cms-post-form" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
                 <input type="hidden" id="cms-post-id">
                 <input type="text" id="cms-post-title" class="form-input" placeholder="عنوان المقال" required>
-                <input type="text" id="cms-post-category" class="form-input" placeholder="التصنيف" required>
-                <textarea id="cms-post-content" class="form-input" placeholder="محتوى المقال" rows="6" required></textarea>
-                <label>رابط صورة الغلاف</label>
-                <input type="url" id="cms-post-image" class="form-input" placeholder="https://..." required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <input type="text" id="cms-post-category" class="form-input" placeholder="التصنيف (مثال: برمجة)" required>
+                    <input type="text" id="cms-post-author" class="form-input" placeholder="اسم الكاتب">
+                </div>
+                <textarea id="cms-post-excerpt" class="form-input" placeholder="ملخص قصير للمقال (200 حرف تقريباً)" rows="2"></textarea>
+                <textarea id="cms-post-content" class="form-input" placeholder="محتوى المقال (HTML مدعوم)" rows="8" required></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-secondary); display:block; margin-bottom:4px;">رابط صورة الغلاف (URL)</label>
+                        <input type="text" id="cms-post-image" class="form-input" placeholder="https://... أو اتركه فارغاً">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-secondary); display:block; margin-bottom:4px;">وقت القراءة (دقائق)</label>
+                        <input type="number" id="cms-post-reading-time" class="form-input" placeholder="5" min="1">
+                    </div>
+                </div>
+                <input type="text" id="cms-post-tags" class="form-input" placeholder="وسوم مفصولة بفاصلة: React, JavaScript, أمان رقمي">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-secondary); display:block; margin-bottom:4px;">حالة النشر</label>
+                        <select id="cms-post-status" class="form-input">
+                            <option value="published">منشور</option>
+                            <option value="draft">مسودة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-secondary); display:block; margin-bottom:4px;">هل هو مقال مميز؟</label>
+                        <select id="cms-post-featured" class="form-input">
+                            <option value="false">لا</option>
+                            <option value="true">نعم (مميز)</option>
+                        </select>
+                    </div>
+                </div>
                 <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">حفظ المقال (نشر)</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">حفظ المقال</button>
                     <button type="button" class="btn btn-secondary" onclick="closeCMSModal('cms-post-modal')" style="flex: 1;">إلغاء</button>
                 </div>
             </form>

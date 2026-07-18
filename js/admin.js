@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------------------------------
     window.switchAdminTab = function(tabName) {
-        const sections = ['payments', 'users', 'requests', 'courses', 'media', 'projects', 'settings'];
+        const sections = ['payments', 'users', 'requests', 'courses', 'media', 'projects', 'messages', 'settings'];
         const pageTitle = document.getElementById('admin-page-title');
         const pageSubtitle = document.getElementById('admin-page-subtitle');
 
@@ -236,6 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pageTitle.textContent = 'إدارة المنتجات';
             pageSubtitle.textContent = 'التحكم في عرض المنتجات والمشاريع وحالتها';
             if(typeof loadCMSProjects === 'function') loadCMSProjects();
+        } else if (tabName === 'messages') {
+            pageTitle.textContent = 'رسائل التواصل';
+            pageSubtitle.textContent = 'الرسائل الواردة من صفحة تواصل معنا';
+            loadContactMessages();
         } else if (tabName === 'settings') {
             pageTitle.textContent = 'إعدادات الموقع';
             pageSubtitle.textContent = 'التحكم في بيانات الشركة ونصوص الصفحة الرئيسية';
@@ -265,18 +269,20 @@ document.addEventListener('DOMContentLoaded', () => {
             snap.forEach(doc => {
                 const req = doc.data();
                 const tr = document.createElement('tr');
+                // Fix: academy.js saves as 'studentName', admin.js expected 'fullName' — support both
+                const displayName = req.studentName || req.fullName || '-';
                 const statusBadge = req.status === 'pending' ? 
                     '<span style="background: var(--warning); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">قيد الانتظار</span>' :
                     '<span style="background: var(--primary-color); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">مكتمل</span>';
 
                 tr.innerHTML = `
-                    <td>${req.fullName || '-'}</td>
+                    <td>${displayName}</td>
                     <td dir="ltr" style="text-align: right;">${req.phone || '-'}</td>
                     <td>${req.courseTitle || '-'}</td>
                     <td><a href="${req.receiptUrl}" target="_blank" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fas fa-eye"></i> عرض</a></td>
                     <td>${statusBadge}</td>
                     <td>
-                        ${req.status === 'pending' ? `<button class="action-btn" style="color: var(--primary-color);" onclick="approveRequest('${doc.id}', '${req.fullName}', '${req.courseId || ''}')" title="موافقة وإنشاء حساب"><i class="fas fa-check-circle"></i></button>` : ''}
+                        ${req.status === 'pending' ? `<button class="action-btn" style="color: var(--primary-color);" onclick="approveRequest('${doc.id}', '${displayName}', '${req.courseId || ''}')" title="موافقة وإنشاء حساب"><i class="fas fa-check-circle"></i></button>` : ''}
                         <button class="action-btn delete-req-btn" onclick="deleteRequest('${doc.id}')" title="حذف"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
@@ -321,4 +327,76 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    // ----------------------------------------------------
+    // Contact Messages
+    // ----------------------------------------------------
+    async function loadContactMessages() {
+        const list = document.getElementById('messages-list');
+        if (!list) return;
+
+        list.innerHTML = '<tr><td colspan="7" style="text-align:center;">جاري التحميل... <i class="fas fa-spinner fa-spin"></i></td></tr>';
+
+        try {
+            const db = firebase.firestore();
+            const snap = await db.collection('contactMessages').orderBy('createdAt', 'desc').get();
+
+            list.innerHTML = '';
+            if (snap.empty) {
+                list.innerHTML = '<tr><td colspan="7" style="text-align:center;">لا توجد رسائل حتى الآن</td></tr>';
+                return;
+            }
+
+            snap.forEach(doc => {
+                const msg = doc.data();
+                const isRead = msg.read === true;
+                const dateStr = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleDateString('ar-SA') : '-';
+                const statusBadge = isRead
+                    ? '<span style="background:var(--success);color:#fff;padding:2px 8px;border-radius:4px;font-size:0.8rem;">مقروءة</span>'
+                    : '<span style="background:var(--warning);color:#000;padding:2px 8px;border-radius:4px;font-size:0.8rem;">جديدة</span>';
+
+                const tr = document.createElement('tr');
+                tr.style.opacity = isRead ? '0.7' : '1';
+                tr.innerHTML = `
+                    <td>${msg.name || '-'}</td>
+                    <td dir="ltr" style="text-align:right;"><a href="mailto:${msg.email}" style="color:var(--primary-color);">${msg.email || '-'}</a></td>
+                    <td>${msg.subject || '-'}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${msg.message || ''}">${msg.message || '-'}</td>
+                    <td>${dateStr}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${!isRead ? `<button class="action-btn" style="color:var(--success);" onclick="markMessageRead('${doc.id}')" title="تحديد كمقروءة"><i class="fas fa-check"></i></button>` : ''}
+                        <button class="action-btn delete-req-btn" onclick="deleteContactMessage('${doc.id}')" title="حذف"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        } catch (err) {
+            console.error(err);
+            list.innerHTML = '<tr><td colspan="7" style="text-align:center;color:red;">حدث خطأ في تحميل الرسائل</td></tr>';
+        }
+    }
+
+    window.markMessageRead = async function(id) {
+        try {
+            await firebase.firestore().collection('contactMessages').doc(id).update({ read: true });
+            loadContactMessages();
+        } catch (err) {
+            console.error(err);
+            alert('فشل التحديث!');
+        }
+    };
+
+    window.deleteContactMessage = async function(id) {
+        if (confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
+            try {
+                await firebase.firestore().collection('contactMessages').doc(id).delete();
+                loadContactMessages();
+            } catch (err) {
+                console.error(err);
+                alert('فشل الحذف!');
+            }
+        }
+    };
+
 });

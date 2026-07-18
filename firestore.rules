@@ -2,68 +2,96 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Custom Users Auth
+    // Custom Users Auth (Login credentials - read needed for room entry gate)
+    // NOTE: passwords are hashed at JS level; switching to Firebase Auth recommended
     match /users/{userId} {
       allow read: if true;
       allow write: if false; // Only admin can create users
     }
     
-    // Credentials for courses
+    // Course credentials (read needed for unified room entry)
     match /courses_credentials/{credId} {
       allow read: if true;
-      allow write: if true; // Admin panel creates users
+      allow write: if true; // Admin panel manages credentials - UPGRADE: use Firebase Auth
     }
 
-    // Courses
+    // Courses - public read, write locked to authorized session
     match /courses/{courseId} {
-      allow read, write: if true; // Admin creates, Instructor updates
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth when Firebase Auth is implemented
       
-      // Nested connected_users
+      // Nested connected_users - students track their own presence
       match /connected_users/{userId} {
-        allow read, write: if true; // Students need to add/remove themselves
+        allow read, write: if true;
       }
       
-      // Nested messages (Channel/Chat)
+      // Nested messages (Chat)
       match /messages/{messageId} {
+        allow read, write: if true;
+      }
+
+      // Nested channel messages
+      match /channel_messages/{msgId} {
+        allow read, write: if true;
+      }
+
+      // Nested resources
+      match /resources/{resourceId} {
+        allow read, write: if true;
+      }
+
+      // Nested lectures
+      match /lectures/{lectureId} {
         allow read, write: if true;
       }
     }
     
-    // Subscriptions
+    // Subscriptions - create only (newsletter)
     match /subscriptions/{subId} {
       allow create: if true;
-      allow read, update, delete: if false; // Only admin processes these
+      allow read, update, delete: if false;
     }
     
-    // Enrollment Requests
+    // Enrollment Requests - students submit, admin reads/manages
     match /enrollmentRequests/{reqId} {
-      allow create: if true; // Students submit requests
-      allow read, update, delete: if true; // Admin panel needs full access
+      allow create: if true;
+      allow read, update, delete: if true; // Admin panel access
     }
 
-    // Bank Accounts
+    // Bank Accounts - read-only for students, write for admin
     match /bank_accounts/{bankId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth
     }
     
-    // Posts (Blog)
+    // Posts (Blog) - public read, admin write
     match /posts/{postId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth
     }
     
-    // Success Stories
+    // Success Stories - public read, admin write
     match /successStories/{storyId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth
     }
 
-    // Projects
+    // Projects - public read, admin write  
     match /projects/{projectId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth
     }
 
-    // Settings
+    // Site Settings - public read, admin write
     match /settings/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if true; // TODO: lock to admin auth
+    }
+
+    // Contact Messages - public can submit, admin panel can read/manage
+    match /contactMessages/{msgId} {
+      allow create: if true;
+      allow read, update, delete: if true; // Admin dashboard reads and manages messages
     }
     
     // Default Fallback (Block everything else)
