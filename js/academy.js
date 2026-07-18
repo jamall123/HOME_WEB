@@ -227,9 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const course = coursesData[courseId];
         if (course) {
             const name = course.instructor || 'مقدم الدورة';
-            const photo = course.instructorPhoto || 'https://ui-avatars.com/api/?name=Instructor&background=1E293B&color=A5B4FC';
-            const specialty = course.instructorSpecialty || 'غير محدد';
-            const bio = course.instructorBio || 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
+            let photo = course.instructorPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            if (photo.includes('instructor.png')) photo = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            
+            let specialty = course.instructorSpecialty || 'غير محدد';
+            if (specialty.includes("مبرمج تطبيقات")) specialty = 'غير محدد';
+            
+            let bio = course.instructorBio || 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
+            if (bio.includes("جمال مؤسس jhome") || bio.includes("مهندس برمجيات ذو خبرة")) bio = 'لا توجد نبذة تعريفية متوفرة عن مقدم هذه الدورة.';
             
             instructorModalBody.innerHTML = `
                 <div style="background: linear-gradient(135deg, #1E293B, #0B162C); border-radius: 20px; overflow: hidden;">
@@ -284,23 +289,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     // 3. Course Room (Virtual Classroom) UI Logic
     // ----------------------------------------------------
-    const roomTabs = document.querySelectorAll('.room-tab');
+    const floatingTabBtns = document.querySelectorAll('.floating-tab-btn');
     const roomContents = document.querySelectorAll('.room-tab-content');
+    const bottomSheet = document.getElementById('bottom-sheet');
 
-    if (roomTabs.length > 0) {
-        roomTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active from all tabs
-                roomTabs.forEach(t => t.classList.remove('active'));
-                roomContents.forEach(c => c.classList.remove('active'));
+    if (floatingTabBtns.length > 0) {
+        floatingTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all tabs and contents
+                floatingTabBtns.forEach(t => {
+                    t.classList.remove('btn-primary');
+                    t.classList.add('btn-secondary');
+                    t.style.boxShadow = 'none';
+                });
+                roomContents.forEach(c => {
+                    c.classList.remove('active');
+                    c.style.display = 'none';
+                });
 
-                // Add active to clicked
-                tab.classList.add('active');
-                const targetId = tab.getAttribute('data-target');
-                document.getElementById(targetId).classList.add('active');
+                // Add active styling to clicked button
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+                btn.style.boxShadow = '0 4px 15px rgba(79, 70, 229, 0.4)';
+
+                // Show target content
+                const targetId = btn.getAttribute('data-target');
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                    targetEl.style.display = 'block';
+                }
+
+                // Slide up bottom sheet
+                if (bottomSheet) {
+                    bottomSheet.style.bottom = '0';
+                }
             });
         });
     }
+
+    // Function to close bottom sheet
+    window.closeBottomSheet = function() {
+        if (bottomSheet) {
+            bottomSheet.style.bottom = '-100%';
+            // Reset tab buttons visually
+            floatingTabBtns.forEach(t => {
+                t.classList.remove('btn-primary');
+                t.classList.add('btn-secondary');
+                t.style.boxShadow = 'none';
+            });
+        }
+    };
 
     // ----------------------------------------------------
     // 4. Mobile Toggles (Sidebar & Chat)
@@ -732,6 +771,20 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             console.log('Login successful:', window.currentUser);
 
+            // Add to connected users
+            if (window.currentRoomCourseId) {
+                try {
+                    await db.collection('courses').doc(window.currentRoomCourseId).collection('connected_users').doc(window.currentUser.username).set({
+                        name: window.currentUser.name,
+                        username: window.currentUser.username,
+                        role: window.currentUser.role,
+                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch(err) {
+                    console.error("Error adding to connected_users", err);
+                }
+            }
+
             // Hide entry gate
             const roomEntryGate = document.getElementById('room-entry-gate');
             if(roomEntryGate) {
@@ -959,6 +1012,50 @@ async function loadCourseRoomData() {
                 html += '</div>';
                 sidebarContainer.innerHTML = html;
             }
+
+            // Set global course ID for current room (for connected users tracking)
+            window.currentRoomCourseId = courseId;
+
+            // Listen to connected users
+            const db = firebase.firestore();
+            db.collection('courses').doc(courseId).collection('connected_users').onSnapshot((snapshot) => {
+                const listEl = document.getElementById('connected-students-list');
+                const countEl = document.getElementById('connected-count');
+                if (listEl && countEl) {
+                    countEl.innerText = snapshot.size;
+                    if (snapshot.empty) {
+                        listEl.innerHTML = '<li style="color: var(--text-muted); font-size: 0.9rem;">لا يوجد طلاب متصلين حالياً.</li>';
+                    } else {
+                        let html = '';
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            html += `
+                                <li style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+                                            ${data.name ? data.name.charAt(0) : 'U'}
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 0.95rem; display: block;">${data.name || data.username}</span>
+                                            <span style="font-size: 0.75rem; color: var(--text-muted);">@${data.username}</span>
+                                        </div>
+                                    </div>
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 5px #10B981;"></span>
+                                </li>
+                            `;
+                        });
+                        listEl.innerHTML = html;
+                    }
+                }
+            });
+
+            // Handle page unload to remove user from connected list
+            window.addEventListener('beforeunload', () => {
+                if (window.currentUser && window.currentRoomCourseId) {
+                    firebase.firestore().collection('courses').doc(window.currentRoomCourseId)
+                        .collection('connected_users').doc(window.currentUser.username).delete();
+                }
+            });
 
             // Load active room details
             let activeRoom = rooms.find(r => r.id === roomId);
