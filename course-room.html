@@ -52,8 +52,7 @@
                 </div>
             </div>
             
-            <div style="padding: 1.5rem;">
-                <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">المنهج الدراسي</h3>
+            <div class="room-sidebar-content" style="padding: 0;">
                 <!-- The room list will be populated here by loadCourseRoomData() -->
             </div>
         </aside>
@@ -66,8 +65,8 @@
                 
                 <!-- Mode 1 & 2: Video Player (Live or Link) -->
                 <div id="mode-video-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
-                    <video id="live-video" controls autoplay loop playsinline style="width: 100%; height: 100%; object-fit: contain;">
-                        <source src="assets/videos/preview.mp4" type="video/mp4">
+                    <video id="live-video" controls playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                        <!-- No default src -->
                         متصفحك لا يدعم تشغيل الفيديو.
                     </video>
                 </div>
@@ -151,6 +150,38 @@
 
                     <!-- Tab Content: Instructor Tools -->
                     <div id="tab-instructor" class="room-tab-content" style="padding: 0; display: none;">
+                        
+                        <!-- Profile Editor Section -->
+                        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                            <h3 style="color: #10B981; margin-bottom: 1rem;"><i class="fas fa-user-edit"></i> تحديث بياناتي كمدرب</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>صورتي (رابط أو رفع)</label>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <input type="text" id="prof-img-url" class="form-input" placeholder="رابط الصورة..." style="flex: 2;">
+                                        <input type="file" id="prof-img-file" class="form-input" accept="image/*" style="flex: 1;" onchange="uploadInstructorMedia(this, 'prof-img-url')">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>اسمي بالكامل</label>
+                                    <input type="text" id="prof-name" class="form-input" placeholder="مثال: أحمد محمد">
+                                </div>
+                                <div class="form-group">
+                                    <label>تخصصي</label>
+                                    <input type="text" id="prof-spec" class="form-input" placeholder="مثال: مبرمج ومصمم">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>نبذة عني</label>
+                                <textarea id="prof-bio" class="form-input" rows="2" placeholder="اكتب نبذة تعريفية قصيرة تظهر للطلاب..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>مصدر مهاراتي (رابط CV أو حسابي على LinkedIn أو غيره)</label>
+                                <input type="text" id="prof-cv-url" class="form-input" placeholder="https://..." dir="ltr">
+                            </div>
+                            <button class="btn btn-primary" onclick="updateInstructorProfile()"><i class="fas fa-save" style="margin-right: 8px;"></i> حفظ بياناتي</button>
+                        </div>
+
                         <!-- Main Header & Mode Tabs -->
                         <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
                             <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث والمحتوى</h3>
@@ -327,7 +358,7 @@
         <aside class="room-chat">
             <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <h3 style="font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
-                    النقاش الحي <span style="background: rgba(79, 70, 229, 0.2); color: var(--primary-light); font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">12 متصل</span>
+                    النقاش الحي <span id="chat-connected-count" style="background: rgba(79, 70, 229, 0.2); color: var(--primary-light); font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">0 متصل</span>
                 </h3>
             </div>
             
@@ -344,6 +375,8 @@
         </aside>
 
     </div>
+
+    <!-- Syllabus/Room Management Modal (Instructor Only) -->
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>

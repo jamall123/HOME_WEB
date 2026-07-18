@@ -69,19 +69,19 @@
             <div class="glass-panel animate-fade-up delay-100">
                 <i class="fas fa-eye" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"></i>
                 <h3 class="heading-3" style="margin-bottom: 1rem;">الرؤية</h3>
-                <p class="text-muted">نطمح إلى أن نكون الشركة الرائدة التي تقود التحول الرقمي في المنطقة، وبناء اقتصاد مستدام قائم على التكنولوجيا.</p>
+                <p id="dy-vision" class="text-muted">نطمح إلى أن نكون الشركة الرائدة التي تقود التحول الرقمي في المنطقة، وبناء اقتصاد مستدام قائم على التكنولوجيا.</p>
             </div>
             
             <div class="glass-panel animate-fade-up delay-200">
                 <i class="fas fa-bullseye" style="font-size: 2.5rem; color: var(--secondary-color); margin-bottom: 1.5rem;"></i>
                 <h3 class="heading-3" style="margin-bottom: 1rem;">الرسالة</h3>
-                <p class="text-muted">تمكين الأفراد والشركات من خلال أدوات برمجية متطورة، موثوقة، وسهلة الاستخدام.</p>
+                <p id="dy-mission" class="text-muted">تمكين الأفراد والشركات من خلال أدوات برمجية متطورة، موثوقة، وسهلة الاستخدام.</p>
             </div>
 
             <div class="glass-panel animate-fade-up delay-300">
                 <i class="fas fa-gem" style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem;"></i>
                 <h3 class="heading-3" style="margin-bottom: 1rem;">القيم الجوهرية</h3>
-                <p class="text-muted">الابتكار، الشفافية، الجودة، والتزامنا الراسخ بتحقيق أعلى معايير الأمان والثقة لعملائنا.</p>
+                <p id="dy-values" class="text-muted">الابتكار، الشفافية، الجودة، والتزامنا الراسخ بتحقيق أعلى معايير الأمان والثقة لعملائنا.</p>
             </div>
         </div>
 
@@ -93,11 +93,11 @@
         <section class="founder-hero grid-2-col" style="margin-top: 2rem;">
             <div class="animate-fade-up delay-100">
                 <span class="caption-meta" style="background: rgba(79, 70, 229, 0.15); color: #A5B4FC; padding: 0.5rem 1.2rem; border-radius: var(--radius-pill); border: 1px solid rgba(79, 70, 229, 0.3); margin-bottom: 1.5rem; display: inline-block;">المؤسس والمدير التنفيذي</span>
-                <h3 class="display-2" style="margin-bottom: 1rem; font-size: 2.5rem;">جمال أحمد</h3>
-                <p class="body-large" style="margin-bottom: 1.5rem;">
+                <h3 id="dy-founder-name" class="display-2" style="margin-bottom: 1rem; font-size: 2.5rem;">جمال أحمد</h3>
+                <p id="dy-founder-bio1" class="body-large" style="margin-bottom: 1.5rem;">
                     في البدايات لم أكن مجرد مؤسس، بل كنت المطور الأول الذي صاغ الأكواد ووضع الأساسات التقنية باستخدام أحدث أطر العمل. أؤمن بقوة البرمجيات في تبسيط تعقيدات الحياة اليومية، وهذا ما دفعني لتأسيس Jhome.
                 </p>
-                <p class="body-large" style="margin-bottom: 2rem;">
+                <p id="dy-founder-bio2" class="body-large" style="margin-bottom: 2rem;">
                     رؤيتي هي بناء شركة تقنية سودانية بمعايير عالمية، تحول المهارات المحلية إلى قيمة اقتصادية مستدامة من خلال منتجات رقمية قابلة للتوسع.
                 </p>
                 <div style="display: flex; gap: 1rem;">
@@ -135,6 +135,12 @@
         </div>
     </footer>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
     <script src="js/main.js?v=6"></script>
+    <script src="js/settings.js"></script>
 </body>
 </html>

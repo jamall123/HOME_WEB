@@ -480,26 +480,45 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let loadedAccounts = [];
 
-    function loadBankAccounts() {
-        const stored = localStorage.getItem('jhome_bank_accounts');
-        if (stored) {
-            loadedAccounts = JSON.parse(stored);
-        } else {
-            loadedAccounts = [{ id: 'default', bank: 'بنكك', name: 'جمال احمد ابراهيم', number: '4373414' }];
-        }
-        
+    async function loadBankAccounts() {
         if (bankSelector) {
-            bankSelector.innerHTML = '';
-            loadedAccounts.forEach(acc => {
-                const opt = document.createElement('option');
-                opt.value = acc.id;
-                opt.textContent = acc.bank + ' - ' + acc.name;
-                bankSelector.appendChild(opt);
+            bankSelector.innerHTML = '<option value="">جاري تحميل الحسابات...</option>';
+        }
+
+        try {
+            const snap = await firebase.firestore().collection('bank_accounts').get();
+            loadedAccounts = [];
+            snap.forEach(doc => {
+                const acc = doc.data();
+                acc.id = doc.id;
+                loadedAccounts.push(acc);
             });
             
-            // Trigger initial selection
-            if(loadedAccounts.length > 0) {
-                updateBankDisplay(loadedAccounts[0].id);
+            // Fallback just in case
+            if (loadedAccounts.length === 0) {
+                loadedAccounts = [{ id: 'default', bank: 'بنكك', name: 'جمال احمد ابراهيم', number: '4373414' }];
+            }
+
+            if (bankSelector) {
+                bankSelector.innerHTML = '';
+                loadedAccounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.id;
+                    opt.textContent = acc.bank + ' - ' + acc.name;
+                    bankSelector.appendChild(opt);
+                });
+                
+                // Trigger initial selection
+                if(loadedAccounts.length > 0) {
+                    updateBankDisplay(loadedAccounts[0].id);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading bank accounts", error);
+            loadedAccounts = [{ id: 'default', bank: 'بنكك', name: 'جمال احمد ابراهيم', number: '4373414' }];
+            if (bankSelector) {
+                bankSelector.innerHTML = '<option value="default">بنكك - جمال احمد ابراهيم</option>';
+                updateBankDisplay('default');
             }
         }
     }
@@ -799,6 +818,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.currentUser.role === 'instructor') {
                 const instBtn = document.getElementById('instructor-tab-btn');
                 if (instBtn) instBtn.style.display = 'block';
+                if (typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
+                
+                // Pre-fill datetime fields
+                const schedStart = document.getElementById('schedule-start');
+                const schedEnd = document.getElementById('schedule-end');
+                if(schedStart && schedEnd) {
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    schedStart.value = now.toISOString().slice(0,16);
+                    now.setHours(now.getHours() + 1);
+                    schedEnd.value = now.toISOString().slice(0,16);
+                }
+
+                // Show modal if no rooms
+                if (window.currentCourseRooms && window.currentCourseRooms.length === 0) {
+                    setTimeout(() => {
+                        if (typeof window.openSyllabusModal === 'function') {
+                            window.openSyllabusModal();
+                        }
+                    }, 500);
+                }
             }
 
             if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
@@ -823,8 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (userData.role === 'instructor') {
                         const instructorTabBtn = document.getElementById('instructor-tab-btn');
                         if (instructorTabBtn) instructorTabBtn.style.display = 'block';
-                        // Generate Instructor tools inside the tab
-                        generateInstructorTools();
+                        if (typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
                     }
                     
                     if (roomEntryGate) {
@@ -841,52 +880,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function generateInstructorTools() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const courseId = urlParams.get('id');
-        const instructorTab = document.getElementById('tab-instructor');
-        if(!instructorTab) return;
 
-        instructorTab.innerHTML = `
-            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
-                <h3 style="margin-bottom: 1.5rem; color: var(--warning);"><i class="fas fa-tools"></i> أدوات إدارة الغرفة الحالية</h3>
-                
-                <div class="form-group">
-                    <label>تحديد وقت بدء الدرس (Start Time)</label>
-                    <input type="datetime-local" id="room-start-time" class="form-input" style="color: black;">
-                </div>
-                
-                <div class="form-group">
-                    <label>إضافة مصادر للغرفة الحالية</label>
-                    <textarea id="room-add-sources" class="form-input" rows="3" placeholder="ضع روابط أو نصوص هنا..."></textarea>
-                </div>
-                
-                <button class="btn btn-primary" onclick="updateCurrentRoomData()" style="width: 100%; margin-bottom: 2rem;">حفظ التحديثات <i class="fas fa-save"></i></button>
-                
-                <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 2rem;">
-                
-                <h3 style="margin-bottom: 1.5rem; color: var(--primary-light);"><i class="fas fa-plus-circle"></i> إضافة محاضرة جديدة (اليوم التالي)</h3>
-                
-                <div class="form-group">
-                    <label>عنوان المحاضرة الجديدة</label>
-                    <input type="text" id="new-day-title" class="form-input" placeholder="مثال: المحاضرة الثانية">
-                </div>
-                <div class="form-group">
-                    <label>نوع المحاضرة</label>
-                    <select id="new-day-type" class="form-input" style="color: black;" onchange="document.getElementById('new-day-video-wrap').style.display = this.value === 'recorded' ? 'block' : 'none'">
-                        <option value="live">بث مباشر</option>
-                        <option value="recorded">فيديو مسجل</option>
-                    </select>
-                </div>
-                <div class="form-group" id="new-day-video-wrap" style="display:none;">
-                    <label>رابط الفيديو</label>
-                    <input type="text" id="new-day-video-url" class="form-input" placeholder="https://youtube.com/watch?v=..." dir="ltr">
-                </div>
-                
-                <button class="btn btn-secondary" onclick="addNewCourseDay()" style="width: 100%;">إنشاء وبدء يوم جديد <i class="fas fa-calendar-plus"></i></button>
-            </div>
-        `;
-    }
 
     window.updateCurrentRoomData = async function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -988,30 +982,12 @@ async function loadCourseRoomData() {
         if (doc.exists) {
             const course = doc.data();
             const rooms = course.rooms || [];
+            window.currentCourseRooms = rooms;
+            window.currentCourseId = courseId;
+            window.currentRoomId = roomId;
             
             // Render Sidebar rooms list
-            const sidebarContainer = document.querySelector('.room-sidebar-content');
-            if (sidebarContainer) {
-                let html = '<h3 style="padding:1rem; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;">المنهج والدروس</h3><div style="padding:1rem;">';
-                if (rooms.length === 0) {
-                    html += '<p class="text-muted">لا توجد دروس متاحة حالياً.</p>';
-                } else {
-                    rooms.forEach((r, idx) => {
-                        const isActive = r.id === roomId || (!roomId && idx === 0);
-                        const typeIcon = r.type === 'recorded' ? 'fa-play-circle' : 'fa-video';
-                        html += `
-                            <div style="margin-bottom: 1rem;">
-                                <div onclick="window.location.href='course-room.html?id=${courseId}&roomId=${r.id}'" style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; background: ${isActive ? 'var(--primary-color)' : 'rgba(255,255,255,0.02)'}; border-radius: var(--radius-sm); cursor: pointer; transition: 0.3s;">
-                                    <span style="font-weight: 500;">${r.name}</span>
-                                    <i class="fas ${typeIcon} text-muted" style="font-size: 0.8rem; color:${isActive?'white':'inherit'} !important;"></i>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                html += '</div>';
-                sidebarContainer.innerHTML = html;
-            }
+            renderSyllabusUI();
 
             // Set global course ID for current room (for connected users tracking)
             window.currentRoomCourseId = courseId;
@@ -1432,29 +1408,39 @@ async function loadCourseRoomData() {
         const start = document.getElementById('schedule-start').value;
         const end = document.getElementById('schedule-end').value;
         
-        if(!title || !start || !end) {
-            alert('يرجى ملء كافة تفاصيل الجدولة');
+        if(!title || !start) {
+            alert('يرجى ملء كافة تفاصيل الجدولة (العنوان ووقت البداية)');
             return;
         }
         
-        if(!window.currentUser || !window.currentUser.courseId) return;
+        const courseId = window.currentCourseId;
+        if(!courseId || !window.currentUser || window.currentUser.role !== 'instructor') return;
 
         try {
-            await firebase.firestore().collection('courses').doc(window.currentUser.courseId).collection('lectures').add({
-                title,
-                startTime: new Date(start),
-                endTime: new Date(end),
-                status: 'scheduled',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const doc = await courseRef.get();
+            let rooms = doc.data().rooms || [];
+
+            rooms.push({
+                id: Date.now().toString(),
+                name: title,
+                type: 'live',
+                videoUrl: '',
+                sources: '',
+                startTime: start,
+                endTime: end || '',
+                instructorName: window.currentUser.name || window.currentUser.username
             });
-            alert('تمت الجدولة بنجاح وسيتم إشعار الطلاب قبل 15 دقيقة من الموعد!');
-            // Clear fields
+
+            await courseRef.update({ rooms });
+            window.currentCourseRooms = rooms;
+            if(typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
+
+            alert('تمت إضافة الدرس القادم إلى المنهج بنجاح!');
             document.getElementById('schedule-title').value = '';
-            document.getElementById('schedule-start').value = '';
-            document.getElementById('schedule-end').value = '';
         } catch(e) {
             console.error(e);
-            alert('حدث خطأ أثناء الجدولة.');
+            alert('حدث خطأ أثناء الإضافة.');
         }
     };
 
@@ -1819,3 +1805,227 @@ async function loadCourseRoomData() {
     setTimeout(() => {
         initModesListener();
     }, 4000);
+
+    // Syllabus Management
+    window.renderSyllabusUI = function() {
+        const sidebarContainer = document.querySelector('.room-sidebar-content');
+        if (!sidebarContainer) return;
+
+        const rooms = window.currentCourseRooms || [];
+        const courseId = window.currentCourseId;
+        const roomId = window.currentRoomId;
+        const isInstructor = window.currentUser && window.currentUser.role === 'instructor';
+
+        let html = '<h3 style="padding:1rem; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;">المنهج والدروس</h3><div style="padding:1rem; display: flex; flex-direction: column; gap: 1rem; position: relative;">';
+        
+        if (rooms.length === 0) {
+            html += '<p class="text-muted text-center" style="margin-top:1rem;">لا توجد دروس متاحة حالياً.</p>';
+        } else {
+            rooms.forEach((r, idx) => {
+                const isActive = r.id === roomId || (!roomId && idx === 0);
+                const typeIcon = r.type === 'recorded' ? 'fa-play-circle' : 'fa-video';
+                
+                html += `
+                    <div style="position: relative; display: flex; flex-direction: column;">
+                        ${idx !== rooms.length - 1 ? '<div style="position: absolute; left: 1rem; top: 2.5rem; bottom: -1rem; width: 2px; background: rgba(255,255,255,0.1); z-index: 1;"></div>' : ''}
+                        
+                        <div onclick="window.location.href='course-room.html?id=${courseId}&roomId=${r.id}'" style="position: relative; z-index: 2; display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: ${isActive ? 'var(--primary-color)' : 'rgba(255,255,255,0.02)'}; border-radius: var(--radius-sm); cursor: pointer; transition: 0.3s; border: 1px solid ${isActive ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)'};">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${isActive ? 'rgba(255,255,255,0.2)' : 'rgba(16, 185, 129, 0.2)'}; color: ${isActive ? '#fff' : '#10B981'}; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                                ${idx + 1}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; font-size: 0.95rem;">${r.name}</div>
+                                <div style="font-size: 0.8rem; color: ${isActive ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)'}; margin-top: 0.2rem;"><i class="fas ${typeIcon}"></i> ${r.type === 'recorded' ? 'مسجل' : 'مباشر'}</div>
+                            </div>
+                            
+                            ${isInstructor ? `
+                            <div style="display: flex; gap: 0.5rem;" onclick="event.stopPropagation()">
+                                <button class="btn btn-icon" style="padding: 0.3rem; background: rgba(245, 158, 11, 0.2); color: var(--warning); border: none; font-size: 0.8rem;" onclick="openSyllabusModal('${r.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-icon" style="padding: 0.3rem; background: rgba(239, 68, 68, 0.2); color: var(--danger); border: none; font-size: 0.8rem;" onclick="deleteSyllabusRoom('${r.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        html += '</div>';
+        
+        if (isInstructor) {
+            html += `
+            <div style="padding: 1rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05);">
+                <button class="btn btn-primary" style="width: 100%; border-style: dashed; background: transparent; border-color: var(--primary-color); color: var(--primary-light);" onclick="openSyllabusModal()"><i class="fas fa-plus"></i> إضافة درس للقام</button>
+            </div>
+            `;
+        }
+
+        sidebarContainer.innerHTML = html;
+    };
+
+    window.openSyllabusModal = function(roomId = null) {
+        document.getElementById('syllabus-room-modal').style.display = 'flex';
+        
+        if (roomId) {
+            document.getElementById('syllabus-modal-title').innerText = 'تعديل الدرس';
+            const room = window.currentCourseRooms.find(r => r.id === roomId);
+            if(room) {
+                document.getElementById('syl-room-id').value = room.id;
+                document.getElementById('syl-room-name').value = room.name;
+                document.getElementById('syl-room-type').value = room.type || 'live';
+                document.getElementById('syl-room-video-url').value = room.videoUrl || '';
+                document.getElementById('syl-room-sources').value = room.sources || '';
+                document.getElementById('syl-video-container').style.display = (room.type === 'recorded') ? 'block' : 'none';
+            }
+        } else {
+            document.getElementById('syllabus-modal-title').innerText = 'إضافة درس جديد';
+            document.getElementById('syl-room-id').value = '';
+            document.getElementById('syl-room-name').value = '';
+            document.getElementById('syl-room-type').value = 'live';
+            document.getElementById('syl-room-video-url').value = '';
+            document.getElementById('syl-room-sources').value = '';
+            document.getElementById('syl-video-container').style.display = 'none';
+        }
+    };
+
+    window.closeSyllabusModal = function() {
+        document.getElementById('syllabus-room-modal').style.display = 'none';
+    };
+
+    window.saveSyllabusRoom = async function() {
+        const id = document.getElementById('syl-room-id').value;
+        const name = document.getElementById('syl-room-name').value.trim();
+        const type = document.getElementById('syl-room-type').value;
+        const videoUrl = document.getElementById('syl-room-video-url').value.trim();
+        const sources = document.getElementById('syl-room-sources').value.trim();
+
+        if (!name) return alert("الرجاء كتابة اسم الدرس");
+        if (type === 'recorded' && !videoUrl) return alert("الرجاء وضع رابط الفيديو");
+
+        const courseId = window.currentCourseId;
+        if (!courseId) return;
+
+        try {
+            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const doc = await courseRef.get();
+            let rooms = doc.data().rooms || [];
+
+            if (id) {
+                const idx = rooms.findIndex(r => r.id === id);
+                if (idx > -1) {
+                    rooms[idx].name = name;
+                    rooms[idx].type = type;
+                    rooms[idx].videoUrl = videoUrl;
+                    rooms[idx].sources = sources;
+                }
+            } else {
+                rooms.push({
+                    id: Date.now().toString(),
+                    name, type, videoUrl, sources,
+                    startTime: '',
+                    instructorName: window.currentUser ? window.currentUser.name || window.currentUser.username : ''
+                });
+            }
+
+            await courseRef.update({ rooms });
+            window.currentCourseRooms = rooms;
+            renderSyllabusUI();
+            closeSyllabusModal();
+            alert("تم الحفظ بنجاح!");
+            
+            // If we just added the very first room, reload page to load it
+            if (!id && rooms.length === 1) {
+                window.location.reload();
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert("حدث خطأ أثناء الحفظ");
+        }
+    };
+
+    window.deleteSyllabusRoom = async function(roomId) {
+        if (!confirm("هل أنت متأكد من حذف هذا الدرس؟ سيتم فقدان كل محتوياته!")) return;
+        
+        const courseId = window.currentCourseId;
+        try {
+            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const doc = await courseRef.get();
+            let rooms = doc.data().rooms || [];
+            rooms = rooms.filter(r => r.id !== roomId);
+            
+            await courseRef.update({ rooms });
+            window.currentCourseRooms = rooms;
+            renderSyllabusUI();
+            
+            if (window.currentRoomId === roomId) {
+                window.location.href = `course-room.html?id=${courseId}`;
+            }
+        } catch(e) {
+            console.error(e);
+            alert("حدث خطأ أثناء الحذف");
+        }
+    };
+
+    // Instructor Profile Updater
+    window.updateInstructorProfile = async function() {
+        const courseId = window.currentCourseId;
+        if (!courseId) return;
+
+        const imgUrl = document.getElementById('prof-img-url').value.trim();
+        const name = document.getElementById('prof-name').value.trim();
+        const spec = document.getElementById('prof-spec').value.trim();
+        const bio = document.getElementById('prof-bio').value.trim();
+        const cvUrl = document.getElementById('prof-cv-url').value.trim();
+
+        if (!name || !spec) return alert("الاسم والتخصص مطلوبان!");
+
+        try {
+            await firebase.firestore().collection('courses').doc(courseId).update({
+                instructor: {
+                    name,
+                    specialty: spec,
+                    bio,
+                    image: imgUrl || 'assets/images/default-avatar.png',
+                    cvUrl: cvUrl || ''
+                }
+            });
+            alert("تم تحديث بياناتك بنجاح! سيراها الطلاب عند الدخول.");
+            
+            // Update the display for the instructor themselves
+            updateInstructorDisplay({name, specialty: spec, bio, image: imgUrl, cvUrl});
+        } catch(e) {
+            console.error(e);
+            alert("حدث خطأ أثناء حفظ البيانات");
+        }
+    };
+
+    function updateInstructorDisplay(instructor) {
+        const instSection = document.getElementById('tab-overview');
+        if(!instSection) return;
+        
+        let instHtml = `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-chalkboard-teacher"></i> مقدم الدورة</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <img src="${instructor.image || 'assets/images/default-avatar.png'}" alt="Instructor" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                    <div>
+                        <h4 style="font-size: 1.2rem; margin-bottom: 0.2rem;">${instructor.name || 'مدرب'}</h4>
+                        <p style="color: var(--primary-light); font-size: 0.9rem; margin-bottom: 0.5rem;">${instructor.specialty || 'تخصص غير محدد'}</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">${instructor.bio || ''}</p>
+                        ${instructor.cvUrl ? `<a href="${instructor.cvUrl}" target="_blank" style="color: #60A5FA; font-size: 0.85rem; text-decoration: none;"><i class="fas fa-external-link-alt"></i> مصدر المهارات</a>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Find existing instructor div and replace, or append
+        const existingInst = instSection.querySelector('.instructor-info');
+        if (existingInst) {
+            existingInst.innerHTML = instHtml;
+        } else {
+            const div = document.createElement('div');
+            div.className = 'instructor-info';
+            div.innerHTML = instHtml;
+            instSection.appendChild(div);
+        }
+    }

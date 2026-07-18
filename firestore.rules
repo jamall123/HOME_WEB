@@ -1,8 +1,74 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    
+    // Custom Users Auth
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if false; // Only admin can create users
+    }
+    
+    // Credentials for courses
+    match /courses_credentials/{credId} {
+      allow read: if true;
+      allow write: if true; // Admin panel creates users
+    }
+
+    // Courses
+    match /courses/{courseId} {
+      allow read, write: if true; // Admin creates, Instructor updates
+      
+      // Nested connected_users
+      match /connected_users/{userId} {
+        allow read, write: if true; // Students need to add/remove themselves
+      }
+      
+      // Nested messages (Channel/Chat)
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+    }
+    
+    // Subscriptions
+    match /subscriptions/{subId} {
+      allow create: if true;
+      allow read, update, delete: if false; // Only admin processes these
+    }
+    
+    // Enrollment Requests
+    match /enrollmentRequests/{reqId} {
+      allow create: if true; // Students submit requests
+      allow read, update, delete: if true; // Admin panel needs full access
+    }
+
+    // Bank Accounts
+    match /bank_accounts/{bankId} {
       allow read, write: if true;
+    }
+    
+    // Posts (Blog)
+    match /posts/{postId} {
+      allow read, write: if true;
+    }
+    
+    // Success Stories
+    match /successStories/{storyId} {
+      allow read, write: if true;
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow read, write: if true;
+    }
+
+    // Settings
+    match /settings/{docId} {
+      allow read, write: if true;
+    }
+    
+    // Default Fallback (Block everything else)
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
