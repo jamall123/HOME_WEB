@@ -2,6 +2,9 @@ import { CMSService } from './CMSService.js';
 import { AdminUI } from './AdminUI.js';
 import { Logger } from './Logger.js';
 
+import { CMSManager } from './CMSManager.js';
+import { MediaManager } from './MediaManager.js';
+
 class AdminControllerClass {
     constructor() {
         this.service = CMSService;
@@ -17,6 +20,50 @@ class AdminControllerClass {
         window.showStoryModal = this.showStoryModal.bind(this);
         window.showProjectModal = this.showProjectModal.bind(this);
         window.closeCMSModal = this.ui.closeModal.bind(this.ui);
+        
+        // Show request details modal
+        window.showRequestDetailsModal = (btnElement) => {
+            try {
+                const reqData = JSON.parse(btnElement.getAttribute('data-req'));
+                const contentDiv = document.getElementById('request-details-content');
+                contentDiv.innerHTML = `
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                        <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-book-open" style="margin-left: 5px;"></i> الدورة المطلوبة:</p>
+                        <strong style="color: var(--primary-light); font-size: 1.1rem;">${reqData.courseTitle}</strong>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-user" style="margin-left: 5px;"></i> الطالب:</p>
+                            <strong>${reqData.name}</strong><br>
+                            <span dir="ltr">${reqData.phone}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-map-marker-alt" style="margin-left: 5px;"></i> الموقع (المدينة):</p>
+                            <strong>${reqData.city}</strong>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                        <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-graduation-cap" style="margin-left: 5px;"></i> المستوى التعليمي:</p>
+                        <strong>${reqData.education}</strong>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                        <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-comment-dots" style="margin-left: 5px;"></i> سبب الانضمام / الهدف:</p>
+                        <p style="margin: 0; line-height: 1.5;">${reqData.reason}</p>
+                    </div>
+                    ${reqData.receipt ? `
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; text-align: center;">
+                        <p style="margin-bottom: 0.5rem; color: var(--text-secondary);"><i class="fas fa-receipt" style="margin-left: 5px;"></i> الإيصال المرفق:</p>
+                        ${reqData.receipt.toLowerCase().includes('.pdf') ? 
+                          `<a href="${reqData.receipt}" target="_blank" class="btn btn-primary" style="display:inline-block; margin-top:0.5rem;"><i class="fas fa-file-pdf"></i> عرض ملف الـ PDF</a>` :
+                          `<a href="${reqData.receipt}" target="_blank"><img src="${reqData.receipt}" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain; cursor: zoom-in;" alt="الإيصال"></a>`
+                        }
+                    </div>` : ''}
+                `;
+                document.getElementById('request-details-modal').style.display = 'flex';
+            } catch (e) {
+                console.error("Error showing details", e);
+            }
+        };
 
         // Map global edit/delete for CMS items that use string interpolation in onclick
         window.editCourse = this.editCourse.bind(this);
@@ -31,8 +78,12 @@ class AdminControllerClass {
         window.markMessageRead = this.markMessageRead.bind(this);
         window.deleteContactMessage = this.deleteContactMessage.bind(this);
         
+        // Init Enterprise Managers
+        CMSManager.init();
+        MediaManager.init();
+
         // Initial Tab setup
-        this.switchAdminTab('payments');
+        this.switchAdminTab('dashboard');
 
         // Form Submit Listeners
         this.attachFormListeners();
@@ -43,7 +94,12 @@ class AdminControllerClass {
 
     async switchAdminTab(tabName) {
         this.ui.switchTab(tabName);
-        if (tabName === 'payments') {
+        if (tabName === 'dashboard') {
+            await this.loadDashboardWidgets();
+        } else if (tabName === 'medialibrary') {
+            // MediaManager handles this automatically, but we can force refresh
+            MediaManager.loadGallery();
+        } else if (tabName === 'payments') {
             await this.loadBankAccounts();
         } else if (tabName === 'users') {
             await this.loadUsers();
@@ -58,7 +114,25 @@ class AdminControllerClass {
         } else if (tabName === 'messages') {
             await this.loadMessages();
         } else if (tabName === 'settings') {
-            await this.loadSettings();
+            // CMSManager is already active, but we can reload if needed
+            CMSManager.loadSettings();
+        }
+    }
+
+    async loadDashboardWidgets() {
+        try {
+            // Fast count query without pulling data (Firestore V9 feature count() is not used here due to compat, fallback to length)
+            const users = await this.service.getUsers();
+            const requests = await this.service.getEnrollmentRequests();
+            
+            document.getElementById('dash-users-count').innerText = users.length;
+            document.getElementById('dash-requests-count').innerText = requests.filter(r => r.status === 'pending').length;
+            
+            // Dummy for media and sales since we don't have aggregated fields yet
+            document.getElementById('dash-media-count').innerText = document.getElementById('media-gallery')?.children?.length || 0;
+            document.getElementById('dash-sales-count').innerText = requests.filter(r => r.status === 'approved').length * 20000; 
+        } catch(e) {
+            console.error('[AdminController] Dashboard load error', e);
         }
     }
 
@@ -441,28 +515,6 @@ class AdminControllerClass {
             });
         }
 
-        const settingsForm = document.getElementById('cms-settings-form');
-        if (settingsForm) {
-            settingsForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                try {
-                    const btn = e.target.querySelector('button[type="submit"]');
-                    const oldText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
-                    await this.service.saveSettings({
-                        heroText: document.getElementById('settings-hero').value,
-                        vision: document.getElementById('settings-vision').value,
-                        mission: document.getElementById('settings-mission').value,
-                        values: document.getElementById('settings-values').value,
-                        founderName: document.getElementById('settings-founder-name').value,
-                        founderBio1: document.getElementById('settings-founder-bio1').value,
-                        founderBio2: document.getElementById('settings-founder-bio2').value
-                    });
-                    btn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ';
-                    setTimeout(() => btn.innerHTML = oldText, 2000);
-                } catch (err) { alert('خطأ في الحفظ'); }
-            });
-        }
     }
 }
 

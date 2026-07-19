@@ -36,7 +36,7 @@ class AdminUIClass {
     }
 
     switchTab(tabName) {
-        const sections = ['payments', 'users', 'requests', 'courses', 'media', 'projects', 'messages', 'settings'];
+        const sections = ['dashboard', 'medialibrary', 'payments', 'users', 'requests', 'courses', 'media', 'projects', 'messages', 'settings'];
         const pageTitle = document.getElementById('admin-page-title');
         const pageSubtitle = document.getElementById('admin-page-subtitle');
 
@@ -54,14 +54,16 @@ class AdminUIClass {
         if (activeNav) activeNav.classList.add('active');
 
         const titles = {
+            'dashboard': { t: 'نظرة عامة (الرئيسية)', s: 'مراقبة الإحصائيات العامة وأداء الموقع' },
+            'medialibrary': { t: 'مكتبة الوسائط', s: 'إدارة الصور والملفات المرفوعة على المنصة' },
             'payments': { t: 'إدارة حسابات الدفع', s: 'تحكم في الحسابات البنكية التي تظهر للطلاب في شاشة الدفع' },
             'users': { t: 'إدارة المستخدمين', s: 'إنشاء وإدارة صلاحيات دخول المستخدمين للدورات المدفوعة' },
             'requests': { t: 'طلبات التسجيل', s: 'مراجعة طلبات التسجيل وإيصالات الدفع' },
             'courses': { t: 'إدارة الأكاديمية', s: 'إضافة وتعديل وحذف الدورات التعليمية' },
-            'media': { t: 'المركز الإعلامي', s: 'إدارة المقالات التقنية وقصص النجاح' },
+            'media': { t: 'إدارة المحتوى (المقالات)', s: 'إدارة المقالات التقنية وقصص النجاح' },
             'projects': { t: 'إدارة المنتجات', s: 'التحكم في عرض المنتجات والمشاريع وحالتها' },
             'messages': { t: 'رسائل التواصل', s: 'الرسائل الواردة من صفحة تواصل معنا' },
-            'settings': { t: 'إعدادات الموقع', s: 'التحكم في بيانات الشركة ونصوص الصفحة الرئيسية' }
+            'settings': { t: 'CMS و إعدادات النظام', s: 'التحكم في بيانات الشركة ونصوص الصفحة الرئيسية' }
         };
 
         if (pageTitle && titles[tabName]) pageTitle.textContent = titles[tabName].t;
@@ -150,17 +152,39 @@ class AdminUIClass {
 
         const fragment = document.createDocumentFragment();
         requests.forEach(req => {
-            const displayName = req.studentName || req.fullName || '-';
+            const displayName = req.studentName || req.fullName || (req.student && req.student.name) || '-';
+            const phone = req.phone || (req.student && req.student.phone) || '-';
             const statusBadge = req.status === 'pending' ? 
                 '<span style="background: var(--warning); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">قيد الانتظار</span>' :
                 '<span style="background: var(--primary-color); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">مكتمل</span>';
 
+            // Extract additional data if nested in `student` object (new format)
+            const studentObj = req.student || {};
+            const city = studentObj.city || '-';
+            const education = studentObj.education || '-';
+            const reason = studentObj.reason || '-';
+            const receipt = req.receiptUrl || (req.payment && req.payment.receiptUrl) || '';
+
+            const reqJson = this.escapeHtml(JSON.stringify({
+                courseTitle: req.courseTitle || '-',
+                name: displayName,
+                phone: phone,
+                city: city,
+                education: education,
+                reason: reason,
+                receipt: receipt
+            }));
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${this.escapeHtml(displayName)}</td>
-                <td dir="ltr" style="text-align: right;">${this.escapeHtml(req.phone || '-')}</td>
-                <td>${this.escapeHtml(req.courseTitle || '-')}</td>
-                <td><a href="${this.escapeHtml(req.receiptUrl)}" target="_blank" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fas fa-eye"></i> عرض</a></td>
+                <td dir="ltr" style="text-align: right;">${this.escapeHtml(phone)}</td>
+                <td><span style="font-weight: 500; color: var(--primary-light);">${this.escapeHtml(req.courseTitle || '-')}</span></td>
+                <td>
+                    <button class="btn btn-secondary" onclick="showRequestDetailsModal(this)" data-req="${reqJson}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                        <i class="fas fa-list-alt"></i> التفاصيل
+                    </button>
+                </td>
                 <td>${statusBadge}</td>
                 <td>
                     ${req.status === 'pending' ? `<button class="action-btn" style="color: var(--primary-color);" data-action="approve-req" data-id="${req.id}" data-name="${this.escapeHtml(displayName)}" data-course="${this.escapeHtml(req.courseId || '')}" title="موافقة وإنشاء حساب"><i class="fas fa-check-circle"></i></button>` : ''}

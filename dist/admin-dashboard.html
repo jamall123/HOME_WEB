@@ -26,9 +26,11 @@
         .action-btn { background: none; border: none; color: #ff4757; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
         .action-btn:hover { color: #ff6b81; }
     </style>
-  <script type="module" crossorigin src="/assets/admin-DIWX1lKv.js"></script>
+  <script type="module" crossorigin src="/assets/admin-BrglVwNp.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-teItJWtm.js">
   <link rel="modulepreload" crossorigin href="/assets/Logger-D7Tvbo4W.js">
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
+  <link rel="modulepreload" crossorigin href="/assets/OfflineSyncEngine-efxVWGeP.js">
   <link rel="stylesheet" crossorigin href="/assets/firebase-config-gkO_wF-V.css">
 </head>
 <body>
@@ -37,14 +39,16 @@
         <aside class="admin-sidebar">
             <h2>Jhome Admin</h2>
             <nav class="admin-nav">
-                <a href="#" id="nav-payments" class="active" onclick="switchAdminTab('payments')"><i class="fas fa-university"></i> حسابات الدفع</a>
+                <a href="#" id="nav-dashboard" class="active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> نظرة عامة (الرئيسية)</a>
+                <a href="#" id="nav-medialibrary" onclick="switchAdminTab('medialibrary')"><i class="fas fa-images"></i> مكتبة الوسائط</a>
+                <a href="#" id="nav-payments" onclick="switchAdminTab('payments')"><i class="fas fa-university"></i> حسابات الدفع</a>
                 <a href="#" id="nav-users" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> إدارة المستخدمين</a>
                 <a href="#" id="nav-requests" onclick="switchAdminTab('requests')"><i class="fas fa-file-invoice"></i> طلبات التسجيل</a>
                 <a href="#" id="nav-courses" onclick="switchAdminTab('courses')"><i class="fas fa-graduation-cap"></i> إدارة الأكاديمية</a>
-                <a href="#" id="nav-media" onclick="switchAdminTab('media')"><i class="fas fa-bullhorn"></i> المركز الإعلامي</a>
+                <a href="#" id="nav-media" onclick="switchAdminTab('media')"><i class="fas fa-pen-nib"></i> إدارة المحتوى (المقالات)</a>
                 <a href="#" id="nav-projects" onclick="switchAdminTab('projects')"><i class="fas fa-project-diagram"></i> إدارة المنتجات</a>
                 <a href="#" id="nav-messages" onclick="switchAdminTab('messages')"><i class="fas fa-envelope"></i> رسائل التواصل</a>
-                <a href="#" id="nav-settings" onclick="switchAdminTab('settings')"><i class="fas fa-cog"></i> إعدادات الموقع</a>
+                <a href="#" id="nav-settings" onclick="switchAdminTab('settings')"><i class="fas fa-cogs"></i> CMS و إعدادات النظام</a>
                 <a href="index.html" style="margin-top: auto;"><i class="fas fa-home"></i> العودة للموقع</a>
             </nav>
         </aside>
@@ -56,8 +60,60 @@
                 <p class="text-muted" id="admin-page-subtitle">تحكم في الحسابات البنكية التي تظهر للطلاب في شاشة الدفع</p>
             </header>
 
-            <!-- Tab: Payment Accounts (Active by default) -->
-            <div id="section-payments" class="admin-section active">
+            <!-- Tab: Dashboard Overview -->
+            <div id="section-dashboard" class="admin-section active">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="admin-card" style="margin-bottom: 0; text-align: center;">
+                        <i class="fas fa-users fa-2x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">إجمالي المستخدمين</h3>
+                        <p class="display-3" id="dash-users-count">--</p>
+                    </div>
+                    <div class="admin-card" style="margin-bottom: 0; text-align: center;">
+                        <i class="fas fa-file-invoice fa-2x" style="color: var(--warning); margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">طلبات معلقة</h3>
+                        <p class="display-3" id="dash-requests-count">--</p>
+                    </div>
+                    <div class="admin-card" style="margin-bottom: 0; text-align: center;">
+                        <i class="fas fa-images fa-2x" style="color: var(--success); margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">ملفات الوسائط</h3>
+                        <p class="display-3" id="dash-media-count">--</p>
+                    </div>
+                    <div class="admin-card" style="margin-bottom: 0; text-align: center;">
+                        <i class="fas fa-wallet fa-2x" style="color: #ff4757; margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 0.5rem;">مبيعات (تقريبي)</h3>
+                        <p class="display-3" id="dash-sales-count">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Media Library -->
+            <div id="section-medialibrary" class="admin-section" style="display: none;">
+                <div class="admin-card" style="border: 2px dashed rgba(255,255,255,0.2); text-align: center; padding: 3rem;">
+                    <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <h3>ارفع ملفات جديدة</h3>
+                    <p class="text-muted" style="margin-bottom: 1.5rem;">اسحب وأفلت الصور هنا، أو اضغط لاختيار ملف (يتم ضغط الصور تلقائياً قبل الرفع)</p>
+                    <input type="file" id="media-upload-input" accept="image/*, application/pdf" multiple style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('media-upload-input').click()"><i class="fas fa-folder-open"></i> تصفح الملفات</button>
+                    <div id="media-upload-progress" style="margin-top: 1rem; color: var(--primary-color);"></div>
+                </div>
+
+                <div class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>مكتبة الملفات</h3>
+                        <select id="media-filter" class="form-input" style="width: auto;">
+                            <option value="all">كل الملفات</option>
+                            <option value="images">صور</option>
+                            <option value="documents">مستندات (PDF)</option>
+                        </select>
+                    </div>
+                    <div id="media-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Payment Accounts -->
+            <div id="section-payments" class="admin-section" style="display: none;">
                 <div class="admin-card">
                     <h3>إضافة حساب بنكي جديد</h3>
                     <form id="add-bank-form" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end; margin-top: 1.5rem;">
@@ -378,6 +434,24 @@
                     <button type="button" class="btn btn-secondary" onclick="closeCMSModal('cms-story-modal')" style="flex: 1;">إلغاء</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Request Details Modal -->
+    <div id="request-details-modal" class="modal-overlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: var(--bg-surface); padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                <h3 style="margin: 0;">تفاصيل طلب الانضمام</h3>
+                <button onclick="closeCMSModal('request-details-modal')" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="request-details-content" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Populated by JS -->
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <button type="button" class="btn btn-secondary" onclick="closeCMSModal('request-details-modal')" style="width: 100%;">إغلاق</button>
+            </div>
         </div>
     </div>
 

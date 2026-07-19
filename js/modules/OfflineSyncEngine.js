@@ -55,9 +55,23 @@ export class OfflineSyncEngineClass {
                     // Clear successful syncs
                     await OfflineQueueDb.delete('metadata_sync', op.syncId);
                 } catch (err) {
-                    console.error('[OfflineSyncEngine] Operation rejected by server. Removing to prevent queue lock:', op.syncId, err);
-                    // Discard bad ops (like schema validation failures) to prevent infinite loop
-                    await OfflineQueueDb.delete('metadata_sync', op.syncId);
+                    console.error('[OfflineSyncEngine] Operation rejected by server:', op.syncId, err);
+                    
+                    // Increment retry count
+                    op.retryCount = (op.retryCount || 0) + 1;
+                    
+                    if (op.retryCount >= 3) {
+                        console.warn('[OfflineSyncEngine] Max retries reached. Moving to DLQ:', op.syncId);
+                        // Move to Dead Letter Queue
+                        op.errorReason = err.message || 'Unknown error';
+                        op.dlqTimestamp = Date.now();
+                        await OfflineQueueDb.put('offline_dlq', op);
+                        // Remove from active queue
+                        await OfflineQueueDb.delete('metadata_sync', op.syncId);
+                    } else {
+                        // Update the operation with new retry count
+                        await OfflineQueueDb.put('metadata_sync', op);
+                    }
                 }
             }
             // console.log('[OfflineSyncEngine] Sync processing completed.');

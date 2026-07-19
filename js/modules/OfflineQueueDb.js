@@ -6,7 +6,7 @@
 export class OfflineQueueDbClass {
     constructor() {
         this.dbName = 'JhomeOfflineDB';
-        this.dbVersion = 2; // Bump version for analytics cache
+        this.dbVersion = 3; // Bump version for DLQ
         this.db = null;
     }
 
@@ -27,6 +27,9 @@ export class OfflineQueueDbClass {
                 }
                 if (!db.objectStoreNames.contains('analytics_cache')) {
                     db.createObjectStore('analytics_cache', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('offline_dlq')) {
+                    db.createObjectStore('offline_dlq', { keyPath: 'syncId' });
                 }
             };
 
