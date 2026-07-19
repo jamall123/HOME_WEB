@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/blog-BDPj1HjV.js"></script>
+  <script type="module" crossorigin src="/assets/blog-lWqj0mpi.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-teItJWtm.js">
   <link rel="modulepreload" crossorigin href="/assets/ThemeManager-Cejr84z9.js">
   <link rel="modulepreload" crossorigin href="/assets/Logger-D7Tvbo4W.js">
@@ -68,17 +68,17 @@
             <p class="body-large">مقالات تقنية وقصص نجاح من رحلتنا مع عملائنا.</p>
         </div>
 
-        <!-- Filter Tabs -->
+    <!-- Filter Tabs -->
         <div id="blog-filters" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
-            <button class="blog-filter-btn active" data-filter="all" onclick="filterBlog('all')"
+            <button class="blog-filter-btn active" data-filter="all"
                 style="padding:10px 24px;border-radius:50px;border:2px solid var(--primary-color);background:var(--primary-color);color:#fff;font-family:var(--font-ar);font-size:0.95rem;cursor:pointer;transition:all 0.3s;">
                 الكل
             </button>
-            <button class="blog-filter-btn" data-filter="post" onclick="filterBlog('post')"
+            <button class="blog-filter-btn" data-filter="post"
                 style="padding:10px 24px;border-radius:50px;border:2px solid var(--primary-color);background:transparent;color:var(--primary-color);font-family:var(--font-ar);font-size:0.95rem;cursor:pointer;transition:all 0.3s;">
                 المقالات
             </button>
-            <button class="blog-filter-btn" data-filter="story" onclick="filterBlog('story')"
+            <button class="blog-filter-btn" data-filter="story"
                 style="padding:10px 24px;border-radius:50px;border:2px solid var(--primary-color);background:transparent;color:var(--primary-color);font-family:var(--font-ar);font-size:0.95rem;cursor:pointer;transition:all 0.3s;">
                 قصص النجاح
             </button>
@@ -113,17 +113,5 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        function filterBlog(type) {
-            document.querySelectorAll('.blog-filter-btn').forEach(btn => {
-                const isActive = btn.dataset.filter === type;
-                btn.style.background = isActive ? 'var(--primary-color)' : 'transparent';
-                btn.style.color = isActive ? '#fff' : 'var(--primary-color)';
-            });
-            document.querySelectorAll('#media-grid [data-card-type]').forEach(card => {
-                card.style.display = (type === 'all' || card.dataset.cardType === type) ? '' : 'none';
-            });
-        }
-    </script>
 </body>
 </html>
