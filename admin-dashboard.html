@@ -21,11 +21,31 @@
         .admin-main { flex: 1; padding: 2rem; overflow-y: auto; }
         .admin-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        th { color: var(--primary-color); }
-        .action-btn { background: none; border: none; color: #ff4757; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
-        .action-btn:hover { color: #ff6b81; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 1rem; }
+        thead th { padding: 1rem 1.5rem; text-align: right; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; border-bottom: none; }
+        tbody tr { background: rgba(255,255,255,0.03); border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        tbody tr:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,255,204,0.1); background: rgba(255,255,255,0.06); }
+        td { padding: 1.2rem 1.5rem; text-align: right; border-bottom: none; }
+        td:first-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+        td:last-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        
+        .action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 0.5rem 0.8rem; color: var(--text-light); cursor: pointer; font-size: 1rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .action-btn:hover { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
+        .action-btn.delete { color: #ff4757; }
+        .action-btn.delete:hover { background: #ff4757; color: #fff; border-color: #ff4757; }
+        
+        .badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-success { background: rgba(0, 255, 204, 0.1); color: var(--primary-color); border: 1px solid rgba(0, 255, 204, 0.2); }
+        .badge-warning { background: rgba(255, 171, 0, 0.1); color: var(--warning); border: 1px solid rgba(255, 171, 0, 0.2); }
+        .badge-danger { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.2); }
+
+        /* Toast Notifications */
+        #toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #1e272e; color: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; font-weight: 600; transform: translateX(-150%); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); min-width: 250px; border-left: 4px solid var(--primary-color); }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.error { border-left-color: #ff4757; }
+        .toast.success { border-left-color: var(--primary-color); }
+
     </style>
 </head>
 <body>
@@ -485,6 +505,9 @@
             </form>
         </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>

@@ -17,9 +17,30 @@ class AdminUIClass {
         if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center;">${this.escapeHtml(message)}</td></tr>`;
     }
 
-    setTableError(tbodyId, colspan) {
+    setTableError(tbodyId, colspan, errorMsg = 'فشل التحميل') {
         const tbody = document.getElementById(tbodyId);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: red;">فصل التحميل</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: #ff4757;">${this.escapeHtml(errorMsg)}</td></tr>`;
+        this.showToast(errorMsg, 'error');
+    }
+
+    showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icon = type === 'success' ? '<i class="fas fa-check-circle" style="color: var(--primary-color);"></i>' : '<i class="fas fa-exclamation-circle" style="color: #ff4757;"></i>';
+        
+        toast.innerHTML = `${icon} <span>${this.escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        
+        // Trigger reflow for animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
     }
 
     closeModal(modalId) {
