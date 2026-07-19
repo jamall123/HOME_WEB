@@ -49,6 +49,11 @@ class ContactControllerClass {
             this.showToast('يرجى تعبئة جميع الحقول المطلوبة', 'error');
             return;
         }
+        
+        if (name.length > 100 || email.length > 150 || subject.length > 200 || message.length > 2000) {
+            this.showToast('عذراً، محتوى الرسالة أو البيانات المدخلة تتجاوز الحد المسموح.', 'error');
+            return;
+        }
 
         if (btn) {
             btn.disabled = true;

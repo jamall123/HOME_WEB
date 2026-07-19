@@ -11,8 +11,14 @@ service firebase.storage {
     }
 
     // Receipts: Anyone can upload (enrollment request), Admin can read
-    match /receipts/{fileName} {
-      allow create: if true;
+    match /receipts/{allPaths=**} {
+      function isReceiptType() {
+        return request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('application/pdf');
+      }
+      function isValidReceiptSize() {
+        return request.resource.size <= 5 * 1024 * 1024; // Max 5MB
+      }
+      allow create: if isReceiptType() && isValidReceiptSize();
       allow read: if isAdmin();
       allow update, delete: if isAdmin();
     }

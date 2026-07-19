@@ -42,26 +42,25 @@ export class OfflineSyncEngineClass {
             // console.log(`[OfflineSyncEngine] Syncing ${pendingOps.length} pending operations...`);
             
             const db = firebase.firestore();
-            const batch = db.batch();
-
             for (const op of pendingOps) {
                 const docRef = db.collection(op.collection).doc(op.docId);
-                if (op.action === 'set') {
-                    batch.set(docRef, op.data, { merge: true });
-                } else if (op.action === 'update') {
-                    batch.update(docRef, op.data);
-                } else if (op.action === 'delete') {
-                    batch.delete(docRef);
+                try {
+                    if (op.action === 'set') {
+                        await docRef.set(op.data, { merge: true });
+                    } else if (op.action === 'update') {
+                        await docRef.update(op.data);
+                    } else if (op.action === 'delete') {
+                        await docRef.delete();
+                    }
+                    // Clear successful syncs
+                    await OfflineQueueDb.delete('metadata_sync', op.syncId);
+                } catch (err) {
+                    console.error('[OfflineSyncEngine] Operation rejected by server. Removing to prevent queue lock:', op.syncId, err);
+                    // Discard bad ops (like schema validation failures) to prevent infinite loop
+                    await OfflineQueueDb.delete('metadata_sync', op.syncId);
                 }
             }
-
-            await batch.commit();
-
-            // Clear successful syncs
-            for (const op of pendingOps) {
-                await OfflineQueueDb.delete('metadata_sync', op.syncId);
-            }
-            // console.log('[OfflineSyncEngine] Sync completed successfully.');
+            // console.log('[OfflineSyncEngine] Sync processing completed.');
         } catch (error) {
             console.error('[OfflineSyncEngine] Sync failed:', error);
         }
