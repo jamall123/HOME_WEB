@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غرفة الدورة | Jhome Academy</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/academy.css?v=1">
+</head>
+<body style="overflow: hidden;"> <!-- Prevent global scrolling in the room layout -->
+
+    <!-- Room Entry Gate (Bouncer) -->
+    <div id="room-entry-gate" class="modal-overlay active" style="background: var(--bg-dark); z-index: 99999;">
+        <div class="modal-content glass-panel" style="max-width: 500px; text-align: center; padding: 3rem 2rem;">
+            <div style="margin-bottom: 2rem;">
+                <i class="fas fa-door-open" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة</h2>
+                <p class="text-muted">الرجاء تسجيل الدخول لدخول الغرفة.</p>
+            </div>
+            
+            <!-- Unified Form for All Courses (Powered by ES Modules) -->
+            <div id="unified-entry-form" style="display: block; text-align: right;">
+                <p class="text-muted" style="text-align: center; margin-bottom: 1.5rem;">يرجى إدخال البريد الإلكتروني وكلمة المرور الخاصة بك.</p>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="unified-email" class="form-input" dir="ltr" placeholder="مثال: student@jhome.com">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="unified-pass" class="form-input" dir="ltr">
+                </div>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="room-layout">
+        
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 90;" onclick="document.querySelector('.room-layout').classList.remove('sidebar-toggled')"></div>
+
+        <!-- 1. Sidebar: Curriculum -->
+        <aside class="room-sidebar">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between;">
+                <a href="courses.html" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">
+                    <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i> العودة للأكاديمية
+                </a>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 0.8rem; background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font-weight: bold;">طالب</span>
+                    <button class="btn btn-icon d-lg-none" style="padding: 0.3rem 0.6rem; font-size: 1rem; color: #fff; background: transparent; border: none; cursor: pointer;" onclick="document.querySelector('.room-layout').classList.remove('sidebar-toggled')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="room-sidebar-content" style="padding: 0;">
+                <!-- The room list will be populated here by loadCourseRoomData() -->
+            </div>
+        </aside>
+
+        <!-- 2. Main Content Area -->
+        <main class="room-main" style="overflow: hidden; position: relative;">
+            
+            <!-- Presentation Area (Modes: Video, Slides, Channel) -->
+            <div class="video-container" id="main-video-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; aspect-ratio: auto; overflow: hidden; background: #000; display: flex; flex-direction: column;">
+                
+                <!-- Mode 1 & 2: Video Player (Live or Link) -->
+                <div id="mode-video-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+                    <video id="live-video" controls playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                        <!-- No default src -->
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>
+
+                <!-- Mode 3: Slideshow Presentation -->
+                <div id="mode-slides-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background: #111; flex-direction: column; align-items: center; justify-content: center;">
+                    <img id="current-slide-img" src="" alt="Slide" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+
+                <!-- Mode 4: Telegram-Style Channel (Only Instructor Posts) -->
+                <div id="mode-channel-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; background: #0f172a; flex-direction: column; padding-bottom: 30vh;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 1rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="margin: 0; color: var(--primary-light);"><i class="fas fa-bullhorn"></i> قناة المحاضرة</h3>
+                        <span style="font-size: 0.8rem; color: #aaa;">منطقة مخصصة لشرح المدرب والتسجيلات الصوتية</span>
+                    </div>
+                    <div id="channel-messages" style="flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Instructor posts will appear here -->
+                    </div>
+                </div>
+
+                <!-- Fullscreen Toggle (Overlaid on top right) -->
+                <div style="position: absolute; top: 5rem; right: 1rem; z-index: 10;">
+                    <button id="fullscreen-btn" class="btn btn-secondary" style="background: rgba(0,0,0,0.6); padding: 0.5rem 1rem; border: none; color: white;">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <!-- Live Badge -->
+                <div style="position: absolute; top: 5rem; left: 1rem; background: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-en); font-size: 0.9rem; z-index: 10;">
+                    <span id="live-badge-text" style="color: red;">&bull;</span> <span id="live-badge-mode">OFFLINE</span>
+                </div>
+            </div>
+
+            <!-- Toggle Header (Floating over Video) -->
+            <div class="room-toggles" style="position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 1rem; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); border: none; align-items: center; z-index: 20; pointer-events: none;">
+                <button id="toggle-sidebar" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; pointer-events: auto;">
+                    <i class="fas fa-bars" style="margin-left: 0.5rem;"></i> المنهج
+                </button>
+                <button id="toggle-chat" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; pointer-events: auto;">
+                    الدردشة <i class="fas fa-comments" style="margin-right: 0.5rem;"></i>
+                </button>
+            </div>
+
+            <!-- Floating Buttons (Centered at Bottom) -->
+            <div style="position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 20;">
+                <button class="btn btn-secondary floating-tab-btn" data-target="tab-desc" style="border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">نظرة عامة</button>
+                <button class="btn btn-secondary floating-tab-btn" data-target="tab-resources" style="border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">الملحقات والموارد</button>
+                <button class="btn btn-primary floating-tab-btn" id="instructor-tab-btn" data-target="tab-instructor" style="display: none; border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);">أدوات المدرب</button>
+            </div>
+
+            <!-- Bottom Sheet Container (Mobile) -->
+            <div id="bottom-sheet" class="room-bottom-sheet" style="position: absolute; bottom: 0; transform: translateY(100%); left: 0; width: 100%; z-index: 30; background: var(--bg-surface); border-radius: 20px 20px 0 0; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);">
+                
+                <!-- Drag Handle / Close Button -->
+                <div id="close-bottom-sheet" class="sheet-header" style="padding: 1rem; display: flex; justify-content: center; cursor: grab; border-bottom: 1px solid rgba(255,255,255,0.05); touch-action: none;" onclick="closeBottomSheet()" aria-label="أغلق القائمة">
+                    <div style="width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px;"></div>
+                </div>
+
+                <!-- Tab Contents Wrapper (Scrollable) -->
+                <div style="overflow-y: auto; flex: 1; padding: 1.5rem; scrollbar-width: thin;">
+                    
+                    <!-- Tab Content: Description -->
+                    <div id="tab-desc" class="room-tab-content active" style="padding: 0; display: none;">
+                        <h2 id="room-title-display" style="font-size: 1.8rem; margin-bottom: 1rem;">جاري تحميل بيانات الدرس...</h2>
+                        <p id="room-desc-display" class="text-muted" style="line-height: 1.6; margin-bottom: 1.5rem;"></p>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img id="room-instructor-photo" src="assets/images/avatar.png" alt="Instructor" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <div id="room-instructor-name" style="font-weight: bold;">المدرب</div>
+                                <div id="room-instructor-specialty" style="font-size: 0.85rem; color: var(--text-secondary);"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Resources -->
+                    <div id="tab-resources" class="room-tab-content" style="padding: 0; display: none;">
+                        <h3 style="margin-bottom: 1.5rem;">الملفات المرفقة</h3>
+                        <div id="room-resources-list">
+                            <!-- Resources will load here -->
+                            <p style="color: var(--text-muted);">لا توجد ملفات مرفقة حالياً.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Instructor Tools -->
+                    <div id="tab-instructor" class="room-tab-content" style="padding: 0; display: none;">
+                        
+                        <!-- Profile Editor Section -->
+                        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                            <h3 style="color: #10B981; margin-bottom: 1rem;"><i class="fas fa-user-edit"></i> تحديث بياناتي كمدرب</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>صورتي (رابط أو رفع)</label>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <input type="text" id="prof-img-url" class="form-input" placeholder="رابط الصورة..." style="flex: 2;">
+                                        <input type="file" id="prof-img-file" class="form-input" accept="image/*" style="flex: 1;" onchange="uploadInstructorMedia(this, 'prof-img-url')">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>اسمي بالكامل</label>
+                                    <input type="text" id="prof-name" class="form-input" placeholder="مثال: أحمد محمد">
+                                </div>
+                                <div class="form-group">
+                                    <label>تخصصي</label>
+                                    <input type="text" id="prof-spec" class="form-input" placeholder="مثال: مبرمج ومصمم">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>نبذة عني</label>
+                                <textarea id="prof-bio" class="form-input" rows="2" placeholder="اكتب نبذة تعريفية قصيرة تظهر للطلاب..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>مصدر مهاراتي (رابط CV أو حسابي على LinkedIn أو غيره)</label>
+                                <input type="text" id="prof-cv-url" class="form-input" placeholder="https://..." dir="ltr">
+                            </div>
+                            <button class="btn btn-primary" onclick="updateInstructorProfile()"><i class="fas fa-save" style="margin-right: 8px;"></i> حفظ بياناتي</button>
+                        </div>
+
+                        <!-- Main Header & Mode Tabs -->
+                        <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--warning); margin-bottom: 1rem;"><i class="fas fa-shield-alt"></i> التحكم في البث والمحتوى</h3>
+                            
+                            <!-- Tabs for Modes -->
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                                <button class="btn inst-mode-btn active" style="flex: 1; min-width: 200px; justify-content: center; background: var(--primary-color);" onclick="changePresentationMode('video', this)">
+                                    <i class="fas fa-video" style="margin-left: 8px;"></i> كاميرا مباشرة
+                                </button>
+                                <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('link', this)">
+                                    <i class="fas fa-play-circle" style="margin-left: 8px;"></i> فيديو مسجل
+                                </button>
+                                <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('slides', this)">
+                                    <i class="fas fa-images" style="margin-left: 8px;"></i> شرائح + صوت
+                                </button>
+                                <button class="btn inst-mode-btn" style="flex: 1; min-width: 200px; justify-content: center; background: rgba(255,255,255,0.05);" onclick="changePresentationMode('channel', this)">
+                                    <i class="fas fa-chalkboard" style="margin-left: 8px;"></i> وضع القناة
+                                </button>
+                            </div>
+
+                            <!-- Mode Panels Wrapper -->
+                            <div style="background: rgba(11, 22, 44, 0.5); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                                <!-- Mode: Video Live -->
+                                <div id="inst-panel-video" class="mode-panel">
+                                    <h4 style="margin-bottom: 1rem; color: #E2E8F0;">بث الكاميرا والصوت مباشرة</h4>
+                                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                        <button id="start-live-btn" class="btn btn-primary" onclick="startLiveStream()">بدء البث المباشر (كاميرا)</button>
+                                        <button id="leave-live-btn" class="btn btn-secondary" onclick="leaveLiveStream()" style="display: none;">إنهاء البث</button>
+                                        <button class="btn btn-secondary">كتم صوت الطلاب</button>
+                                        <button class="btn btn-danger" onclick="archiveLecture()">إنهاء المحاضرة <i class="fas fa-save"></i></button>
+                                    </div>
+                                </div>
+
+                                <!-- Mode: Link -->
+                                <div id="inst-panel-link" class="mode-panel" style="display: none;">
+                                    <h4 style="margin-bottom: 1rem; color: #E2E8F0;">تشغيل فيديو مسجل</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                        <div class="form-group" style="margin: 0;">
+                                            <label>ارفع الفيديو مباشرة أو ضع رابط خارجي</label>
+                                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                                <input type="text" id="inst-video-link" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                                <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                                <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                                    <input type="file" id="inst-video-file" class="form-input" accept="video/mp4,video/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-video-link')">
+                                                    <span id="upload-status-inst-video-link" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-primary" onclick="setVideoLinkMode()">تشغيل للطلاب الآن <i class="fas fa-play" style="margin-right: 8px;"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mode: Slides -->
+                                <div id="inst-panel-slides" class="mode-panel" style="display: none;">
+                                    <h4 style="margin-bottom: 1rem; color: #E2E8F0;">عرض شريحة مع بث صوتي</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                        <div class="form-group" style="margin: 0;">
+                                            <label>ارفع صورة الشريحة أو ضع رابطها</label>
+                                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                                <input type="text" id="inst-slide-url" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                                <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                                <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                                    <input type="file" id="inst-slide-file" class="form-input" accept="image/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-slide-url')">
+                                                    <span id="upload-status-inst-slide-url" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 1rem;">
+                                            <button class="btn btn-primary" onclick="setSlideMode()">عرض الشريحة للطلاب <i class="fas fa-image" style="margin-right: 8px;"></i></button>
+                                            <button id="start-audio-btn" class="btn btn-secondary" onclick="startAudioOnlyStream()">بدء بث الصوت المباشر <i class="fas fa-microphone" style="margin-right: 8px;"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mode: Channel -->
+                                <div id="inst-panel-channel" class="mode-panel" style="display: none;">
+                                    <h4 style="margin-bottom: 1rem; color: #E2E8F0;">إرسال رسائل وصور لقناة الدرس</h4>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1.5rem;">
+                                        <div class="form-group" style="flex: 2; margin: 0;">
+                                            <label>رسالة / نص للقناة</label>
+                                            <input type="text" id="inst-channel-text" class="form-input" placeholder="اكتب رسالة للطلاب...">
+                                        </div>
+                                        <button class="btn btn-primary" onclick="sendChannelMessage('text')"><i class="fas fa-paper-plane"></i> إرسال النص</button>
+                                    </div>
+                                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.5rem;">
+                                    <div class="form-group" style="margin: 0;">
+                                        <label>ارفع صورة للقناة أو ضع رابطها</label>
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                                            <input type="text" id="inst-channel-img" class="form-input" dir="ltr" placeholder="رابط URL..." style="flex: 2; min-width: 200px;">
+                                            <span style="color: var(--text-muted); font-size: 0.9rem;">أو</span>
+                                            <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 0.5rem;">
+                                                <input type="file" id="inst-channel-file" class="form-input" accept="image/*" style="padding: 0.5rem; font-size: 0.85rem;" onchange="uploadInstructorMedia(this, 'inst-channel-img')">
+                                                <span id="upload-status-inst-channel-img" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> جاري الرفع...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 1rem;">
+                                        <button class="btn btn-secondary" onclick="sendChannelMessage('image')"><i class="fas fa-image" style="margin-right: 8px;"></i> إرسال الصورة للمجموعة</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Tools (Grid) -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+                            
+                            <!-- Connected Students -->
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                                <h4 style="margin-bottom: 1.5rem; color: #60A5FA; border-bottom: 1px solid rgba(96, 165, 250, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-users"></i> الطلاب المتصلين حالياً (<span id="connected-count">0</span>)</h4>
+                                <ul id="connected-students-list" style="list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; scrollbar-width: thin; display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <li style="color: var(--text-muted); font-size: 0.9rem;">جاري تحميل الأسماء...</li>
+                                </ul>
+                            </div>
+
+                            <!-- Resources Upload -->
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                                <h4 style="margin-bottom: 1.5rem; color: #10B981; border-bottom: 1px solid rgba(16, 185, 129, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-file-upload"></i> إضافة ملحقات (كتب، ملفات PDF، إلخ)</h4>
+                                <div class="form-group">
+                                    <label>اسم الملف (كما يظهر للطلاب)</label>
+                                    <input type="text" id="resource-name" class="form-input" placeholder="مثال: عرض تقديمي بصيغة PDF">
+                                </div>
+                                <div class="form-group">
+                                    <label>ارفع الملف مباشرة من جهازك (أو ضع رابط)</label>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px dashed rgba(16, 185, 129, 0.5);">
+                                            <input type="file" id="resource-file" class="form-input" style="flex: 1; padding: 0.5rem; border: none; background: transparent; font-size: 0.9rem;" onchange="uploadInstructorMedia(this, 'resource-url')">
+                                            <span id="upload-status-resource-url" style="color: #10B981; font-size: 0.8rem; display: none;"><i class="fas fa-spinner fa-spin"></i> رفع...</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="font-size: 0.8rem; color: var(--text-muted);">أو رابط خارجي:</span>
+                                            <input type="text" id="resource-url" class="form-input" dir="ltr" placeholder="https://..." style="flex: 1; font-size: 0.85rem; padding: 0.4rem;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="addResource()"><i class="fas fa-plus"></i> حفظ في الملحقات</button>
+                            </div>
+
+                            <!-- Scheduling -->
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: var(--radius-md);">
+                                <h4 style="margin-bottom: 1.5rem; color: #A5B4FC; border-bottom: 1px solid rgba(165, 180, 252, 0.2); padding-bottom: 0.5rem;"><i class="fas fa-calendar-alt"></i> جدولة المحاضرة القادمة</h4>
+                                <div class="form-group">
+                                    <label>عنوان المحاضرة</label>
+                                    <input type="text" id="schedule-title" class="form-input" placeholder="مثال: الدرس الثاني: مقدمة في لغة البرمجة">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="form-group">
+                                        <label>وقت البداية</label>
+                                        <input type="datetime-local" id="schedule-start" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>وقت النهاية</label>
+                                        <input type="datetime-local" id="schedule-end" class="form-input">
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" style="width: 100%; border-color: var(--primary-light); color: var(--primary-light); margin-top: 1rem;" onclick="scheduleLecture()"><i class="fas fa-bell" style="margin-right: 8px;"></i> حفظ وإشعار الطلاب</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End Bottom Sheet -->
+            <!-- Join Live Stream Button for Students (Overlaid on Video) -->
+            <div id="student-join-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; display: none;">
+                <button class="btn btn-primary" onclick="joinLiveStream()" style="font-size: 1.2rem; padding: 1rem 2rem;">
+                    <i class="fas fa-video"></i> الانضمام للبث المباشر الآن
+                </button>
+            </div>
+
+        </main>
+
+        <!-- 3. Chat / Q&A Panel -->
+        <aside class="room-chat">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <h3 style="font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                    النقاش الحي <span id="chat-connected-count" style="background: rgba(79, 70, 229, 0.2); color: var(--primary-light); font-size: 0.8rem; padding: 2px 8px; border-radius: 10px;">0 متصل</span>
+                </h3>
+            </div>
+            
+            <div id="chat-messages-container" style="flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Chat Messages will be loaded here via JS -->
+            </div>
+
+            <div style="padding: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                <form id="chat-form" style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-pill); padding: 0.5rem;">
+                    <input id="chat-input" type="text" placeholder="اكتب سؤالك هنا..." style="flex: 1; background: transparent; border: none; color: white; padding-right: 0.5rem; outline: none; font-family: var(--font-ar);" autocomplete="off" required>
+                    <button type="submit" id="send-chat-btn" style="background: var(--primary-color); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Syllabus/Room Management Modal (Instructor Only) -->
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script type="module" src="js/firebase-config.js"></script>
+    
+    <!-- Agora RTC SDK & Extensions -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.19.3.js"></script>
+    <script src="https://download.agora.io/sdk/release/agora-extension-ai-denoiser-1.0.1.js"></script>
+    
+    <!-- Removed legacy academy.js for v2 -->
+
+    <!-- New ES Modules Architecture (Phase 3 Integration) -->
+    <script type="module">
+        import { AuthService } from './js/modules/AuthService.js';
+        import { RoomEngine } from './js/modules/RoomEngine.js';
+        import { EventBus, Events } from './js/modules/EventBus.js';
+        import { CurriculumEngine } from './js/modules/CurriculumEngine.js';
+        import { ResourceEngine } from './js/modules/ResourceEngine.js';
+        import { ChatEngine } from './js/modules/ChatEngine.js';
+        import { AttendanceEngine } from './js/modules/AttendanceEngine.js';
+        import { GestureEngine } from './js/modules/GestureEngine.js';
+
+        // Auto-extract courseId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id');
+        
+        // Init isolated modules
+        CurriculumEngine.init(courseId);
+        ResourceEngine.init(courseId);
+        ChatEngine.init(courseId);
+        AttendanceEngine.init(courseId);
+        GestureEngine.init();
+
+        document.getElementById('login-submit-btn').addEventListener('click', async (e) => {
+            const email = document.getElementById('unified-email').value.trim();
+            const pass = document.getElementById('unified-pass').value.trim();
+            const btn = e.target;
+            
+            if(!email || !pass) {
+                alert('الرجاء إدخال البريد وكلمة المرور');
+                return;
+            }
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
+
+
+
+            try {
+                await AuthService.login(email, pass);
+                document.getElementById('room-entry-gate').classList.remove('active');
+                
+                // Initialize RoomEngine
+                RoomEngine.init(courseId);
+            } catch (err) {
+                console.error("Login failed:", err);
+                alert("بيانات الدخول غير صحيحة.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Global Bridges for legacy inline onclick attributes
+        window.changePresentationMode = (mode, btn) => EventBus.emit(Events.UI_CHANGE_MODE, {mode, btn});
+        window.startLiveStream = () => EventBus.emit(Events.UI_START_LIVE);
+        window.leaveLiveStream = () => EventBus.emit(Events.UI_STOP_LIVE);
+        window.sendChannelMessage = (type) => EventBus.emit(Events.UI_SEND_MESSAGE, {type});
+        
+        // Placeholder alerts for unmigrated functions to avoid breaking silently during V2 testing
+        window.updateInstructorProfile = () => alert("V2: Profile updates are moved to the Dashboard.");
+        window.archiveLecture = () => alert("V2: Lecture Archiving is handled by Cloud Functions now.");
+        // Bottom Sheet Logic for Mobile Tabs
+        const floatingBtns = document.querySelectorAll('.floating-tab-btn');
+        const sheetContentSections = document.querySelectorAll('.room-tab-content');
+        
+        floatingBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                sheetContentSections.forEach(sec => sec.style.display = 'none');
+                document.getElementById(targetId).style.display = 'block';
+                
+                const sheet = document.getElementById('bottom-sheet');
+                sheet.classList.add('active');
+                sheet.style.transform = 'translateY(0)'; // Slide up
+            });
+        });
+
+        window.closeBottomSheet = () => {
+            const sheet = document.getElementById('bottom-sheet');
+            sheet.classList.remove('active');
+            sheet.style.transform = 'translateY(100%)';
+        };
+
+        // Sidebar Backdrop Logic
+        const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const roomLayout = document.querySelector('.room-layout');
+        
+        if(toggleSidebarBtn) {
+            toggleSidebarBtn.addEventListener('click', () => {
+                roomLayout.classList.toggle('sidebar-toggled');
+                backdrop.style.display = roomLayout.classList.contains('sidebar-toggled') ? 'block' : 'none';
+            });
+        }
+        
+        const closeSidebarLogic = () => {
+            roomLayout.classList.remove('sidebar-toggled');
+            backdrop.style.display = 'none';
+        };
+        
+        if(backdrop) backdrop.addEventListener('click', closeSidebarLogic);
+        document.querySelector('.room-sidebar .d-lg-none')?.addEventListener('click', closeSidebarLogic);
+    </script>
+</body>
+</html>

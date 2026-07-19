@@ -1,0 +1,1 @@
+var r={init(){this.applyTheme("dark")},applyTheme(t){const e=document.documentElement;t==="dark"&&(e.style.setProperty("--bg-base","#03040B"),e.style.setProperty("--bg-surface","#0A0C14"),e.style.setProperty("--text-primary","#FFFFFF"),e.style.setProperty("--text-secondary","#A1A1AA"),e.style.setProperty("--primary-color","#3B82F6"))}};export{r as t};

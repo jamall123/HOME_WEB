@@ -163,162 +163,223 @@
     margin-top: 0.25rem;
 }
 
-/* 4. Course Room (Virtual Classroom) Styles */
-.room-layout {
+/* ==========================================================================
+   Phase 4: Smart Teaching Room Enterprise UI
+   ========================================================================== */
+
+/* Design Tokens for Room */
+:root {
+    --room-bg: var(--bg-base);
+    --room-surface: var(--bg-surface);
+    --room-surface-hover: rgba(255, 255, 255, 0.05);
+    --room-border: rgba(255, 255, 255, 0.05);
+    --room-text: var(--text-primary);
+    --room-text-muted: var(--text-secondary);
+    --room-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Layout Constants */
+    --header-height: 60px;
+    --panel-width: 350px;
+}
+
+/* 4. Room Application Layout (CSS Grid) */
+.room-app {
     display: grid;
-    grid-template-columns: 300px 1fr 350px; /* Sidebar, Main, Chat */
+    grid-template-rows: var(--header-height) 1fr;
     height: 100vh;
-    background: var(--bg-dark);
+    width: 100vw;
+    background: var(--room-bg);
+    color: var(--room-text);
     overflow: hidden;
-    transition: grid-template-columns 0.3s ease;
+    font-family: var(--font-ar);
 }
 
-/* Desktop Toggled States */
-.room-layout.sidebar-toggled {
-    grid-template-columns: 0px 1fr 350px;
-}
-.room-layout.chat-toggled {
-    grid-template-columns: 300px 1fr 0px;
-}
-.room-layout.sidebar-toggled.chat-toggled {
-    grid-template-columns: 0px 1fr 0px;
+/* Global Header */
+.room-header {
+    grid-row: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    background: var(--room-surface);
+    border-bottom: 1px solid var(--room-border);
+    z-index: 50;
 }
 
-.room-sidebar {
-    background: var(--bg-surface);
-    border-left: 1px solid rgba(255, 255, 255, 0.05);
+/* Main Workspace Grid */
+.room-workspace {
+    grid-row: 2;
+    display: grid;
+    /* Desktop: 3 Columns. Left (Curriculum), Center (Teaching Area + Bottom), Right (Chat) */
+    grid-template-columns: var(--panel-width) 1fr var(--panel-width);
+    height: 100%;
+    overflow: hidden;
+    transition: var(--room-transition);
+}
+
+/* Toggled States for Desktop */
+.room-workspace.hide-curriculum {
+    grid-template-columns: 0 1fr var(--panel-width);
+}
+.room-workspace.hide-chat {
+    grid-template-columns: var(--panel-width) 1fr 0;
+}
+.room-workspace.hide-all {
+    grid-template-columns: 0 1fr 0;
+}
+
+/* Side Panels */
+.room-panel {
+    background: var(--room-surface);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden; /* For when width is 0 */
+}
+.panel-curriculum {
+    border-left: 1px solid var(--room-border); /* RTL */
+}
+.panel-chat {
+    border-right: 1px solid var(--room-border); /* RTL */
 }
 
-.room-main {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-dark);
-    overflow-y: auto;
+/* Center Area: Teaching + Bottom Workspace */
+.room-center {
+    display: grid;
+    /* Rows: Teaching Renderer auto, Bottom Workspace 1fr */
+    grid-template-rows: auto 1fr;
+    height: 100%;
+    overflow: hidden;
     position: relative;
-    min-width: 0; /* Prevents flex/grid blowouts */
+    background: #000;
 }
 
-.room-chat {
-    background: var(--bg-surface);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-}
-
-/* Video Player Area */
-.video-container {
+/* Teaching Renderer (Aspect Ratio Box) */
+.teaching-renderer {
     width: 100%;
     aspect-ratio: 16 / 9;
+    position: relative;
     background: #000;
+    overflow: hidden;
+    /* Hardware acceleration */
+    transform: translateZ(0);
+}
+
+/* Unified Renderer Layers */
+.renderer-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
+    background: #000;
+}
+.renderer-layer.active {
+    opacity: 1;
+    visibility: visible;
 }
 
-/* Room Tabs */
-.room-tabs {
+.renderer-layer video,
+.renderer-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Bottom Workspace */
+.bottom-workspace {
+    background: var(--room-bg);
     display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background: var(--bg-surface);
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 1px solid var(--room-border);
 }
 
-.room-tab {
-    padding: 1rem 2rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.room-tab:hover {
-    color: var(--text-primary);
-}
-
-.room-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-    background: rgba(79, 70, 229, 0.05);
-}
-
-.room-tab-content {
-    padding: 2rem;
-    display: none;
-}
-
-.room-tab-content.active {
-    display: block;
-}
-
-/* Responsive Room */
+/* Responsive Adaptive Layout */
 @media (max-width: 1024px) {
-    .room-layout {
-        display: flex;
-        width: 100vw;
-        overflow-x: hidden;
-        /* Reset grid since we use flex on mobile */
-        grid-template-columns: none;
-    }
-    .room-layout.sidebar-toggled,
-    .room-layout.chat-toggled,
-    .room-layout.sidebar-toggled.chat-toggled {
-        grid-template-columns: none;
+    .room-workspace {
+        /* Tablet/Mobile: 1 Column */
+        grid-template-columns: 1fr !important;
     }
 
-    .room-sidebar {
+    /* Off-canvas Panels */
+    .room-panel {
         position: fixed;
-        right: -300px;
-        top: 0;
-        width: 300px;
-        height: 100vh;
-        z-index: 100;
-        transition: right 0.3s ease;
-    }
-    
-    /* When sidebar is toggled on mobile, show it */
-    .room-layout.sidebar-toggled .room-sidebar {
-        right: 0;
-    }
-
-    .room-main {
-        flex: 1;
+        top: var(--header-height);
+        height: calc(100vh - var(--header-height));
         width: 100%;
-        transition: width 0.3s ease;
+        max-width: 400px;
+        z-index: 100;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
 
-    .room-chat {
-        width: 0;
-        overflow: hidden;
-        transition: width 0.3s ease;
-        border: none;
+    .panel-curriculum {
+        right: 0; /* RTL start */
+        transform: translateX(100%);
+    }
+    .panel-curriculum.active-mobile {
+        transform: translateX(0);
+    }
+
+    .panel-chat {
+        left: 0; /* RTL end */
+        transform: translateX(-100%);
+    }
+    .panel-chat.active-mobile {
+        transform: translateX(0);
+    }
+
+    /* Mobile Bottom Sheet conversion */
+    .bottom-workspace {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80vh;
+        z-index: 90;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+    }
+    .bottom-workspace.active-mobile {
+        transform: translateY(0);
     }
     
-    /* When chat is toggled on mobile */
-    .room-layout.chat-toggled .room-chat {
-        width: 35%; /* جهة الشمال بشكل مصغر */
-        min-width: 250px;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .room-layout.chat-toggled .room-main {
-        width: 65%; /* إزاحة الفيديو لليمين */
-        flex: none;
+    .room-center {
+        /* When bottom sheet is active, push layout up or let it overlay. 
+           Mobile usually overlays. */
+        grid-template-rows: auto 1fr;
     }
 }
 
-@media (max-width: 768px) {
-    .room-layout.chat-toggled .room-chat {
-        width: 40%;
-        min-width: 200px;
-    }
-    .room-layout.chat-toggled .room-main {
-        width: 60%;
-    }
+/* Utility Animations */
+.animate-fade {
+    animation: simpleFade 0.2s ease forwards;
+}
+@keyframes simpleFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Scrollbars */
+.scrollable {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
 }
 
 /* 5. Enrollment & Payment Styles */
@@ -508,4 +569,61 @@
     background: var(--bg-surface);
     border-radius: 50%;
     padding: 2px;
+}
+
+/* ==========================================================================
+   Phase 3: Registration Modals & States
+   ========================================================================== */
+   
+.form-input.is-invalid {
+    border-color: var(--danger-color) !important;
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.form-input.is-valid {
+    border-color: #10b981 !important;
+}
+
+.sheet-drag-handle {
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    margin: 1rem auto;
+    cursor: grab;
+    touch-action: none;
+}
+.sheet-drag-handle:active {
+    cursor: grabbing;
+}
+
+#registration-bottom-sheet {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.enrollment-step {
+    display: none;
+    animation: fadeInStep 0.3s ease-in-out;
+}
+.enrollment-step.active-step {
+    display: block;
+}
+
+@keyframes fadeInStep {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Skeleton Loaders */
+.skeleton-loader {
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    color: transparent !important;
+    border-radius: 4px;
+}
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
