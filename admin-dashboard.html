@@ -34,17 +34,28 @@
         <aside class="admin-sidebar">
             <h2>Jhome Admin</h2>
             <nav class="admin-nav">
-                <a href="#" id="nav-dashboard" class="active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> نظرة عامة (الرئيسية)</a>
-                <a href="#" id="nav-medialibrary" onclick="switchAdminTab('medialibrary')"><i class="fas fa-images"></i> مكتبة الوسائط</a>
-                <a href="#" id="nav-payments" onclick="switchAdminTab('payments')"><i class="fas fa-university"></i> حسابات الدفع</a>
-                <a href="#" id="nav-users" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> إدارة المستخدمين</a>
-                <a href="#" id="nav-requests" onclick="switchAdminTab('requests')"><i class="fas fa-file-invoice"></i> طلبات التسجيل</a>
-                <a href="#" id="nav-courses" onclick="switchAdminTab('courses')"><i class="fas fa-graduation-cap"></i> إدارة الأكاديمية</a>
-                <a href="#" id="nav-media" onclick="switchAdminTab('media')"><i class="fas fa-pen-nib"></i> إدارة المحتوى (المقالات)</a>
+                <div style="padding: 1rem 1rem 0.5rem; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">📊 نظرة عامة</div>
+                <a href="#" id="nav-dashboard" class="active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> الرئيسية / الإحصائيات</a>
+                
+                <div style="padding: 1.5rem 1rem 0.5rem; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">🎓 الأكاديمية</div>
+                <a href="#" id="nav-courses" onclick="switchAdminTab('courses')"><i class="fas fa-graduation-cap"></i> الدورات التعليمية</a>
+                <a href="#" id="nav-users" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> طلاب الأكاديمية</a>
+                <a href="#" id="nav-requests" onclick="switchAdminTab('requests')"><i class="fas fa-file-invoice"></i> طلبات الانضمام</a>
+                
+                <div style="padding: 1.5rem 1rem 0.5rem; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">📝 المحتوى (CMS)</div>
+                <a href="#" id="nav-media" onclick="switchAdminTab('media')"><i class="fas fa-pen-nib"></i> المقالات وقصص النجاح</a>
                 <a href="#" id="nav-projects" onclick="switchAdminTab('projects')"><i class="fas fa-project-diagram"></i> إدارة المنتجات</a>
+                <a href="#" id="nav-settings" onclick="switchAdminTab('settings')"><i class="fas fa-columns"></i> محتوى الصفحات</a>
+                <a href="#" id="nav-medialibrary" onclick="switchAdminTab('medialibrary')"><i class="fas fa-images"></i> مكتبة الوسائط</a>
+                
+                <div style="padding: 1.5rem 1rem 0.5rem; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">📩 التواصل</div>
                 <a href="#" id="nav-messages" onclick="switchAdminTab('messages')"><i class="fas fa-envelope"></i> رسائل التواصل</a>
-                <a href="#" id="nav-settings" onclick="switchAdminTab('settings')"><i class="fas fa-cogs"></i> CMS و إعدادات النظام</a>
-                <a href="index.html" style="margin-top: auto;"><i class="fas fa-home"></i> العودة للموقع</a>
+                <!-- The newsletter section can be added later if missing, currently using messages tab or we add one -->
+                
+                <div style="padding: 1.5rem 1rem 0.5rem; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px;">⚙️ الإعدادات</div>
+                <a href="#" id="nav-payments" onclick="switchAdminTab('payments')"><i class="fas fa-university"></i> حسابات الدفع</a>
+
+                <a href="index.html" style="margin-top: 3rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-arrow-right"></i> رجوع للرئيسية</a>
             </nav>
         </aside>
 

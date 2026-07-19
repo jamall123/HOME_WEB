@@ -9,7 +9,12 @@ service cloud.firestore {
     function isAdmin() {
       // Assuming admin status is stored in token claims or by specific UID, 
       // For now, allow auth.uid to be cross-checked with an admins collection or basic auth
-      return isSignedIn() && request.auth.token.email.matches('.*@jhome\\.com');
+      return isSignedIn() && (
+        request.auth.token.email.matches('.*@jhome\\.com') ||
+        request.auth.token.email == 'admin@sudanfree.com' ||
+        request.auth.token.email == 'jamal@home20' ||
+        request.auth.token.email == 'jamal@home20.com'
+      );
     }
     function isEnrolled(courseId) {
       return isSignedIn() && exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + "_" + courseId));
