@@ -1,14 +1,17 @@
 import { Logger } from './Logger.js';
 
 class BlogServiceClass {
-    constructor() {
-        this.db = window.firebase ? window.firebase.firestore() : null;
+
+    // Lazy getter — resolves db at call time, not at import time
+    // This prevents the race condition where firebase isn't ready yet
+    get db() {
+        return window.firebase ? window.firebase.firestore() : null;
     }
 
     async getMediaContent() {
         if (!this.db) {
             Logger.error('BlogService: Firebase not initialized.');
-            return [];
+            throw new Error('Firebase not ready');
         }
 
         try {

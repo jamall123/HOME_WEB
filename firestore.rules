@@ -92,10 +92,11 @@ service cloud.firestore {
     }
 
     // ── CMS (Public Read) ────────────────────────────────────────────────────
-    match /posts/{postId}         { allow read: if true; allow write: if false; }
-    match /stories/{storyId}      { allow read: if true; allow write: if false; }
-    match /projects/{projectId}   { allow read: if true; allow write: if false; }
-    match /pages/{pageId}         { allow read: if true; allow write: if false; }
+    match /posts/{postId}            { allow read: if true; allow write: if false; }
+    match /stories/{storyId}         { allow read: if true; allow write: if false; }
+    match /successStories/{storyId}  { allow read: if true; allow write: if false; }
+    match /projects/{projectId}      { allow read: if true; allow write: if false; }
+    match /pages/{pageId}            { allow read: if true; allow write: if false; }
     match /media_library/{mediaId} {
       allow read: if true;
       // Hard delete allowed directly (triggers mediaController workflow)
