@@ -79,12 +79,12 @@ class CurriculumServiceClass {
      */
     async addSection(courseId, title, order) {
         try {
-            const docRef = await this.db.collection('curriculum').add({
+            const docRef = await (await import('../core/CommandBus.js')).commandBus.dispatch({ domain: 'generic', action: 'add', payload: { collection: 'curriculum', data: {
                 courseId: courseId,
                 title: title,
                 order: order,
                 status: 'Draft',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp( } }),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             return docRef;

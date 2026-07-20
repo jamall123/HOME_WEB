@@ -78,10 +78,10 @@ export class InstructorServiceClass {
      * Posts a new announcement to the course.
      */
     async postAnnouncement(courseId, data) {
-        await this.db.collection('lessonAnnouncements').add({
+        await (await import('../core/CommandBus.js')).commandBus.dispatch({ domain: 'generic', action: 'add', payload: { collection: 'lessonAnnouncements', data: {
             courseId,
             ...data,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            timestamp: firebase.firestore.FieldValue.serverTimestamp( } })
         });
     }
 }

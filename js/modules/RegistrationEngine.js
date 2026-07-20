@@ -552,9 +552,7 @@ window.RegistrationEngine = {
                     specialization: this.elements.specialization.value.trim() || null,
                     city: this.elements.city.value.trim(),
                     reason: this.elements.reason.value.trim()
-                },
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }
             };
 
             if (this.isPaidCourse) {
@@ -564,7 +562,18 @@ window.RegistrationEngine = {
                 };
             }
 
-            await db.collection('enrollmentRequests').add(payload);
+            const { commandBus } = await import('../core/CommandBus.js');
+            await commandBus.dispatch({
+                domain: 'academy_enrollments',
+                action: 'request',
+                payload: {
+                    courseId: payload.courseId,
+                    student: payload.student,
+                    email: window.currentUser ? window.currentUser.email : '',
+                    name: payload.student.fullName,
+                    payment: payload.payment
+                }
+            });
             
             this.showStep(this.elements.successStep);
 

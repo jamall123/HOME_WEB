@@ -2,7 +2,7 @@ import { OfflineSyncEngine } from './OfflineSyncEngine.js';
 
 class ContactServiceClass {
     constructor() {
-        this.collectionName = 'contactMessages';
+        this.collectionName = 'messages'; // Unified with admin dashboard reads
     }
 
     async submitContactMessage(messageData) {

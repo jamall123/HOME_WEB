@@ -1,7 +1,7 @@
 import { CMSService } from './CMSService.js';
 import { AdminUI } from './AdminUI.js';
 import { Logger } from './Logger.js';
-
+import { eventBus } from '../core/EventBus.js';
 import { CMSManager } from './CMSManager.js';
 import { MediaManager } from './MediaManager.js';
 
@@ -9,6 +9,20 @@ class AdminControllerClass {
     constructor() {
         this.service = CMSService;
         this.ui = AdminUI;
+        // Initialize UI logic
+        this.ui.initModals();
+
+        // Cursors for pagination
+        this.cursors = {
+            users: null,
+            requests: null
+        };
+
+        // Loaded data
+        this.loadedData = {
+            users: [],
+            requests: []
+        };
         this.init();
     }
 
@@ -82,22 +96,30 @@ class AdminControllerClass {
         CMSManager.init();
         MediaManager.init();
 
-        // Initial Tab setup
-        this.switchAdminTab('dashboard');
+        // Initial Tab setup is now handled by AppShell Router
 
         // Form Submit Listeners
         this.attachFormListeners();
 
         // Global Action Delegation (for buttons rendered dynamically)
         document.body.addEventListener('click', this.handleGlobalClick.bind(this));
+
+        // Hook into the Enterprise EventBus
+        eventBus.on('workspace:module_loaded', (route) => {
+            this.handleModuleLoaded(route);
+        });
+
     }
 
     async switchAdminTab(tabName) {
-        this.ui.switchTab(tabName);
+        // Forward legacy tab switching to the new router hash
+        window.location.hash = tabName;
+    }
+
+    async handleModuleLoaded(tabName) {
         if (tabName === 'dashboard') {
             await this.loadDashboardWidgets();
         } else if (tabName === 'medialibrary') {
-            // MediaManager handles this automatically, but we can force refresh
             MediaManager.loadGallery();
         } else if (tabName === 'payments') {
             await this.loadBankAccounts();
@@ -114,25 +136,69 @@ class AdminControllerClass {
         } else if (tabName === 'messages') {
             await this.loadMessages();
         } else if (tabName === 'settings') {
-            // CMSManager is already active, but we can reload if needed
             CMSManager.loadSettings();
+        } else if (tabName === 'auditlog') {
+            await this.loadAuditLog(false);
         }
     }
 
     async loadDashboardWidgets() {
         try {
-            // Fast count query without pulling data (Firestore V9 feature count() is not used here due to compat, fallback to length)
-            const users = await this.service.getUsers();
-            const requests = await this.service.getEnrollmentRequests();
-            
-            document.getElementById('dash-users-count').innerText = users.length;
-            document.getElementById('dash-requests-count').innerText = requests.filter(r => r.status === 'pending').length;
-            
-            // Dummy for media and sales since we don't have aggregated fields yet
-            document.getElementById('dash-media-count').innerText = document.getElementById('media-gallery')?.children?.length || 0;
-            document.getElementById('dash-sales-count').innerText = requests.filter(r => r.status === 'approved').length * 20000; 
+            const [usersRes, requests, messages] = await Promise.all([
+                this.service.getUsers(),
+                this.service.getEnrollmentRequests(),
+                this.service.getContactMessages ? this.service.getContactMessages() : Promise.resolve([])
+            ]);
+
+            const users = Array.isArray(usersRes) ? usersRes : (usersRes.data || []);
+            const pendingRequests = requests.filter(r => r.status === 'pending');
+            const approvedRequests = requests.filter(r => r.status === 'approved');
+            const unreadMessages = messages.filter(m => !m.isRead);
+
+            const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+            setEl('dash-users-count', users.length);
+            setEl('dash-requests-count', pendingRequests.length);
+            setEl('dash-media-count', approvedRequests.length);
+            setEl('dash-sales-count', unreadMessages.length || messages.length);
+
+            // Recent Activity Feed
+            const activityEl = document.getElementById('dash-recent-activity');
+            if (activityEl) {
+                const activities = [
+                    ...pendingRequests.slice(0, 3).map(r => ({
+                        icon: 'fas fa-file-invoice',
+                        color: 'var(--warning)',
+                        text: `طلب انضمام جديد من <strong>${r.name || 'مجهول'}</strong> — ${r.courseTitle || 'دورة'}`,
+                        time: r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString('ar-SD') : 'منذ قليل'
+                    })),
+                    ...unreadMessages.slice(0, 2).map(m => ({
+                        icon: 'fas fa-envelope',
+                        color: '#A78BFA',
+                        text: `رسالة جديدة من <strong>${m.name || m.email || 'زائر'}</strong> — ${m.subject || ''}`,
+                        time: m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString('ar-SD') : 'منذ قليل'
+                    }))
+                ];
+
+                if (activities.length === 0) {
+                    activityEl.innerHTML = `<p class="text-muted" style="text-align:center; padding:1.5rem;">لا توجد نشاطات حديثة</p>`;
+                } else {
+                    activityEl.innerHTML = activities.map(a => `
+                        <div style="display:flex; align-items:center; gap:1rem; padding:0.9rem 0; border-bottom:1px solid var(--border-color);">
+                            <div style="width:38px; height:38px; border-radius:50%; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="${a.icon}" style="color:${a.color};"></i>
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <p style="margin:0; font-size:0.9rem;">${a.text}</p>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">${a.time}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
         } catch(e) {
             console.error('[AdminController] Dashboard load error', e);
+            const activityEl = document.getElementById('dash-recent-activity');
+            if (activityEl) activityEl.innerHTML = `<p class="text-muted" style="text-align:center;">فشل تحميل النشاطات</p>`;
         }
     }
 
@@ -150,25 +216,76 @@ class AdminControllerClass {
         }
     }
 
-    async loadUsers() {
-        this.ui.setTableLoading('users-list', 6);
+    async loadUsers(isLoadMore = false) {
+        if (!isLoadMore) {
+            this.cursors.users = null;
+            this.loadedData.users = [];
+            this.ui.setTableLoading('users-list', 6);
+        } else {
+            const btn = document.getElementById('btn-load-more-users');
+            if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+        }
+
         try {
-            const users = await this.service.getUsers();
-            this.ui.renderUsers(users);
+            const { data, lastVisible } = await this.service.getUsers(50, this.cursors.users);
+            this.cursors.users = lastVisible;
+            this.loadedData.users.push(...data);
+            
+            this.ui.renderUsers(this.loadedData.users);
+            
+            // Update UI count and load more button
+            const countText = document.getElementById('users-count-text');
+            if (countText) countText.innerText = `عرض ${this.loadedData.users.length} مستخدم`;
+            
+            const loadMoreBtn = document.getElementById('btn-load-more-users');
+            if (loadMoreBtn) {
+                if (data.length < 50) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                    loadMoreBtn.innerHTML = 'عرض المزيد <i class="fas fa-chevron-down"></i>';
+                }
+            }
+
         } catch (e) {
             Logger.error('AdminController', 'Failed to load users', e);
-            this.ui.setTableError('users-list', 6);
+            if (!isLoadMore) this.ui.setTableError('users-list', 6);
         }
     }
 
-    async loadRequests() {
-        this.ui.setTableLoading('requests-list', 6);
+    async loadRequests(isLoadMore = false) {
+        if (!isLoadMore) {
+            this.cursors.requests = null;
+            this.loadedData.requests = [];
+            this.ui.setTableLoading('requests-list', 6);
+        } else {
+            const btn = document.getElementById('btn-load-more-requests');
+            if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+        }
+
         try {
-            const reqs = await this.service.getEnrollmentRequests();
-            this.ui.renderEnrollmentRequests(reqs);
+            const { data, lastVisible } = await this.service.getEnrollmentRequests(50, this.cursors.requests);
+            this.cursors.requests = lastVisible;
+            this.loadedData.requests.push(...data);
+            
+            this.ui.renderEnrollmentRequests(this.loadedData.requests);
+
+            // Update UI count and load more button
+            const countText = document.getElementById('requests-count-text');
+            if (countText) countText.innerText = `عرض ${this.loadedData.requests.length} طلب`;
+            
+            const loadMoreBtn = document.getElementById('btn-load-more-requests');
+            if (loadMoreBtn) {
+                if (data.length < 50) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                    loadMoreBtn.innerHTML = 'عرض المزيد <i class="fas fa-chevron-down"></i>';
+                }
+            }
         } catch (e) {
             Logger.error('AdminController', 'Failed to load requests', e);
-            this.ui.setTableError('requests-list', 6);
+            if (!isLoadMore) this.ui.setTableError('requests-list', 6);
         }
     }
 
@@ -222,7 +339,7 @@ class AdminControllerClass {
 
     async loadSettings() {
         try {
-            const data = await this.service.getSettings();
+            const data = await this.service.getSettings('global');
             this.ui.populateSettings(data);
         } catch (e) {
             Logger.error('AdminController', 'Failed to load settings', e);
@@ -241,11 +358,17 @@ class AdminControllerClass {
         switch (action) {
             case 'delete-bank': this.deleteBankAccount(id); break;
             case 'delete-user': this.deleteUser(id); break;
-            case 'approve-req': 
+            case 'approve-req': {
                 const name = btn.getAttribute('data-name');
                 const course = btn.getAttribute('data-course');
                 this.approveRequest(id, name, course);
                 break;
+            }
+            case 'reject-req': {
+                const name = btn.getAttribute('data-name');
+                this.rejectRequest(id, name);
+                break;
+            }
             case 'delete-req': this.deleteRequest(id); break;
             case 'mark-msg-read': this.markMessageRead(id); break;
             case 'delete-msg': this.deleteContactMessage(id); break;
@@ -279,19 +402,34 @@ class AdminControllerClass {
         } catch (e) { alert("حدث خطأ أثناء الحذف"); }
     }
 
+    handleError(e) {
+        console.error('[AdminController]', e);
+        const message = e.message || 'حدث خطأ غير متوقع';
+        // Check if there is a notificationManager, else fallback to alert
+        if (window.NotificationManager) {
+            window.NotificationManager.show({ title: 'خطأ', message, type: 'error' });
+        } else {
+            alert(message);
+        }
+    }
+
     async approveRequest(id, fullName, courseId) {
-        if (!confirm(`هل أنت متأكد من الموافقة على طلب: ${fullName}؟ سيطلب منك النظام إنشاء حساب له الآن.`)) return;
+        if (!confirm(`هل أنت متأكد من الموافقة على طلب: ${fullName}؟ سيتم تفعيل حسابه تلقائياً.`)) return;
         try {
-            await this.service.updateRequestStatus(id, 'approved');
-            this.switchAdminTab('users');
-            const nameInput = document.getElementById('new-user-fullname');
-            const courseInput = document.getElementById('new-user-course');
-            if (nameInput) {
-                nameInput.value = fullName;
-                if(courseInput && courseId && courseId !== 'undefined') courseInput.value = courseId;
-                nameInput.focus();
-            }
-        } catch (e) { alert('فشل التحديث!'); }
+            const requestData = this.requestsData?.find(r => r.id === id);
+            await this.service.approveEnrollment(id, requestData);
+            this.loadRequests();
+            alert('تمت الموافقة على الطلب بنجاح.');
+        } catch (e) { this.handleError(e); }
+    }
+
+    async rejectRequest(id, fullName) {
+        if (!confirm(`هل أنت متأكد من رفض طلب: ${fullName}؟`)) return;
+        try {
+            await this.service.rejectEnrollment(id);
+            this.loadRequests();
+            alert('تم رفض الطلب.');
+        } catch (e) { this.handleError(e); }
     }
 
     async deleteRequest(id) {
@@ -299,7 +437,7 @@ class AdminControllerClass {
         try {
             await this.service.deleteRequest(id);
             this.loadRequests();
-        } catch (e) { alert('فشل الحذف!'); }
+        } catch (e) { this.handleError(e); }
     }
 
     async markMessageRead(id) {
@@ -400,16 +538,17 @@ class AdminControllerClass {
                 const creds = { username: base + unique, password: base + unique };
                 
                 try {
-                    await this.service.addUser(creds.username, {
-                        fullname: fullnameInput.value,
-                        password: creds.password,
-                        role: roleInput.value,
+                    await this.service.createUser({
+                        displayName: fullnameInput.value,
+                        email: `${base}${unique}@jhome.local`,
+                        password: base + unique,
+                        role: roleInput.value || 'STUDENT',
                         courseId: courseInput.value.trim() || null
                     });
-                    alert("تم إنشاء المستخدم بنجاح!");
+                    alert('تم إنشاء المستخدم بنجاح!');
                     userForm.reset();
                     this.loadUsers();
-                } catch (err) { alert("حدث خطأ أثناء إنشاء الحساب."); }
+                } catch (err) { alert('حدث خطأ أثناء إنشاء الحساب: ' + (err.message || '')); }
             });
         }
 
@@ -516,6 +655,100 @@ class AdminControllerClass {
         }
 
     }
+
+    // ------------------------------------------------
+    // Audit Log
+    // ------------------------------------------------
+    async loadAuditLog(isLoadMore = false) {
+        const tbody = document.getElementById('auditlog-list');
+        if (!tbody) return;
+
+        if (!isLoadMore) {
+            this.cursors = this.cursors || {};
+            this.cursors.auditlog = null;
+            this.loadedData = this.loadedData || {};
+            this.loadedData.auditlog = [];
+            this.ui.setTableLoading?.('auditlog-list', 5);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</td></tr>`;
+        }
+
+        try {
+            const db = window.firebase?.firestore ? window.firebase.firestore() : null;
+            if (!db) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--error);">لم يتم الاتصال بقاعدة البيانات</td></tr>`; return; }
+
+            let query = db.collection('auditLogs').orderBy('timestamp', 'desc').limit(30);
+            if (isLoadMore && this.cursors?.auditlog) {
+                query = query.startAfter(this.cursors.auditlog);
+            }
+
+            const snap = await query.get();
+            const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            if (!isLoadMore) this.loadedData.auditlog = [];
+            this.loadedData.auditlog.push(...logs);
+            this.cursors.auditlog = snap.docs[snap.docs.length - 1] || null;
+
+            const actionColors = { CREATE: 'var(--success)', UPDATE: 'var(--info)', DELETE: 'var(--error)', APPROVE: 'var(--primary)', REJECT: 'var(--warning)' };
+            const actionIcons = { CREATE: 'fa-plus-circle', UPDATE: 'fa-edit', DELETE: 'fa-trash', APPROVE: 'fa-check-circle', REJECT: 'fa-times-circle' };
+
+            if (this.loadedData.auditlog.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);"><i class="fas fa-history fa-2x" style="display:block; margin-bottom:0.5rem;"></i>لا توجد سجلات بعد</td></tr>`;
+            } else {
+                tbody.innerHTML = this.loadedData.auditlog.map(log => {
+                    const action = log.action || 'UNKNOWN';
+                    const color = actionColors[action] || 'var(--text-secondary)';
+                    const icon = actionIcons[action] || 'fa-circle';
+                    const ts = log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString('ar-SD') : (log.timestamp || '—');
+                    const statusOk = log.success !== false;
+                    return `<tr>
+                        <td>${log.performedBy || log.userId || 'النظام'}</td>
+                        <td><span class="badge" style="background:${color}22; color:${color}; border:1px solid ${color}44;"><i class="fas ${icon}" style="margin-left:4px;"></i>${action}</span></td>
+                        <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${log.description || ''}"><code style="font-size:0.78rem; color:var(--text-secondary);">${log.collection || ''}</code> ${log.description || log.targetId || '—'}</td>
+                        <td style="font-size:0.82rem; color:var(--text-muted); white-space:nowrap;">${ts}</td>
+                        <td><span class="badge ${statusOk ? 'badge-success' : 'badge-danger'}">${statusOk ? 'نجح' : 'فشل'}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const countEl = document.getElementById('auditlog-count-text');
+            if (countEl) countEl.innerText = `عرض ${this.loadedData.auditlog.length} سجل`;
+
+            const loadMoreBtn = document.getElementById('btn-load-more-auditlog');
+            if (loadMoreBtn) loadMoreBtn.style.display = logs.length < 30 ? 'none' : 'inline-flex';
+
+        } catch(e) {
+            console.error('[AdminController] Audit log load error', e);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--error); padding:2rem;"><i class="fas fa-exclamation-triangle"></i> فشل تحميل سجل العمليات: ${e.message}</td></tr>`;
+        }
+    }
+
 }
 
 export const AdminController = new AdminControllerClass();
+
+// Global table filtering utilities
+window.filterTable = (tableId, query, cols = [0]) => {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const q = query.toLowerCase();
+    Array.from(table.getElementsByTagName('tr')).forEach(tr => {
+        const tds = tr.getElementsByTagName('td');
+        if (!tds.length) return;
+        const matches = cols.some(c => tds[c] && tds[c].innerText.toLowerCase().includes(q));
+        tr.style.display = matches ? '' : 'none';
+    });
+};
+
+window.filterTableByCol = (tableId, query, colIndex) => {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const q = query.toLowerCase();
+    Array.from(table.getElementsByTagName('tr')).forEach(tr => {
+        const tds = tr.getElementsByTagName('td');
+        if (!tds.length || !tds[colIndex]) return;
+        
+        // Exact match for selects, or 'all' if query is empty
+        const matches = q === '' || tds[colIndex].innerText.toLowerCase().includes(q) || tds[colIndex].innerHTML.toLowerCase().includes(q);
+        tr.style.display = matches ? '' : 'none';
+    });
+};

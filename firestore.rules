@@ -1,170 +1,151 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper Functions
+
+    // ── Helper Functions ────────────────────────────────────────────────────
     function isSignedIn() {
       return request.auth != null;
     }
+
+    // Checks Custom Claims set by Cloud Functions (api_v1_users changeRole action)
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
     function isAdmin() {
-      // Assuming admin status is stored in token claims or by specific UID, 
-      // For now, allow auth.uid to be cross-checked with an admins collection or basic auth
-      return isSignedIn() && (
-        request.auth.token.email.matches('.*@jhome\\.com') ||
-        request.auth.token.email == 'admin@sudanfree.com' ||
-        request.auth.token.email == 'jamal@home20' ||
-        request.auth.token.email == 'jamal@home20.com'
-      );
+      return hasRole('ADMIN') || hasRole('SUPER_ADMIN') ||
+        // Fallback: email-based (for initial setup before custom claims are set)
+        (isSignedIn() && (
+          request.auth.token.email == 'jamal@home20.com' ||
+          request.auth.token.email == 'admin@sudanfree.com' ||
+          request.auth.token.email.matches('.*@jhome\\.com')
+        ));
     }
+
+    function isInstructorRole() {
+      return hasRole('INSTRUCTOR');
+    }
+
     function isEnrolled(courseId) {
-      return isSignedIn() && exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + "_" + courseId));
-    }
-    function isInstructor(courseId) {
-      return isSignedIn() && get(/databases/$(database)/documents/enrollments/$(request.auth.uid + "_" + courseId)).data.role == 'instructor';
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId));
     }
 
-    // Phase 3 Architecture: Enrollments
-    match /enrollments/{enrollmentId} {
-      allow read: if isSignedIn() && enrollmentId.matches(request.auth.uid + "_.*");
-      allow write: if isAdmin();
-    }
-
-    // Deprecated Collections (Read-only for migration script compatibility)
-    match /courses_credentials/{credId} { allow read: if true; allow write: if isAdmin(); }
-
-    // Core Course Architecture
+    // ── Academy ─────────────────────────────────────────────────────────────
     match /courses/{courseId} {
-      // Public reading for course listings
       allow read: if true;
-      allow write: if isAdmin();
-      
-      // Live State (Instructor writes, Students read)
-      match /state/live {
-        allow read: if isEnrolled(courseId);
-        allow write: if isInstructor(courseId) || isAdmin();
-      }
+      allow write: if false; // Cloud Functions only
 
-      // Live Presence (Users write only to their own presence document)
       match /connected_users/{userId} {
         allow read: if isEnrolled(courseId);
         allow write: if isEnrolled(courseId) && request.auth.uid == userId;
       }
-      // Live Typing Status (Users write only to their own status)
       match /typing_status/{typingId} {
         allow read: if isEnrolled(courseId);
-        allow write: if isEnrolled(courseId) && typingId.matches(".*_" + request.auth.uid);
+        allow write: if isEnrolled(courseId) && typingId.matches('.*_' + request.auth.uid);
       }
     }
 
-    // Phase 6 Architecture: Smart Multi-Channel Chat
-    match /course_chats/{chatId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      
-      // Students can create messages in public and questions, but not announcements
-      allow create: if isEnrolled(request.resource.data.courseId) 
-                    && request.resource.data.userId == request.auth.uid
-                    && (request.resource.data.channel != 'announcements' || isInstructor(request.resource.data.courseId));
-                    
-      allow update, delete: if isInstructor(resource.data.courseId) || isAdmin() || (resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'timestamp']));
+    match /enrollments/{enrollmentId} {
+      allow read: if isSignedIn() && enrollmentId.matches(request.auth.uid + '_.*');
+      allow write: if false; // Cloud Functions only
     }
 
-    // Phase 5 Architecture: Enterprise Curriculum Engine
+    match /enrollmentRequests/{reqId} {
+      allow read: if isAdmin() || isInstructorRole();
+      allow write: if false; // Cloud Functions only
+    }
+
+    match /studentProgress/{docId} {
+      allow read: if isSignedIn() && (docId.matches(request.auth.uid + '_.*') || isAdmin());
+      allow write: if isSignedIn() && docId.matches(request.auth.uid + '_.*');
+    }
+
+    match /active_sessions/{courseId} {
+      allow read: if isEnrolled(courseId) || isAdmin();
+      allow write: if false;
+    }
+
+    match /course_chats/{chatId} {
+      allow read: if isAdmin() || isInstructorRole();
+      allow write: if false;
+    }
+
     match /curriculum/{sectionId} {
       allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
+      allow write: if false;
     }
-    
+
     match /curriculumLessons/{lessonId} {
       allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
+      allow write: if false;
     }
 
     match /lessonResources/{resourceId} {
       allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
+      allow write: if false;
     }
 
-    match /lessonAssignments/{assignmentId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
+    match /courses_credentials/{credId} {
+      allow read: if true;
+      allow write: if false;
     }
 
-    match /lessonQuizzes/{quizId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
+    // ── CMS (Public Read) ────────────────────────────────────────────────────
+    match /posts/{postId}         { allow read: if true; allow write: if false; }
+    match /stories/{storyId}      { allow read: if true; allow write: if false; }
+    match /projects/{projectId}   { allow read: if true; allow write: if false; }
+    match /pages/{pageId}         { allow read: if true; allow write: if false; }
+    match /media_library/{mediaId} {
+      allow read: if true;
+      // Hard delete allowed directly (triggers mediaController workflow)
+      allow delete: if isAdmin();
+      // Soft delete / restore = update
+      allow update: if isAdmin();
+      allow create: if false;
     }
 
-    match /lessonAnnouncements/{annId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
-    }
+    // ── Settings (Public Read, Admin Write via Functions) ────────────────────
+    match /settings/{docId}     { allow read: if true; allow write: if false; }
+    match /siteSettings/{docId} { allow read: if true; allow write: if false; }
 
-    match /studentProgress/{docId} {
-      // docId is uid_courseId
-      allow read: if isSignedIn() && (docId.matches(request.auth.uid + "_.*") || isAdmin());
-      allow write: if isSignedIn() && docId.matches(request.auth.uid + "_.*");
-    }
-
-    match /curriculumVersions/{versionId} {
-      allow read, write: if isAdmin();
-    }
-
-    match /curriculumAuditLogs/{logId} {
-      allow read, write: if isAdmin();
-    }
-
-    // Legacy Sub-Collections of courses (if any were meant to be here, though we flattened curriculum)
-    // We will place them back inside match /courses/{courseId} or use resource.data.courseId
-    match /resources/{resourceId} {
-      allow read: if isEnrolled(resource.data.courseId);
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
-    }
-
-    match /lectures/{lectureId} {
-      allow read: if isEnrolled(resource.data.courseId);
-      allow write: if isInstructor(resource.data.courseId) || isAdmin();
-    }
-    
-    // User Profiles (Global)
+    // ── Users ────────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read, write: if request.auth.uid == userId || isAdmin();
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if false;
     }
 
-    // Active Teaching Sessions
-    match /active_sessions/{courseId} {
-      allow read: if isEnrolled(courseId) || isAdmin();
-      allow write: if isInstructor(courseId) || isAdmin();
-    }
+    // ── Contact / Messages ───────────────────────────────────────────────────
+    match /messages/{msgId} {
+      allow read: if isAdmin();
+      // Public can submit contact form (anonymous write is blocked — must be signed in)
+      allow create: if isSignedIn();
+      allow update, delete: if false;
 
-    // Phase 8: Archived Sessions
-    match /archived_sessions/{sessionId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if isInstructor(request.resource.data.courseId) || isAdmin();
+      match /replies/{replyId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
     }
-    
-    // Global Read-Only Collections (Admin Write)
-    match /posts/{postId} { allow read: if true; allow write: if isAdmin(); }
-    match /successStories/{storyId} { allow read: if true; allow write: if isAdmin(); }
-    match /projects/{projectId} { allow read: if true; allow write: if isAdmin(); }
-    match /settings/{docId} { allow read: if true; allow write: if isAdmin(); }
-    match /bank_accounts/{bankId} { allow read: if true; allow write: if isAdmin(); }
-    
-    // Public Submit Collections (Admin Read/Manage)
-    match /subscriptions/{subId} {
-      allow create: if request.resource.data.keys().hasAll(['email']);
-      allow read, update, delete: if isAdmin();
-    }
-    match /enrollmentRequests/{reqId} {
-      allow create: if request.resource.data.keys().hasAll(['courseId', 'student', 'status']);
-      allow read, update, delete: if isAdmin();
-    }
+    // Legacy collection — keep readable for any existing data
     match /contactMessages/{msgId} {
-      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'subject', 'message']) 
-                    && request.resource.data.message.size() <= 2000;
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if false;
     }
-    
-    // Default Block
+
+    // ── Audit Logs (Read-Only for admins) ────────────────────────────────────
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── System ───────────────────────────────────────────────────────────────
+    match /system_config/{docId} { allow read: if true; allow write: if false; }
+    match /subscriptions/{subId} { allow read, write: if false; }
+
+    match /pageContent/{docId} { allow read: if true; allow write: if false; }
+
+    // ── Default: Deny Everything Else ───────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }

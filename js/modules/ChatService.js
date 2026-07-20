@@ -42,15 +42,16 @@ class ChatServiceClass {
 
     async sendMessage(courseId, userId, userName, role, text, channel, replyToId = null) {
         try {
-            await this.db.collection('course_chats').add({
-                courseId,
-                userId,
-                userName,
-                role,
-                text,
-                channel,
-                replyToId,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            const { commandBus } = await import('../core/CommandBus.js');
+            await commandBus.dispatch({
+                domain: 'academy',
+                action: 'createCourseChat',
+                payload: {
+                    courseId,
+                    userId,
+                    text,
+                    channel
+                }
             });
         } catch (error) {
             console.error("[ChatService] Failed to send message", error);
