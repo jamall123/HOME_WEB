@@ -7,8 +7,13 @@
 
 export class LoggerClass {
     constructor() {
-        // Automatically reads Vite's production environment flag
-        this.isProduction = import.meta.env.PROD;
+        // Automatically reads Vite's production environment flag if available
+        this.isProduction = false;
+        try {
+            if (typeof process !== 'undefined' && process.env) {
+                this.isProduction = process.env.NODE_ENV === 'production';
+            }
+        } catch (e) {}
         this.logHistory = []; // Keep a short in-memory buffer of latest events for crash reports
         this.maxHistory = 100;
     }
