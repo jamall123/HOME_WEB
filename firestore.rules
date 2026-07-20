@@ -97,6 +97,14 @@ service cloud.firestore {
     match /successStories/{storyId}  { allow read: if true; allow write: if false; }
     match /projects/{projectId}      { allow read: if true; allow write: if false; }
     match /pages/{pageId}            { allow read: if true; allow write: if false; }
+
+    // Story Submissions: anyone can submit, only admins can read/update
+    match /storySubmissions/{subId} {
+      allow read, update: if isAdmin();
+      allow create: if true; // public can submit stories
+      allow delete: if isAdmin();
+    }
+
     match /media_library/{mediaId} {
       allow read: if true;
       // Hard delete allowed directly (triggers mediaController workflow)
