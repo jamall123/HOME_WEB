@@ -41,9 +41,13 @@ class PostUIClass {
           </div>
         ` : '';
 
+        const coverHtml = post.coverImage 
+            ? `<img src="${this.escapeHtml(post.coverImage)}" alt="${this.escapeHtml(post.title)}">` 
+            : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
+
         this.container.innerHTML = `
             <div class="post-cover">
-                <img src="${post.coverImage || 'assets/images/blog-placeholder.jpg'}" alt="${this.escapeHtml(post.title)}">
+                ${coverHtml}
             </div>
             <div class="post-meta-top">
                 <span class="post-category-badge">${this.escapeHtml(post.category || 'عام')}</span>
