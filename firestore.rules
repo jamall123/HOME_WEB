@@ -34,7 +34,7 @@ service cloud.firestore {
     // ── Academy ─────────────────────────────────────────────────────────────
     match /courses/{courseId} {
       allow read: if true;
-      allow write: if false; // Cloud Functions only
+      allow write: if isAdmin();
 
       match /connected_users/{userId} {
         allow read: if isEnrolled(courseId);
