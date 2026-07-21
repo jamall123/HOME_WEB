@@ -81,8 +81,8 @@ export class InstructorServiceClass {
         await (await import('../core/CommandBus.js')).commandBus.dispatch({ domain: 'generic', action: 'add', payload: { collection: 'lessonAnnouncements', data: {
             courseId,
             ...data,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp( } })
-        });
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        } } });
     }
 }
 
