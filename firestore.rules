@@ -53,9 +53,8 @@ service cloud.firestore {
     }
 
     match /enrollmentRequests/{reqId} {
-      allow read: if isAdmin() || isInstructorRole();
+      allow read, update, delete: if isAdmin() || isInstructorRole();
       allow create: if true;
-      allow update, delete: if false; // Cloud Functions or Admins only
     }
 
     match /studentProgress/{docId} {
@@ -93,18 +92,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── CMS (Public Read) ────────────────────────────────────────────────────
-    match /posts/{postId}            { allow read: if true; allow write: if false; }
-    match /stories/{storyId}         { allow read: if true; allow write: if false; }
-    match /successStories/{storyId}  { allow read: if true; allow write: if false; }
-    match /projects/{projectId}      { allow read: if true; allow write: if false; }
-    match /pages/{pageId}            { allow read: if true; allow write: if false; }
+    // ── CMS (Public Read, Admin Write) ────────────────────────────────────────
+    match /posts/{postId}            { allow read: if true; allow write: if isAdmin(); }
+    match /stories/{storyId}         { allow read: if true; allow write: if isAdmin(); }
+    match /successStories/{storyId}  { allow read: if true; allow write: if isAdmin(); }
+    match /projects/{projectId}      { allow read: if true; allow write: if isAdmin(); }
+    match /pages/{pageId}            { allow read: if true; allow write: if isAdmin(); }
+    match /pageContent/{docId}       { allow read: if true; allow write: if isAdmin(); }
+    match /bank_accounts/{docId}     { allow read: if isAdmin(); allow write: if isAdmin(); }
+    match /newsletter/{docId}        { allow read: if isAdmin(); allow create: if true; allow update, delete: if isAdmin(); }
 
     // Story Submissions: anyone can submit, only admins can read/update
     match /storySubmissions/{subId} {
-      allow read, update: if isAdmin();
-      allow create: if true; // public can submit stories
-      allow delete: if isAdmin();
+      allow read, update, delete: if isAdmin();
+      allow create: if true;
     }
 
     match /media_library/{mediaId} {
@@ -154,7 +155,7 @@ service cloud.firestore {
     match /system_config/{docId} { allow read: if true; allow write: if false; }
     match /subscriptions/{subId} { allow read, write: if false; }
 
-    match /pageContent/{docId} { allow read: if true; allow write: if false; }
+    // (pageContent admin write handled above under CMS section)
 
     // ── Default: Deny Everything Else ───────────────────────────────────────
     match /{document=**} {
