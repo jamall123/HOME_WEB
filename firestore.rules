@@ -53,7 +53,8 @@ service cloud.firestore {
 
     match /enrollmentRequests/{reqId} {
       allow read: if isAdmin() || isInstructorRole();
-      allow write: if false; // Cloud Functions only
+      allow create: if true;
+      allow update, delete: if false; // Cloud Functions or Admins only
     }
 
     match /studentProgress/{docId} {

@@ -413,22 +413,15 @@ window.RegistrationEngine = {
 
         const phone = this.elements.phone.value.trim();
 
-        // Prevent Duplicate Check
         this.showStep(this.elements.loadingStep);
         try {
-            const isDuplicate = await this.checkDuplicateRegistration(phone);
-            if (isDuplicate) {
-                this.showError("مسجل مسبقاً", "عفواً، لقد قمت بالتسجيل في هذا الكورس مسبقاً. سيتم التواصل معك قريباً أو يمكنك متابعة حالة طلبك من لوحة التحكم.", false);
-                return;
-            }
-
             if (this.isPaidCourse) {
                 this.showStep(this.elements.step2);
             } else {
                 await this.submitFinalRegistration(); // Free course, submit directly
             }
         } catch (error) {
-            console.error("Duplicate check failed:", error);
+            console.error("Submission failed:", error);
             this.showError("حدث خطأ", "تعذر الاتصال بالخادم. الرجاء التأكد من اتصالك بالإنترنت وإعادة المحاولة.");
         }
     },
@@ -562,18 +555,10 @@ window.RegistrationEngine = {
                 };
             }
 
-            const { commandBus } = await import('../core/CommandBus.js');
-            await commandBus.dispatch({
-                domain: 'academy_enrollments',
-                action: 'request',
-                payload: {
-                    courseId: payload.courseId,
-                    student: payload.student,
-                    email: window.currentUser ? window.currentUser.email : '',
-                    name: payload.student.fullName,
-                    payment: payload.payment
-                }
-            });
+            payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            
+            // Direct write to Firestore since Cloud Functions are not active
+            await db.collection('enrollmentRequests').add(payload);
             
             this.showStep(this.elements.successStep);
 
