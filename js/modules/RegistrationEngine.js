@@ -319,8 +319,8 @@ window.RegistrationEngine = {
         const cityVal = this.elements.city.value.trim();
         const reasonVal = this.elements.reason.value.trim();
 
-        // 1. Name: No numbers allowed, min length 5
-        if (!nameVal || /\d/.test(nameVal) || nameVal.length < 5) {
+        // 1. Name: No numbers allowed, min length 3
+        if (!nameVal || /\d/.test(nameVal) || nameVal.length < 3) {
             this.markInvalid(this.elements.name, this.elements.errName);
             isValid = false;
         } else {
