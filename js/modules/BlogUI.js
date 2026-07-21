@@ -49,7 +49,9 @@ class BlogUIClass {
                 let imageHtml = '';
                 if (imageUrl === 'assets/images/favicon.png') {
                     imageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img src="${imageUrl}" style="width: 80px; opacity: 0.7;" alt="Jhome">
+                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
+                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
+                        </div>
                     </div>`;
                 } else {
                     imageHtml = `<div style="background: url('${encodeURI(imageUrl)}') center/cover no-repeat; height: 220px; position: relative;"></div>`;
@@ -85,7 +87,9 @@ class BlogUIClass {
                 let imageHtml = '';
                 if (imageUrl === 'assets/images/favicon.png') {
                     imageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <img src="${imageUrl}" style="width: 80px; opacity: 0.7;" alt="Jhome">
+                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
+                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
+                        </div>
                     </div>`;
                 } else {
                     imageHtml = `<div style="background: url('${encodeURI(imageUrl)}') center/cover no-repeat; height: 220px; position: relative;"></div>`;
