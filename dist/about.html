@@ -8,11 +8,9 @@
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/firebase-config-teItJWtm.js"></script>
-  <script type="module" crossorigin src="/assets/ThemeManager-Cejr84z9.js"></script>
-  <script type="module" crossorigin src="/assets/Logger-D7Tvbo4W.js"></script>
-  <script type="module" crossorigin src="/assets/GlobalController-DC8vr5AO.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/firebase-config-gkO_wF-V.css">
+  <script type="module" crossorigin src="/assets/ThemeManager-BXOTmtaH.js"></script>
+  <script type="module" crossorigin src="/assets/GlobalController-BfbF-0JH.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/ThemeManager-gkO_wF-V.css">
 </head>
 <body>
 
@@ -35,10 +33,11 @@
             </a>
             <ul class="desktop-nav">
                 <li><a href="index.html">الرئيسية</a></li>
-                <li><a href="projects.html">المنتجات</a></li>
+                <li><a href="services.html">الخدمات والمنتجات</a></li>
                 <li><a href="courses.html">الأكاديمية</a></li>
-                <li><a href="about.html" class="active">الشركة</a></li>
+                <li><a href="projects.html">مشاريعنا</a></li>
                 <li><a href="blog.html">المركز الإعلامي</a></li>
+                <li><a href="about.html" class="active">الشركة</a></li>
                 <li><a href="contact.html">تواصل معنا</a></li>
             </ul>
             <button class="hamburger-btn" aria-label="Toggle Navigation">
@@ -53,10 +52,11 @@
         <button class="close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <ul class="nav-links-overlay">
             <li><a href="index.html" class="nav-link">الرئيسية</a></li>
-            <li><a href="projects.html" class="nav-link">المنتجات</a></li>
+            <li><a href="services.html" class="nav-link">الخدمات والمنتجات</a></li>
             <li><a href="courses.html" class="nav-link">الأكاديمية</a></li>
-            <li><a href="about.html" class="nav-link active">الشركة</a></li>
+            <li><a href="projects.html" class="nav-link">مشاريعنا</a></li>
             <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
+            <li><a href="about.html" class="nav-link active">الشركة</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
         </ul>
     </div>
@@ -120,6 +120,13 @@
             </div>
         </section>
 
+        <!-- CTA to join -->
+        <section class="section animate-fade-up" style="text-align: center; border-top: 1px solid var(--glass-border); padding-top: 4rem;">
+            <h2 class="display-2" style="margin-bottom: 1rem;">تريد أن تكون جزءًا من الرحلة؟;</h2>
+            <p class="body-large" style="max-width: 550px; margin: 0 auto 2rem;">سواء كنت مهندسًا، مفكرًا، أو لديك شراكة استراتيجية، نرحب بك دائمًا في Jhome.</p>
+            <a href="contact.html" class="btn btn-primary">تواصل معنا الآن <i class="fas fa-arrow-left" style="margin-right: 8px;"></i></a>
+        </section>
+
     </main>
 
     <footer>
@@ -130,10 +137,11 @@
             <p class="footer-slogan">نبني تقنية اليوم.. لتمكين الغد</p>
             <div class="footer-links">
                 <a href="index.html">الرئيسية</a>
-                <a href="projects.html">المنتجات</a>
+                <a href="services.html">الخدمات والمنتجات</a>
                 <a href="courses.html">الأكاديمية</a>
-                <a href="about.html">الشركة</a>
+                <a href="projects.html">مشاريعنا</a>
                 <a href="blog.html">المركز الإعلامي</a>
+                <a href="about.html">الشركة</a>
                 <a href="contact.html">تواصل معنا</a>
             </div>
             <p class="copyright">&copy; <span class="en-text">2026</span> Jhome Technology. جميع الحقوق محفوظة.</p>
@@ -141,8 +149,12 @@
     </footer>
 
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
 
+    <script src="js/animations.js"></script>
     </body>
 </html>

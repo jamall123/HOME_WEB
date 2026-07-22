@@ -231,33 +231,40 @@
             }
         });
 
-        const loginBtn = document.getElementById('login-submit-btn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', async (e) => {
-                const email = document.getElementById('unified-email').value.trim();
-                const pass = document.getElementById('unified-pass').value.trim();
-                const btn = e.target;
-                
-                if(!email || !pass) {
-                    NotificationManager?.show('الرجاء إدخال البريد وكلمة المرور', 'error');
-                    return;
+        document.body.addEventListener('click', async (e) => {
+            const btn = e.target.closest('#login-submit-btn');
+            if (!btn) return;
+            
+            const email = document.getElementById('unified-email').value.trim();
+            const pass = document.getElementById('unified-pass').value.trim();
+            
+            if(!email || !pass) {
+                if (NotificationManager) {
+                    NotificationManager.show('الرجاء إدخال البريد وكلمة المرور', 'error');
+                } else {
+                    alert('الرجاء إدخال البريد وكلمة المرور');
                 }
+                return;
+            }
 
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
-                btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
 
-                try {
-                    await AuthService.login(email, pass);
-                    // onAuthStateChanged will handle the rest
-                } catch (err) {
-                    console.error("Login failed:", err);
-                    NotificationManager?.show('بيانات الدخول غير صحيحة.', 'error');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
+            try {
+                await AuthService.login(email, pass);
+                // onAuthStateChanged will handle the rest
+            } catch (err) {
+                console.error("Login failed:", err);
+                if (NotificationManager) {
+                    NotificationManager.show('بيانات الدخول غير صحيحة.', 'error');
+                } else {
+                    alert('بيانات الدخول غير صحيحة.');
                 }
-            });
-        }
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
