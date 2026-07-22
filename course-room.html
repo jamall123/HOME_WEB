@@ -213,13 +213,15 @@
     <script type="module">
         import { AuthService } from './js/modules/AuthService.js';
         import { RoomEngine } from './js/modules/RoomEngine.js';
+        import { NotificationManager } from './js/modules/NotificationManager.js';
+        import { jhomeAuth } from './js/modules/FirebaseAdapter.js';
 
         // Auto-extract courseId from URL
         const urlParams = new URLSearchParams(window.location.search);
         const courseId = urlParams.get('id');
 
         // Check auth state to init RoomEngine
-        firebase.auth().onAuthStateChanged(user => {
+        jhomeAuth.onAuthStateChanged(user => {
             const gate = document.getElementById('room-entry-gate');
             if (user && courseId) {
                 if (gate) gate.classList.remove('active');
