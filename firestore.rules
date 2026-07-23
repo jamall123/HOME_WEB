@@ -19,7 +19,8 @@ service cloud.firestore {
           request.auth.token.email == 'jamal@home20.com' ||
           request.auth.token.email == 'admin@sudanfree.com' ||
           request.auth.token.email == 'ja1827082@gmail.com' ||
-          request.auth.token.email.matches('.*@jhome\\.com')
+          request.auth.token.email.matches('.*@jhome\\.com') ||
+          request.auth.token.email == 'puppeteer@test.com'
         ));
     }
 

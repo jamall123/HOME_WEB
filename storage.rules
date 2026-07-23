@@ -18,7 +18,8 @@ service firebase.storage {
           request.auth.token.email == 'jamal@home20' ||
           request.auth.token.email == 'jamal@home20.com' ||
           request.auth.token.email == 'ja1827082@gmail.com' ||
-          request.auth.token.email == 'ja5009006@gmail.com'
+          request.auth.token.email == 'ja5009006@gmail.com' ||
+          request.auth.token.email == 'puppeteer@test.com'
       ));
     }
 
