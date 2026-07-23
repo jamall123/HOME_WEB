@@ -6,13 +6,20 @@ service firebase.storage {
     function isSignedIn() {
       return request.auth != null;
     }
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email.matches('.*@jhome\\.com') ||
-        request.auth.token.email == 'admin@sudanfree.com' ||
-        request.auth.token.email == 'jamal@home20' ||
-        request.auth.token.email == 'jamal@home20.com'
-      );
+      return hasRole('ADMIN') || hasRole('SUPER_ADMIN') ||
+        (isSignedIn() && (
+          request.auth.token.email.matches('.*@jhome\\.com') ||
+          request.auth.token.email == 'admin@sudanfree.com' ||
+          request.auth.token.email == 'jamal@home20' ||
+          request.auth.token.email == 'jamal@home20.com' ||
+          request.auth.token.email == 'ja1827082@gmail.com' ||
+          request.auth.token.email == 'ja5009006@gmail.com'
+      ));
     }
 
     // Receipts: Anyone can upload (enrollment request), Admin can read
@@ -44,6 +51,12 @@ service firebase.storage {
       allow write: if isAdmin();
     }
     match /successStories/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Course Thumbnails
+    match /courses/{fileName} {
       allow read: if true;
       allow write: if isAdmin();
     }
