@@ -102,7 +102,7 @@ class GlobalControllerClass {
             }
             
         } catch (error) {
-            Logger.error('GlobalController', 'Error loading dynamic data', error);
+            Logger.error('GlobalController', 'Error loading dynamic data: ' + (error.message || error), error.stack || '');
             // On failure, hide the statistics block entirely
             const statsSection = document.querySelector('.statistics-section');
             if (statsSection) {
@@ -142,8 +142,8 @@ class GlobalControllerClass {
                 const founderBio2 = document.getElementById('dy-founder-bio2');
                 if(founderBio2 && data.founderBio2) founderBio2.textContent = data.founderBio2;
             }
-        } catch(e) {
-            Logger.error('GlobalController', 'Error loading settings', e);
+        } catch(error) {
+            Logger.error('GlobalController', 'Error loading settings: ' + (error.message || error), error.stack || '');
         }
     }
 

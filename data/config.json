@@ -1,51 +1,8 @@
 {
-  "company": {
-    "name": "Jhome",
-    "founded": 2023,
-    "founder": "Jamal Ahmed Ibrahim"
-  },
   "metrics": {
-    "lines_of_code": 150000,
-    "projects_completed": 3,
-    "active_users_target": 10000,
-    "system_uptime": 99.9
-  },
-  "products": [
-    {
-      "id": "sudan-free",
-      "name": "سودان فري",
-      "status": "مباشر",
-      "version": "v1.2.0",
-      "progress": 100
-    },
-    {
-      "id": "deiony",
-      "name": "ديوني",
-      "status": "قيد التطوير",
-      "version": "Alpha",
-      "progress": 65
-    }
-  ],
-  "roadmap": [
-    {
-      "quarter": "Q1 2026",
-      "title": "تأسيس البنية التحتية",
-      "description": "وضع حجر الأساس لهندسة البرمجيات وإطلاق الموقع الرسمي بحلة مؤسسية عالمية."
-    },
-    {
-      "quarter": "Q2 2026",
-      "title": "إطلاق 'سودان فري'",
-      "description": "الإطلاق التجريبي للمنصة الرقمية الأولى وتكوين قاعدة بيانات للمستقلين في العاصمة."
-    },
-    {
-      "quarter": "Q3 2026",
-      "title": "التوسع التقني وبوابات الدفع",
-      "description": "تحديث خوارزميات التوصية، إضافة بوابات الدفع المحلية، وتوسيع النطاق ليشمل ولايات إضافية."
-    },
-    {
-      "quarter": "2027 ومابعدها",
-      "title": "منظومة رقمية متكاملة",
-      "description": "إطلاق سلسلة من المنتجات التقنية الداعمة لبناء اقتصاد رقمي متكامل يخدم مختلف القطاعات."
-    }
-  ]
+    "lines_of_code": "100K+",
+    "projects_completed": "50+",
+    "happy_clients": "100+",
+    "awards_won": "10+"
+  }
 }

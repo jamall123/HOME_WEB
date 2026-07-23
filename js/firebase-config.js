@@ -22,4 +22,13 @@ window.API_BASE = "";
 // Initialize Firebase if not already initialized
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(window.FIREBASE_CONFIG);
+    
+    // Connect to emulators if running locally
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Connecting to Firebase Emulators...');
+        firebase.auth().useEmulator('http://127.0.0.1:9099');
+        firebase.firestore().useEmulator('127.0.0.1', 8080);
+        firebase.storage().useEmulator('127.0.0.1', 9199);
+        firebase.functions().useEmulator('127.0.0.1', 5001);
+    }
 }
