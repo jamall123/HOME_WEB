@@ -153,6 +153,15 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group" style="flex: 1;">
+                                <label>الجنس <span class="text-danger">*</span></label>
+                                <select id="reg-gender" class="form-input" required>
+                                    <option value="" disabled selected>اختر...</option>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </select>
+                                <span class="error-msg" id="err-gender" style="color: var(--danger-color); font-size: 0.8rem; display: none;">مطلوب</span>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
                                 <label>العمر <span class="text-danger">*</span></label>
                                 <input type="number" id="reg-age" required placeholder="سنة" min="10" max="100" class="form-input">
                                 <span class="error-msg" id="err-age" style="color: var(--danger-color); font-size: 0.8rem; display: none;">عمر غير صالح</span>
@@ -178,10 +187,17 @@
                             <label>التخصص</label>
                             <input type="text" id="reg-specialization" placeholder="مثال: هندسة برمجيات، محاسبة..." class="form-input">
                         </div>
-                        <div class="form-group">
-                            <label>المدينة / الولاية <span class="text-danger">*</span></label>
-                            <input type="text" id="reg-city" required placeholder="مثال: الخرطوم، بورتسودان..." class="form-input">
-                            <span class="error-msg" id="err-city" style="color: var(--danger-color); font-size: 0.8rem; display: none;">مطلوب</span>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label>الدولة <span class="text-danger">*</span></label>
+                                <input type="text" id="reg-country" required placeholder="مثال: السودان..." class="form-input">
+                                <span class="error-msg" id="err-country" style="color: var(--danger-color); font-size: 0.8rem; display: none;">مطلوب</span>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>المدينة / الولاية <span class="text-danger">*</span></label>
+                                <input type="text" id="reg-city" required placeholder="مثال: الخرطوم، بورتسودان..." class="form-input">
+                                <span class="error-msg" id="err-city" style="color: var(--danger-color); font-size: 0.8rem; display: none;">مطلوب</span>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>سبب رغبتك في الالتحاق بالكورس <span class="text-danger">*</span></label>

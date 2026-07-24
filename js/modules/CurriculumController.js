@@ -84,6 +84,23 @@ class CurriculumControllerClass {
         return this.cache.lessons[sectionId] || [];
     }
 
+    calculateTotalProgress(completedLessons = []) {
+        let total = 0;
+        let completed = 0;
+        
+        Object.values(this.cache.lessons).forEach(sectionLessons => {
+            sectionLessons.forEach(lesson => {
+                if (lesson.status !== 'Draft' && lesson.status !== 'Hidden') {
+                    total++;
+                    if (completedLessons.includes(lesson.id)) completed++;
+                }
+            });
+        });
+
+        if (total === 0) return 0;
+        return Math.round((completed / total) * 100);
+    }
+
     /**
      * Optimistically reorders sections.
      */
@@ -132,8 +149,20 @@ class CurriculumControllerClass {
 
     selectLesson(lessonId) {
         this.cache.currentLessonId = lessonId;
-        // In a real scenario, this would communicate with RoomEngine to change the global mode/video.
         this.notifyUIRender();
+        
+        // Find lesson object
+        let lesson = null;
+        for (const sectionId in this.cache.lessons) {
+            const found = this.cache.lessons[sectionId].find(l => l.id === lessonId);
+            if (found) { lesson = found; break; }
+        }
+
+        if (lesson) {
+            import('./EventBus.js').then(({ EventBus, Events }) => {
+                EventBus.emit(Events.PLAY_LECTURE, lesson);
+            });
+        }
         
         // Example: Emit event for Analytics
         import('./CurriculumAnalytics.js').then(({ CurriculumAnalytics }) => {

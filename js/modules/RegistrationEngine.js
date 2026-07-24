@@ -49,6 +49,8 @@ window.RegistrationEngine = {
             education: document.getElementById('reg-education'),
             specialization: document.getElementById('reg-specialization'),
             city: document.getElementById('reg-city'),
+            country: document.getElementById('reg-country'),
+            gender: document.getElementById('reg-gender'),
             reason: document.getElementById('reg-reason'),
             
             // Errors
@@ -58,6 +60,8 @@ window.RegistrationEngine = {
             errPhone: document.getElementById('err-phone'),
             errEducation: document.getElementById('err-education'),
             errCity: document.getElementById('err-city'),
+            errCountry: document.getElementById('err-country'),
+            errGender: document.getElementById('err-gender'),
             errReason: document.getElementById('err-reason'),
 
             // Step 1 Submit
@@ -187,7 +191,7 @@ window.RegistrationEngine = {
         }
 
         // Reset validation styling on input
-        const inputs = [this.elements.name, this.elements.email, this.elements.age, this.elements.phone, this.elements.education, this.elements.city, this.elements.reason];
+        const inputs = [this.elements.name, this.elements.email, this.elements.age, this.elements.phone, this.elements.education, this.elements.city, this.elements.country, this.elements.gender, this.elements.reason];
         inputs.forEach(input => {
             if(input) {
                 input.addEventListener('input', () => {
@@ -317,6 +321,8 @@ window.RegistrationEngine = {
         const phoneVal = this.elements.phone.value.trim();
         const eduVal = this.elements.education.value;
         const cityVal = this.elements.city.value.trim();
+        const countryVal = this.elements.country.value.trim();
+        const genderVal = this.elements.gender.value;
         const reasonVal = this.elements.reason.value.trim();
 
         // 1. Name: No numbers allowed, min length 3
@@ -371,6 +377,22 @@ window.RegistrationEngine = {
             isValid = false;
         } else {
             this.markValid(this.elements.city);
+        }
+
+        // Country
+        if (!countryVal || countryVal.length < 2) {
+            this.markInvalid(this.elements.country, this.elements.errCountry);
+            isValid = false;
+        } else {
+            this.markValid(this.elements.country);
+        }
+
+        // Gender
+        if (!genderVal) {
+            this.markInvalid(this.elements.gender, this.elements.errGender);
+            isValid = false;
+        } else {
+            this.markValid(this.elements.gender);
         }
 
         // 7. Reason
@@ -530,33 +552,30 @@ window.RegistrationEngine = {
 
             const db = firebase.firestore();
             
+            // Generate unique request number (e.g. REQ-12345678)
+            const requestNumber = 'REQ-' + Math.floor(10000000 + Math.random() * 90000000);
+
             // Build the payload matching the schema
             const payload = {
+                requestNumber: requestNumber,
                 courseId: this.currentCourseId,
                 courseTitle: this.currentCourseTitle,
-                type: this.isPaidCourse ? 'paid' : 'free',
+                fullName: this.elements.name.value.trim(),
+                phone: this.elements.phone.value.trim(),
+                email: this.elements.email.value.trim() || null,
+                age: parseInt(this.elements.age.value),
+                gender: this.elements.gender.value,
+                country: this.elements.country.value.trim(),
+                city: this.elements.city.value.trim(),
+                paymentStatus: this.isPaidCourse ? 'paid' : 'free',
+                receiptUrl: receiptUrl,
                 status: 'pending',
-                student: {
-                    name: this.elements.name.value.trim(),
-                    phone: this.elements.phone.value.trim(),
-                    email: this.elements.email.value.trim() || null,
-                    age: parseInt(this.elements.age.value),
-                    education: this.elements.education.value,
-                    specialization: this.elements.specialization.value.trim() || null,
-                    city: this.elements.city.value.trim(),
-                    reason: this.elements.reason.value.trim()
-                }
+                education: this.elements.education.value,
+                specialization: this.elements.specialization.value.trim() || null,
+                reason: this.elements.reason.value.trim(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            if (this.isPaidCourse) {
-                payload.payment = {
-                    bankId: this.elements.bankSelector ? this.elements.bankSelector.value : null,
-                    receiptUrl: receiptUrl
-                };
-            }
-
-            payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            
             // Direct write to Firestore since Cloud Functions are not active
             await db.collection('enrollmentRequests').add(payload);
             

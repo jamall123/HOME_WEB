@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحقق من الشهادة - منصة السودان المجاني</title>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0056b3;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg: #f4f6f9;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .valid-icon { color: var(--success); }
+        .invalid-icon { color: var(--danger); }
+        .info-group {
+            margin: 15px 0;
+            text-align: right;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        .info-group strong {
+            display: inline-block;
+            width: 120px;
+            color: #555;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="loading-container">
+        <div class="icon">⏳</div>
+        <h2>جاري التحقق من الشهادة...</h2>
+        <p>يرجى الانتظار بينما نقوم بمراجعة السجلات.</p>
+    </div>
+
+    <div class="container" id="result-container" style="display: none;">
+        <!-- Content injected by JS -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const certId = urlParams.get('id');
+
+            const loading = document.getElementById('loading-container');
+            const result = document.getElementById('result-container');
+
+            if (!certId) {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <div class="icon invalid-icon">✖</div>
+                    <h2>رقم الشهادة مفقود</h2>
+                    <p>يرجى التأكد من الرابط أو مسح رمز الـ QR بشكل صحيح.</p>
+                `;
+                return;
+            }
+
+            try {
+                const db = firebase.firestore();
+                const doc = await db.collection('certificates').doc(certId).get();
+
+                loading.style.display = 'none';
+                result.style.display = 'block';
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    const dateObj = data.issueDate ? data.issueDate.toDate() : new Date();
+                    const dateStr = dateObj.toLocaleDateString('en-GB');
+
+                    result.innerHTML = `
+                        <div class="icon valid-icon">✔</div>
+                        <h2 style="color: var(--success)">شهادة معتمدة وموثقة</h2>
+                        <div class="info-group">
+                            <div><strong>رقم الشهادة:</strong> ${certId}</div>
+                            <div><strong>اسم الطالب:</strong> ${data.studentName}</div>
+                            <div><strong>اسم الدورة:</strong> ${data.courseTitle}</div>
+                            <div><strong>تاريخ الإصدار:</strong> ${dateStr}</div>
+                        </div>
+                        <a href="index.html" class="btn">العودة للمنصة الرئيسية</a>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="icon invalid-icon">✖</div>
+                        <h2 style="color: var(--danger)">شهادة غير صالحة</h2>
+                        <p>لم يتم العثور على أي سجل مطابق لرقم الشهادة المُدخل في قاعدة بيانات منصة السودان المجاني.</p>
+                        <a href="index.html" class="btn" style="background:#555;">العودة للمنصة الرئيسية</a>
+                    `;
+                }
+
+            } catch (error) {
+                console.error("Verification Error:", error);
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <div class="icon invalid-icon">⚠</div>
+                    <h2>حدث خطأ أثناء الاتصال بالخادم</h2>
+                    <p>يرجى المحاولة مرة أخرى لاحقاً.</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

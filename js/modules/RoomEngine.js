@@ -127,10 +127,24 @@ class RoomEngineClass {
         this.attachGlobalListeners();
         this.setupFirestoreListeners();
 
+        const badge = document.getElementById('role-badge');
+        if (badge) {
+            if (this.isInstructor) {
+                badge.textContent = 'مدرب / مشرف';
+                badge.style.background = '#8b5cf6'; // Violet color for instructor
+            } else {
+                badge.textContent = 'طالب';
+                badge.style.background = 'var(--primary-color)';
+            }
+        }
+
         // console.log(`[RoomEngine] Initialized for ${courseId} | Role: ${this.isInstructor ? 'Instructor' : 'Student'}`);
     }
 
     async checkUserRole() {
+        if (this.currentUser && this.currentUser.role) {
+            return this.currentUser.role === 'instructor' || this.currentUser.role === 'admin';
+        }
         try {
             const doc = await firebase.firestore().collection('users').doc(this.currentUser.uid).get();
             if (doc.exists) {
@@ -280,6 +294,46 @@ class RoomEngineClass {
         window.addEventListener('offline', () => {
             this.updateState({ network: { isOffline: true } });
             NotificationManager.show('انقطع الاتصال بالإنترنت', 'error', 0);
+        });
+
+        import('./EventBus.js').then(({ EventBus, Events }) => {
+            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+                if (!lesson) return;
+                let mode = 'video';
+                if (lesson.type && lesson.type !== 'video' && lesson.type !== 'audio') mode = 'link';
+                
+                this.updateState({
+                    room: { mode: mode },
+                    presentation: { videoUrl: lesson.contentUrl || lesson.url, activeLessonId: lesson.id }
+                });
+
+                const playerVideo = document.getElementById('player-video');
+                if (playerVideo && (lesson.contentUrl || lesson.url)) {
+                    playerVideo.src = lesson.contentUrl || lesson.url;
+                    playerVideo.load();
+                    playerVideo.play().catch(e => console.log('Autoplay prevented', e));
+                    
+                    // Track video progress and completion
+                    playerVideo.onended = () => {
+                        import('./CurriculumProgress.js').then(({ CurriculumProgress }) => {
+                            if (this.state.presentation.activeLessonId) {
+                                CurriculumProgress.markLessonComplete(this.state.presentation.activeLessonId);
+                            }
+                        });
+                    };
+                    
+                    // Update timestamp periodically (e.g. every 5 seconds)
+                    playerVideo.ontimeupdate = () => {
+                        if (playerVideo.currentTime > 0 && Math.floor(playerVideo.currentTime) % 5 === 0) {
+                            import('./CurriculumProgress.js').then(({ CurriculumProgress }) => {
+                                if (this.state.presentation.activeLessonId) {
+                                    CurriculumProgress.updateVideoTimestamp(this.state.presentation.activeLessonId, playerVideo.currentTime);
+                                }
+                            });
+                        }
+                    };
+                }
+            });
         });
 
         // Low bandwidth toggle handler
