@@ -69,10 +69,15 @@ export const AuthService = {
                     const credDoc = snapshot.docs[0];
                     const credData = credDoc.data();
                     
-                    await credDoc.ref.update({
-                        lastLogin: new Date(), // using generic date instead of firestore FieldValue for module compat
-                        loginCount: (credData.loginCount || 0) + 1
-                    });
+                    // Update login stats (non-critical — don't block login if rules deny write)
+                    try {
+                        await credDoc.ref.update({
+                            lastLogin: new Date(),
+                            loginCount: (credData.loginCount || 0) + 1
+                        });
+                    } catch(updateErr) {
+                        console.warn('تعذّر تحديث إحصائيات الدخول (Firestore rules):', updateErr.message);
+                    }
 
                     const mockUser = {
                         uid: credDoc.id,
