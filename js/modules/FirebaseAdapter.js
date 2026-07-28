@@ -55,7 +55,7 @@ export const auth = firebase.auth(mainApp);
 export const jhomeAuth = firebase.auth(jhomeApp || mainApp);
 
 export const storage = firebase.storage(mainApp);
-export const functions = mainApp.functions('us-central1');
+export const functions = typeof mainApp.functions === 'function' ? mainApp.functions('us-central1') : null;
 
 export const FirebaseAdapter = {
     db,
