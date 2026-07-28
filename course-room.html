@@ -17,7 +17,7 @@
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: center; padding: 3rem 2rem;">
             <div style="margin-bottom: 2rem;">
                 <i class="fas fa-door-open" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة</h2>
+                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة (v3)</h2>
                 <p class="text-muted">الرجاء تسجيل الدخول لدخول الغرفة.</p>
             </div>
             
@@ -32,7 +32,7 @@
                     <label>كلمة المرور</label>
                     <input type="password" id="unified-pass" class="form-input" dir="ltr">
                 </div>
-                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;" onmousedown="this.style.backgroundColor='red'; alert('Button MouseDown Fired!');" onclick="handleLoginClick(this)"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
             </div>
         </div>
     </div>
@@ -210,6 +210,36 @@
     <script type="module" src="js/academy.js"></script>
 
     <!-- New ES Modules Architecture (Phase 3 Integration) -->
+    <script>
+        window.addEventListener('error', function(e) {
+            alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            alert('Promise Error: ' + e.reason);
+        });
+        // Make the button say "Script loaded" if the module loads successfully
+        window.moduleLoaded = function() {
+            // document.getElementById('login-submit-btn').innerHTML += ' (Script Loaded)';
+        };
+
+        window.handleLoginClick = function(btn) {
+            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
+
+            const email = document.getElementById('unified-email').value.trim();
+            const pass = document.getElementById('unified-pass').value.trim();
+            
+            if(!email || !pass) {
+                alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة';
+                btn.disabled = false;
+                return;
+            }
+
+            const ev = new CustomEvent('DO_LOGIN', { detail: { email, pass, btn } });
+            document.dispatchEvent(ev);
+        };
+    </script>
     <script type="module">
         import { AuthService } from './js/modules/AuthService.js';
         import { RoomEngine } from './js/modules/RoomEngine.js';
@@ -242,30 +272,10 @@
             }
         });
 
-        document.body.addEventListener('click', async (e) => {
-            const btn = e.target.closest('#login-submit-btn');
-            if (!btn) return;
-            
-            const email = document.getElementById('unified-email').value.trim();
-            const pass = document.getElementById('unified-pass').value.trim();
-            
-            if(!email || !pass) {
-                if (NotificationManager) {
-                    NotificationManager.show('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error');
-                } else {
-                    alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
-                }
-                return;
-            }
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
-            btn.disabled = true;
-
+        document.addEventListener('DO_LOGIN', async (e) => {
+            const { email, pass, btn } = e.detail;
             try {
-                // Pass courseId to login to allow custom auth fallback
                 await AuthService.login(email, pass, courseId);
-                // EventBus will handle the rest
             } catch (err) {
                 console.error("Login failed:", err);
                 if (NotificationManager) {
@@ -273,7 +283,7 @@
                 } else {
                     alert('بيانات الدخول غير صحيحة.');
                 }
-                btn.innerHTML = originalText;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة';
                 btn.disabled = false;
             }
         });
