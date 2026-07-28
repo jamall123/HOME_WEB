@@ -5,6 +5,7 @@
 
 import { SessionExporter } from './SessionExporter.js';
 import { ArchiveService } from './ArchiveService.js';
+import { NotificationManager } from './NotificationManager.js';
 
 export class ArchiveControllerClass {
     constructor() {

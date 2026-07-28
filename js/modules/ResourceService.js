@@ -4,6 +4,7 @@ import { UploadQueue } from './UploadQueue.js';
 import { HashEngine } from './HashEngine.js';
 import { AIProcessingEngine } from './AIProcessingEngine.js';
 import { OfflineSyncEngine } from './OfflineSyncEngine.js';
+import { StateStore } from './StateStore.js';
 
 export class ResourceServiceClass {
     constructor() {
@@ -93,7 +94,7 @@ export class ResourceServiceClass {
                 fileHash: fileHash, // Save hash for future deduplication
                 downloadUrl: downloadUrl,
                 storagePath: storagePath,
-                uploadedBy: firebase.auth().currentUser.uid,
+                uploadedBy: StateStore.getState('user')?.uid || firebase.auth().currentUser?.uid,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 visibility: 'public',

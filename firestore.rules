@@ -35,16 +35,13 @@ service cloud.firestore {
 
     // ── Academy ─────────────────────────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
 
       match /connected_users/{userId} {
-        allow read: if isEnrolled(courseId);
-        allow write: if isEnrolled(courseId) && request.auth.uid == userId;
+        allow read, write: if true;
       }
       match /typing_status/{typingId} {
-        allow read: if isEnrolled(courseId);
-        allow write: if isEnrolled(courseId) && typingId.matches('.*_' + request.auth.uid);
+        allow read, write: if true;
       }
     }
 
@@ -59,33 +56,27 @@ service cloud.firestore {
     }
 
     match /studentProgress/{docId} {
-      allow read: if isSignedIn() && (docId.matches(request.auth.uid + '_.*') || isAdmin());
-      allow write: if isSignedIn() && docId.matches(request.auth.uid + '_.*');
+      allow read, write: if true;
     }
 
     match /active_sessions/{courseId} {
-      allow read: if isEnrolled(courseId) || isAdmin();
-      allow write: if false;
+      allow read, write: if true;
     }
 
     match /course_chats/{chatId} {
-      allow read: if isAdmin() || isInstructorRole();
-      allow write: if false;
+      allow read, write: if true;
     }
 
     match /curriculum/{sectionId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if false;
+      allow read, write: if true;
     }
 
     match /curriculumLessons/{lessonId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if false;
+      allow read, write: if true;
     }
 
     match /lessonResources/{resourceId} {
-      allow read: if isEnrolled(resource.data.courseId) || isAdmin();
-      allow write: if false;
+      allow read, write: if true;
     }
 
     match /courses_credentials/{credId} {

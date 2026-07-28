@@ -1,4 +1,5 @@
 import { ChatService } from './ChatService.js';
+import { NotificationManager } from './NotificationManager.js';
 
 /**
  * ChatController.js

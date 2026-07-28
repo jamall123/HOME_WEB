@@ -23,7 +23,9 @@ class CurriculumControllerClass {
         
         // Initialize Progress (using dynamic import to avoid circular dep)
         const { CurriculumProgress } = await import('./CurriculumProgress.js');
-        await CurriculumProgress.init(courseId, firebase.auth().currentUser.uid);
+        const { AuthService } = await import('./AuthService.js');
+        const user = AuthService.getCurrentUser();
+        await CurriculumProgress.init(courseId, user?.uid);
 
         await this.loadCurriculum();
     }
@@ -200,8 +202,10 @@ class CurriculumControllerClass {
             this.cache.lessons[newSection.id] = [];
             delete this.cache.lessons['temp_' + Date.now()];
 
-            import('./CurriculumAudit.js').then(({ CurriculumAudit }) => {
-                CurriculumAudit.logAction('create_section', docRef.id, 'section', null, newSection, firebase.auth().currentUser.uid);
+            import('./CurriculumAudit.js').then(async ({ CurriculumAudit }) => {
+                const { AuthService } = await import('./AuthService.js');
+                const user = AuthService.getCurrentUser();
+                CurriculumAudit.logAction('create_section', docRef.id, 'section', null, newSection, user?.uid);
             });
             
             NotificationManager.show("تمت إضافة القسم بنجاح", "success");

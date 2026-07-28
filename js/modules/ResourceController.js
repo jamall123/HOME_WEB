@@ -6,6 +6,7 @@
 import { ResourceService } from './ResourceService.js';
 import { UploadQueue } from './UploadQueue.js';
 import { PreviewEngine } from './PreviewEngine.js';
+import { NotificationManager } from './NotificationManager.js';
 
 export class ResourceControllerClass {
     constructor() {
