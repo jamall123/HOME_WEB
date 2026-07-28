@@ -17,7 +17,7 @@
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: center; padding: 3rem 2rem;">
             <div style="margin-bottom: 2rem;">
                 <i class="fas fa-door-open" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة (v3)</h2>
+                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة</h2>
                 <p class="text-muted">الرجاء تسجيل الدخول لدخول الغرفة.</p>
             </div>
             
@@ -32,7 +32,7 @@
                     <label>كلمة المرور</label>
                     <input type="password" id="unified-pass" class="form-input" dir="ltr">
                 </div>
-                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;" onmousedown="this.style.backgroundColor='red'; alert('Button MouseDown Fired!');" onclick="handleLoginClick(this)"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;" onclick="handleLoginClick(this)"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
             </div>
         </div>
     </div>
@@ -251,7 +251,7 @@
         const courseId = urlParams.get('id');
 
         // Check auth state to init RoomEngine
-        EventBus.on(Events.AUTH_STATE_CHANGED, (user) => {
+        EventBus.subscribe(Events.AUTH_STATE_CHANGED, (user) => {
             const gate = document.getElementById('room-entry-gate');
             if (user && courseId) {
                 // Prevent cross-course access for custom auth users
