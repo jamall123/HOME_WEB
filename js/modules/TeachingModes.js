@@ -16,7 +16,7 @@ export class TeachingModesClass {
      */
     async setMode(modeName, metadata = {}) {
         const payload = {
-            mode: modeName, // 'video', 'slides', 'audio_only', 'channel'
+            mode: modeName, // 'video', 'slides', 'audio', 'channel'
             metadata: metadata
         };
         await InstructorService.updateTeachingMode(this.controller.engine.courseId, payload);

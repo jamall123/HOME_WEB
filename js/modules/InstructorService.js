@@ -6,8 +6,8 @@
 
 export class InstructorServiceClass {
     constructor() {
-        this.db = firebase.firestore();
-        this.storage = firebase.storage();
+        this.db = window.firebase.firestore();
+        this.storage = window.firebase.storage();
     }
 
     /**
@@ -49,7 +49,7 @@ export class InstructorServiceClass {
     async updateTeachingMode(courseId, modePayload) {
         const payload = {
             ...modePayload,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         };
         await this.db.collection('active_sessions').doc(courseId).set(payload, { merge: true });
     }

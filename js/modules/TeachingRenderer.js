@@ -58,6 +58,9 @@ export const TeachingRenderer = {
             case 'channel':
                 this.elements.channelLayer.classList.add('active');
                 break;
+            case 'audio':
+                this.elements.audioLayer.classList.add('active');
+                break;
             default:
                 this.elements.videoLayer.classList.add('active');
         }
