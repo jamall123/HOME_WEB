@@ -302,6 +302,12 @@ class RoomEngineClass {
                 let mode = 'video';
                 if (lesson.type && lesson.type !== 'video' && lesson.type !== 'audio') mode = 'link';
                 
+                // Update Overview metadata
+                const titleEl = document.getElementById('info-title');
+                const descEl = document.getElementById('info-desc');
+                if (titleEl) titleEl.textContent = lesson.title || 'درس بدون عنوان';
+                if (descEl) descEl.textContent = lesson.description || 'لا يوجد وصف متاح لهذا الدرس.';
+                
                 this.updateState({
                     room: { mode: mode },
                     presentation: { videoUrl: lesson.contentUrl || lesson.url, activeLessonId: lesson.id }

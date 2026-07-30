@@ -12,13 +12,13 @@ class ChatServiceClass {
     /**
      * Subscribe to a specific channel's messages with pagination.
      */
-    subscribeToChannel(courseId, channel, limit, onSnapshotCallback) {
+    subscribeToChannel(lessonId, channel, limit, onSnapshotCallback) {
         if (this.unsubscribeFunctions[channel]) {
             this.unsubscribeFunctions[channel]();
         }
 
         const query = this.db.collection('course_chats')
-            .where('courseId', '==', courseId)
+            .where('lessonId', '==', lessonId)
             .where('channel', '==', channel)
             .orderBy('timestamp', 'desc') // desc for lazy loading upward
             .limit(limit);
@@ -40,14 +40,14 @@ class ChatServiceClass {
         this.unsubscribeFunctions = {};
     }
 
-    async sendMessage(courseId, userId, userName, role, text, channel, replyToId = null) {
+    async sendMessage(lessonId, userId, userName, role, text, channel, replyToId = null) {
         try {
             const { commandBus } = await import('../core/CommandBus.js');
             await commandBus.dispatch({
                 domain: 'academy',
                 action: 'createCourseChat',
                 payload: {
-                    courseId,
+                    lessonId,
                     userId,
                     text,
                     channel

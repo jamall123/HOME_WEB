@@ -33,7 +33,31 @@ class ChatControllerClass {
 
     init(engine) {
         this.engine = engine;
-        this.switchChannel('public'); // Default
+        this.activeLessonId = null;
+        
+        import('../core/EventBus.js').then(({ EventBus, Events }) => {
+            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+                if (lesson && lesson.id) {
+                    this.setLessonId(lesson.id);
+                }
+            });
+        });
+        
+        // Wait for a lesson to be set before subscribing
+    }
+
+    setLessonId(lessonId) {
+        if (this.activeLessonId === lessonId) return;
+        this.activeLessonId = lessonId;
+        
+        // Clear messages when switching lessons
+        this.cache.messages = { public: [], questions: [], announcements: [], system: [] };
+        
+        if (this.cache.activeChannel) {
+            this.switchChannel(this.cache.activeChannel);
+        } else {
+            this.switchChannel('public');
+        }
     }
 
     setChatVisibility(isOpen) {
@@ -48,8 +72,13 @@ class ChatControllerClass {
         this.cache.activeChannel = channelName;
         this.cache.unreadCounts[channelName] = 0;
         
+        if (!this.activeLessonId) {
+            // Cannot subscribe without an active lesson
+            return;
+        }
+
         ChatService.subscribeToChannel(
-            this.engine.courseId, 
+            this.activeLessonId, 
             channelName, 
             30, 
             (messages) => this.handleNewMessages(channelName, messages)
@@ -99,12 +128,14 @@ class ChatControllerClass {
             return;
         }
 
+        if (!this.activeLessonId) return;
+
         try {
             await ChatService.sendMessage(
-                this.engine.courseId,
+                this.activeLessonId,
                 this.engine.currentUser.uid,
-                this.engine.currentUser.displayName || 'طالب',
-                this.engine.isInstructor ? 'instructor' : 'student',
+                this.engine.currentUser.name,
+                this.engine.currentUser.role || 'student',
                 text,
                 channel,
                 replyToId

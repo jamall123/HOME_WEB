@@ -40,10 +40,28 @@ class CurriculumControllerClass {
             const sections = await CurriculumService.getSections(this.courseId);
             this.cache.sections = sections;
 
-            // 2. Fetch lessons for each section (could be optimized with pagination later)
+            let totalLessonsCount = 0;
+            let activeLesson = null;
+
+            // 2. Fetch lessons for each section
             for (const section of sections) {
                 const lessons = await CurriculumService.getLessons(section.id);
                 this.cache.lessons[section.id] = lessons;
+                totalLessonsCount += lessons.length;
+                
+                // Find active (uncompleted) lesson
+                const active = lessons.find(l => l.status !== 'Completed');
+                if (active) activeLesson = active;
+            }
+
+            // 3. Session-Based Logic: Auto-create an active lesson if none exists
+            if (this.isInstructor && !activeLesson) {
+                activeLesson = await this.createAutomaticLesson(totalLessonsCount + 1);
+            }
+
+            if (activeLesson) {
+                // Auto-select the active lesson
+                this.selectLesson(activeLesson.id);
             }
 
             // console.log("[CurriculumController] Curriculum loaded into cache.");
@@ -217,6 +235,88 @@ class CurriculumControllerClass {
             this.cache.sections = this.cache.sections.filter(s => !s.id.startsWith('temp_'));
             this.notifyUIRender();
             NotificationManager.show("فشل إضافة القسم", "error");
+        }
+    }
+
+    async createAutomaticLesson(lessonNumber) {
+        let section = this.cache.sections[0];
+        if (!section) {
+            const docRef = await CurriculumService.addSection(this.courseId, "بث مباشر", 0);
+            section = { id: docRef.id, title: "بث مباشر", courseId: this.courseId, order: 0, status: 'Published' };
+            this.cache.sections.push(section);
+            this.cache.lessons[section.id] = [];
+        }
+
+        const title = `الدرس ${lessonNumber}`;
+        const newLesson = {
+            title: title,
+            type: 'video',
+            duration: '0',
+            locked: false,
+            status: 'Active',
+            order: this.cache.lessons[section.id].length
+        };
+
+        const lessonDocRef = await CurriculumService.addLesson(section.id, newLesson);
+        newLesson.id = lessonDocRef.id;
+        
+        this.cache.lessons[section.id].push(newLesson);
+        this.notifyUIRender();
+        return newLesson;
+    }
+
+    async renameLesson(lessonId, newTitle) {
+        if (!newTitle.trim()) return;
+        try {
+            // Optimistic Update
+            let targetLesson = null;
+            for (const sectionId in this.cache.lessons) {
+                targetLesson = this.cache.lessons[sectionId].find(l => l.id === lessonId);
+                if (targetLesson) {
+                    targetLesson.title = newTitle;
+                    break;
+                }
+            }
+            this.notifyUIRender();
+            
+            // Background sync
+            await CurriculumService.updateLesson(lessonId, { title: newTitle });
+            NotificationManager.show("تم تغيير اسم الدرس بنجاح", "success");
+        } catch(error) {
+            console.error("Rename lesson failed:", error);
+            NotificationManager.show("فشل تغيير اسم الدرس", "error");
+        }
+    }
+
+    async endCurrentLesson() {
+        if (!this.cache.currentLessonId) return;
+        
+        try {
+            // Mark current as completed
+            await CurriculumService.updateLesson(this.cache.currentLessonId, { status: 'Completed', locked: true });
+            
+            // Optimistic update
+            for (const sectionId in this.cache.lessons) {
+                const targetLesson = this.cache.lessons[sectionId].find(l => l.id === this.cache.currentLessonId);
+                if (targetLesson) {
+                    targetLesson.status = 'Completed';
+                    targetLesson.locked = true;
+                    break;
+                }
+            }
+            
+            // Reload curriculum to auto-create the next active lesson
+            await this.loadCurriculum();
+            NotificationManager.show("تم إنهاء الدرس بنجاح وبدء دورة جديدة", "success");
+            
+            // Notify other controllers to clear their caches
+            import('../core/EventBus.js').then(({ EventBus, Events }) => {
+                EventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
+            });
+            
+        } catch(error) {
+            console.error("End lesson failed:", error);
+            NotificationManager.show("فشل إنهاء الدرس", "error");
         }
     }
 

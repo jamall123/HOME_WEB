@@ -11,11 +11,22 @@ import { NotificationManager } from './NotificationManager.js';
 export class ResourceControllerClass {
     constructor() {
         this.engine = null;
+        this.activeLessonId = null;
+        this.onLessonChange = null;
     }
 
     init(engine) {
         this.engine = engine;
         UploadQueue.init(this.engine.courseId);
+        
+        import('../core/EventBus.js').then(({ EventBus, Events }) => {
+            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+                if (lesson && lesson.id && this.activeLessonId !== lesson.id) {
+                    this.activeLessonId = lesson.id;
+                    if (this.onLessonChange) this.onLessonChange(lesson.id);
+                }
+            });
+        });
     }
 
     async handleFilesDropped(files, lessonId = null) {
@@ -26,15 +37,13 @@ export class ResourceControllerClass {
 
         for (const file of files) {
             try {
-                // Determine preview early if possible
                 const preview = await PreviewEngine.generatePreview(file);
                 
                 await ResourceService.uploadFile(
                     this.engine.courseId, 
-                    lessonId || this.engine.state.presentation?.lessonId || 'global', 
+                    this.activeLessonId || lessonId || 'global', 
                     file, 
                     (id, state, progress) => {
-                        // Render progress updates to the active queue UI
                         if (this.onProgressUpdate) this.onProgressUpdate(id, state, progress, preview);
                     }
                 );
@@ -55,7 +64,8 @@ export class ResourceControllerClass {
     }
 
     async getResources() {
-        return await ResourceService.getResources(this.engine.courseId);
+        if (!this.activeLessonId) return [];
+        return await ResourceService.getResources(this.engine.courseId, this.activeLessonId);
     }
 }
 export const ResourceController = new ResourceControllerClass();

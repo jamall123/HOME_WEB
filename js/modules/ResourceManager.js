@@ -32,12 +32,16 @@ export class ResourceManagerClass {
                 }
             };
         }
+        
+        ResourceController.onLessonChange = () => {
+            this.loadResources();
+        };
 
         this.loadResources();
     }
 
     setupDragAndDrop() {
-        const container = document.getElementById('tab-content-resources');
+        const container = document.getElementById('side-content-resources');
         if (!container) return;
 
         // Create Drop Zone Overlay

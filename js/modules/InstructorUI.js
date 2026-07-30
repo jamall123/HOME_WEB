@@ -95,6 +95,13 @@ export class InstructorUIClass {
                             <span><i class="fas fa-lock"></i> إغلاق الموارد</span>
                             <label class="switch"><input type="checkbox" id="inst-toggle-resources"><span class="slider"></span></label>
                         </div>
+                        <div class="stat-card" style="padding: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; grid-column: 1 / -1;">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0;"><i class="fas fa-flag-checkered"></i> إنهاء الدرس الحالي</h4>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">سيتم حفظ جميع الموارد والمحادثات تحت هذا الدرس، وبدء درس جديد فارغ.</span>
+                            </div>
+                            <button class="btn btn-danger" onclick="window.InstructorAPI.endCurrentLesson()">إنهاء وبدء جديد</button>
+                        </div>
                     </div>
                 </div>
 
@@ -120,7 +127,12 @@ export class InstructorUIClass {
         
         // Expose a safe global for inline onclicks in the template above
         window.InstructorAPI = {
-            setMode: (mode) => this.controller.setTeachingMode(mode)
+            setMode: (mode) => this.controller.setTeachingMode(mode),
+            endCurrentLesson: () => {
+                if (confirm('هل أنت متأكد من إنهاء الدرس الحالي وبدء دورة درس جديدة؟')) {
+                    import('./CurriculumController.js').then(({CurriculumController}) => CurriculumController.endCurrentLesson());
+                }
+            }
         };
 
         const navBtns = this.mountPoint.querySelectorAll('.inst-nav');

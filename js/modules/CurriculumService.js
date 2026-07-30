@@ -95,6 +95,38 @@ class CurriculumServiceClass {
     }
 
     /**
+     * Create a new lesson
+     */
+    async addLesson(sectionId, lessonData) {
+        try {
+            const data = {
+                sectionId: sectionId,
+                ...lessonData,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            const docRef = await this.db.collection('curriculumLessons').add(data);
+            return docRef;
+        } catch (error) {
+            console.error(`[CurriculumService] Failed to add lesson:`, error);
+            throw new Error('SyncError');
+        }
+    }
+
+    /**
+     * Update an existing lesson
+     */
+    async updateLesson(lessonId, updates) {
+        try {
+            updates.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+            await this.db.collection('curriculumLessons').doc(lessonId).update(updates);
+        } catch (error) {
+            console.error(`[CurriculumService] Failed to update lesson:`, error);
+            throw new Error('SyncError');
+        }
+    }
+
+    /**
      * Soft delete a curriculum entity.
      */
     async softDelete(collectionName, documentId, userId) {

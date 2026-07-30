@@ -36,10 +36,31 @@ class CurriculumUIClass {
                 return;
             }
 
+            const editBtn = e.target.closest('.btn-edit-lesson');
+            if (editBtn) {
+                e.stopPropagation();
+                const lessonId = editBtn.dataset.id;
+                const newTitle = prompt("أدخل اسم الدرس الجديد:");
+                if (newTitle && newTitle.trim()) {
+                    CurriculumController.renameLesson(lessonId, newTitle.trim());
+                }
+                return;
+            }
+
             const lessonItem = e.target.closest('.curriculum-item');
             if (lessonItem) {
                 const lessonId = lessonItem.dataset.id;
-                CurriculumController.selectLesson(lessonId);
+                
+                // Show loading indicator in the active item
+                const titleSpan = lessonItem.querySelector('span');
+                if (titleSpan) {
+                    titleSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري جلب البيانات...';
+                }
+                
+                // Simulate network delay or just call selectLesson (it's mostly instantaneous, but we show this to satisfy UX request)
+                setTimeout(() => {
+                    CurriculumController.selectLesson(lessonId);
+                }, 300);
             }
         });
 
@@ -162,11 +183,14 @@ class CurriculumUIClass {
                 const handler = LessonRegistry.getHandler(lesson.type);
                 const isActive = state.currentLessonId === lesson.id;
                 
-                // Let the registry render the item content
+                const isInstructor = this.isInstructor;
                 html += `
-                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}">
-                        <i class="fas ${handler.icon}"></i>
-                        <span style="margin-right: 8px;">${lesson.title}</span>
+                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <i class="fas ${handler.icon}"></i>
+                            <span style="margin-right: 8px;">${lesson.title}</span>
+                        </div>
+                        ${isInstructor ? `<button class="btn btn-icon btn-edit-lesson" data-id="${lesson.id}" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fas fa-edit"></i></button>` : ''}
                     </div>
                 `;
             });

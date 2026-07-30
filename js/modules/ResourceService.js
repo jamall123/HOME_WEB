@@ -150,13 +150,17 @@ export class ResourceServiceClass {
         }
     }
 
-    async getResources(courseId) {
+    async getResources(courseId, lessonId = null) {
         try {
-            const snap = await this.db.collection('lessonResources')
+            let query = this.db.collection('lessonResources')
                 .where('courseId', '==', courseId)
-                .where('status', '==', 'active')
-                .orderBy('createdAt', 'desc')
-                .get();
+                .where('status', '==', 'active');
+                
+            if (lessonId) {
+                query = query.where('lessonId', '==', lessonId);
+            }
+            
+            const snap = await query.orderBy('createdAt', 'desc').get();
             return snap.docs.map(d => d.data());
         } catch (error) {
             console.error("[ResourceService] Failed to get resources:", error);

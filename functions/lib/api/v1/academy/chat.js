@@ -5,12 +5,12 @@ import { SecurityMiddleware } from '../../../shared/middleware/security.js';
 export const createCourseChat = functions.https.onCall(async (data, context) => {
     SecurityMiddleware.requireAppCheck(context);
     const authContext = AuthMiddleware.requireAuth(context);
-    const { courseId, text, channel } = data;
-    if (!courseId || !text)
+    const { lessonId, text, channel } = data;
+    if (!lessonId || !text)
         throw new functions.https.HttpsError('invalid-argument', 'Missing fields.');
     try {
         await DI.db.collection('course_chats').add({
-            courseId,
+            lessonId,
             userId: authContext.auth.uid,
             userName: authContext.auth.token.name || 'Unknown',
             text,
