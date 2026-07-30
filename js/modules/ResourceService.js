@@ -151,12 +151,17 @@ export class ResourceServiceClass {
     }
 
     async getResources(courseId) {
-        const snap = await this.db.collection('lessonResources')
-            .where('courseId', '==', courseId)
-            .where('status', '==', 'active')
-            .orderBy('createdAt', 'desc')
-            .get();
-        return snap.docs.map(d => d.data());
+        try {
+            const snap = await this.db.collection('lessonResources')
+                .where('courseId', '==', courseId)
+                .where('status', '==', 'active')
+                .orderBy('createdAt', 'desc')
+                .get();
+            return snap.docs.map(d => d.data());
+        } catch (error) {
+            console.error("[ResourceService] Failed to get resources:", error);
+            return [];
+        }
     }
 
     async deleteResource(resourceId) {
