@@ -146,7 +146,7 @@ class RoomEngineClass {
             return this.currentUser.role === 'instructor' || this.currentUser.role === 'admin';
         }
         try {
-            const doc = await firebase.firestore().collection('users').doc(this.currentUser.uid).get();
+            const doc = await window.firebase.firestore().collection('users').doc(this.currentUser.uid).get();
             if (doc.exists) {
                 return doc.data().role === 'instructor' || doc.data().role === 'admin';
             }
@@ -362,7 +362,7 @@ class RoomEngineClass {
     }
 
     setupFirestoreListeners() {
-        const db = firebase.firestore();
+        const db = window.firebase.firestore();
         
         // 1. Room Session Sync
         this.listeners.room = db.collection('active_sessions').doc(this.courseId)

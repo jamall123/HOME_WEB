@@ -8,8 +8,8 @@ import { StateStore } from './StateStore.js';
 
 export class ResourceServiceClass {
     constructor() {
-        this.db = firebase.firestore();
-        this.storage = firebase.storage();
+        this.db = window.firebase.firestore();
+        this.storage = window.firebase.storage();
         this.activeUploadTasks = new Map();
     }
 
@@ -65,7 +65,7 @@ export class ResourceServiceClass {
                             UploadQueue.updateProgress(resourceId, progress);
                             if (onStateChange) onStateChange(resourceId, snapshot.state, progress);
 
-                            if (snapshot.state === firebase.storage.TaskState.PAUSED) {
+                            if (snapshot.state === window.firebase.storage.TaskState.PAUSED) {
                                 UploadQueue.setStatus(resourceId, 'Paused');
                             }
                         }, 
@@ -94,9 +94,9 @@ export class ResourceServiceClass {
                 fileHash: fileHash, // Save hash for future deduplication
                 downloadUrl: downloadUrl,
                 storagePath: storagePath,
-                uploadedBy: StateStore.getState('user')?.uid || firebase.auth().currentUser?.uid,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                uploadedBy: StateStore.getState('user')?.uid || window.firebase.auth().currentUser?.uid,
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
                 visibility: 'public',
                 downloads: 0,
                 status: 'active'
@@ -178,7 +178,7 @@ export class ResourceServiceClass {
                 await this.storage.ref(data.storagePath).delete().catch(e => Logger.warn("Storage deletion failed", e));
             }
             // Soft delete in Firestore
-            await docRef.update({ status: 'deleted', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            await docRef.update({ status: 'deleted', updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
         }
     }
 }

@@ -5,7 +5,7 @@
 
 class ChatServiceClass {
     constructor() {
-        this.db = firebase.firestore();
+        this.db = window.firebase.firestore();
         this.unsubscribeFunctions = {};
     }
 
@@ -72,7 +72,7 @@ class ChatServiceClass {
                     userId,
                     userName,
                     channel,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
                 await ref.delete();

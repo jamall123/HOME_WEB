@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-muted); grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 1rem;">جاري تحميل الدورات...</p></div>';
         
         try {
-            const snap = await firebase.firestore().collection('courses').orderBy('createdAt', 'desc').get();
+            const snap = await window.firebase.firestore().collection('courses').orderBy('createdAt', 'desc').get();
             grid.innerHTML = '';
             coursesData = {}; // Clear old data
             
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.innerHTML = 'جاري تسجيل الدخول...';
                 btn.disabled = true;
 
-                await firebase.auth().signInWithEmailAndPassword(email, pass);
+                await window.firebase.auth().signInWithEmailAndPassword(email, pass);
                 
                 // onAuthStateChanged will handle UI changes
             } catch(e) {
@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) { btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
         try {
-            const db = firebase.firestore();
+            const db = window.firebase.firestore();
 
             // Try all possible username formats for backward compatibility
             const u = usernameRaw;
@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         name: window.currentUser.name,
                         username: window.currentUser.username,
                         role: window.currentUser.role,
-                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        joinedAt: window.firebase.firestore.FieldValue.serverTimestamp()
                     });
                 } catch(err) {
                     console.error("Error adding to connected_users", err);
@@ -632,10 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Listen for Auth State Changes
-    firebase.auth().onAuthStateChanged(async (user) => {
+    window.firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             try {
-                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                const userDoc = await window.firebase.firestore().collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
                     const userData = userDoc.data();
                     window.currentUser = { name: userData.fullname, role: userData.role };
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newSources = document.getElementById('room-add-sources').value;
 
         try {
-            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const courseRef = window.firebase.firestore().collection('courses').doc(courseId);
             const doc = await courseRef.get();
             if(doc.exists) {
                 const course = doc.data();
@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const courseRef = window.firebase.firestore().collection('courses').doc(courseId);
             const doc = await courseRef.get();
             if(doc.exists) {
                 const course = doc.data();
@@ -758,7 +758,7 @@ async function loadCourseRoomData() {
     if (!courseId) return;
 
     try {
-        const doc = await firebase.firestore().collection('courses').doc(courseId).get();
+        const doc = await window.firebase.firestore().collection('courses').doc(courseId).get();
         if (doc.exists) {
             const course = doc.data();
             const rooms = course.rooms || [];
@@ -773,7 +773,7 @@ async function loadCourseRoomData() {
             window.currentRoomCourseId = courseId;
 
             // Listen to connected users
-            const db = firebase.firestore();
+            const db = window.firebase.firestore();
             db.collection('courses').doc(courseId).collection('connected_users').onSnapshot((snapshot) => {
                 const listEl = document.getElementById('connected-students-list');
                 const countEl = document.getElementById('connected-count');
@@ -808,7 +808,7 @@ async function loadCourseRoomData() {
             // Handle page unload to remove user from connected list
             window.addEventListener('beforeunload', () => {
                 if (window.currentUser && window.currentRoomCourseId) {
-                    firebase.firestore().collection('courses').doc(window.currentRoomCourseId)
+                    window.firebase.firestore().collection('courses').doc(window.currentRoomCourseId)
                         .collection('connected_users').doc(window.currentUser.username).delete();
                 }
             });
@@ -1010,7 +1010,7 @@ async function loadCourseRoomData() {
             if (startBtn) startBtn.style.display = 'none';
             if (leaveBtn) leaveBtn.style.display = 'block';
 
-            firebase.firestore().collection('courses').doc(courseId).update({ 
+            window.firebase.firestore().collection('courses').doc(courseId).update({ 
                 isLive: true,
                 liveChannel: options.channel
             }).catch(console.warn);
@@ -1046,7 +1046,7 @@ async function loadCourseRoomData() {
             document.getElementById("main-video-container").innerHTML = '<div style="color:white; display:flex; align-items:center; justify-content:center; height:100%;">تم إنهاء البث</div>';
             
             const courseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
-            firebase.firestore().collection('courses').doc(courseId).update({ isLive: false }).catch(console.warn);
+            window.firebase.firestore().collection('courses').doc(courseId).update({ isLive: false }).catch(console.warn);
             
             alert('تم إنهاء البث المباشر.');
         } catch (err) {
@@ -1068,7 +1068,7 @@ async function loadCourseRoomData() {
 
     // Real-time listener for Live status for students
     const liveCourseId = new URLSearchParams(window.location.search).get('id') || 'mock-course-id';
-    firebase.firestore().collection('courses').doc(liveCourseId).onSnapshot((doc) => {
+    window.firebase.firestore().collection('courses').doc(liveCourseId).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
             const overlay = document.getElementById('student-join-overlay');
@@ -1098,7 +1098,7 @@ async function loadCourseRoomData() {
 
     if (chatForm && chatContainer) {
         // Listen to new messages
-        firebase.firestore().collection('courses').doc(currentCourseId)
+        window.firebase.firestore().collection('courses').doc(currentCourseId)
             .collection('rooms').doc(currentRoomId).collection('chat')
             .orderBy('timestamp', 'asc')
             .onSnapshot((snapshot) => {
@@ -1148,12 +1148,12 @@ async function loadCourseRoomData() {
             chatInput.value = ''; // clear immediately for UX
             
             try {
-                await firebase.firestore().collection('courses').doc(currentCourseId)
+                await window.firebase.firestore().collection('courses').doc(currentCourseId)
                     .collection('rooms').doc(currentRoomId).collection('chat').add({
                     text: text,
                     senderName: window.currentUser.name,
                     role: window.currentUser.role,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
                 });
             } catch(err) {
                 console.error("Error sending message", err);
@@ -1171,7 +1171,7 @@ async function loadCourseRoomData() {
         if(!window.currentUser || !window.currentUser.courseId) return;
         
         try {
-            await firebase.firestore().collection('courses').doc(window.currentUser.courseId).update({
+            await window.firebase.firestore().collection('courses').doc(window.currentUser.courseId).update({
                 instructorPhoto: photo || 'https://ui-avatars.com/api/?name=Instructor&background=1E293B&color=A5B4FC',
                 instructorSpecialty: specialty,
                 instructorBio: bio
@@ -1191,7 +1191,7 @@ async function loadCourseRoomData() {
     function initLectureNotifications() {
         if (!currentCourseId || currentCourseId === 'mock-course-id') return;
 
-        firebase.firestore().collection('courses').doc(currentCourseId).collection('lectures')
+        window.firebase.firestore().collection('courses').doc(currentCourseId).collection('lectures')
             .where('status', '==', 'scheduled')
             .onSnapshot((snapshot) => {
                 const now = new Date().getTime();
@@ -1348,7 +1348,7 @@ async function loadCourseRoomData() {
         if (!courseId) return;
 
         try {
-            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const courseRef = window.firebase.firestore().collection('courses').doc(courseId);
             const doc = await courseRef.get();
             let rooms = doc.data().rooms || [];
 
@@ -1391,7 +1391,7 @@ async function loadCourseRoomData() {
         
         const courseId = window.currentCourseId;
         try {
-            const courseRef = firebase.firestore().collection('courses').doc(courseId);
+            const courseRef = window.firebase.firestore().collection('courses').doc(courseId);
             const doc = await courseRef.get();
             let rooms = doc.data().rooms || [];
             rooms = rooms.filter(r => r.id !== roomId);
@@ -1423,7 +1423,7 @@ async function loadCourseRoomData() {
         if (!name || !spec) return alert("الاسم والتخصص مطلوبان!");
 
         try {
-            await firebase.firestore().collection('courses').doc(courseId).update({
+            await window.firebase.firestore().collection('courses').doc(courseId).update({
                 instructor: {
                     name,
                     specialty: spec,
