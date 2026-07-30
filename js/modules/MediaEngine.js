@@ -141,7 +141,7 @@ export const MediaEngine = {
         // In a real implementation, subscriber logic goes here
     },
 
-    async startLiveWebRTC() {
+    async startLiveWebRTC(courseId) {
         if (!window.AgoraRTC) {
             this.showError("مكتبة البث المباشر (Agora) غير محملة.");
             return;
@@ -151,27 +151,105 @@ export const MediaEngine = {
 
         try {
             this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-            const APP_ID = 'YOUR_AGORA_APP_ID';
-            const roomId = StateStore.getState('currentRoomId');
+            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
+            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
+            const channel = 'course-test';
+            const uid = Math.floor(Math.random() * 100000);
             
-            await this.agoraClient.join(APP_ID, roomId, null, null);
+            await this.agoraClient.join(APP_ID, channel, token, uid);
             
             this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
             this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack();
             
             await this.agoraClient.publish(Object.values(this.localTracks));
             
-            const container = this.transitionToContainer('mode-live-stream');
-            container.innerHTML = '<div id="instructor-local-video" style="width:100%; height:100%;"></div>';
-            this.localTracks.video.play('instructor-local-video');
+            // Show video in the instructor dashboard immediately (InstructorUI handles button toggles)
+            const videoContainer = document.getElementById('player-video'); // use the existing video player container
+            if (videoContainer) {
+                // We need to append the Agora video track to a div, not a <video> element.
+                // Let's create an overlay or replace the video element
+                let liveDiv = document.getElementById('agora-local-live');
+                if (!liveDiv) {
+                    liveDiv = document.createElement('div');
+                    liveDiv.id = 'agora-local-live';
+                    liveDiv.style.width = '100%';
+                    liveDiv.style.height = '100%';
+                    liveDiv.style.position = 'absolute';
+                    liveDiv.style.top = '0';
+                    liveDiv.style.left = '0';
+                    liveDiv.style.zIndex = '5';
+                    videoContainer.parentElement.appendChild(liveDiv);
+                }
+                liveDiv.style.display = 'block';
+                this.localTracks.video.play(liveDiv.id);
+            }
+            
+            // Update Firestore so students know it's live
+            jhomeDb.collection('courses').doc(courseId).update({
+                isLive: true,
+                liveChannel: channel
+            });
+            
+            // Toggle UI buttons
+            document.getElementById('btn-start-agora').style.display = 'none';
+            document.getElementById('btn-stop-agora').style.display = 'block';
             
             this.hideLoader();
+            alert('تم بدء البث المباشر بنجاح!');
         } catch (error) {
             console.error("[MediaEngine] WebRTC Error:", error);
             if (error.code === 'PERMISSION_DENIED') {
                 this.showError("يرجى السماح بالوصول إلى الكاميرا والميكروفون لبدء البث.");
             } else {
                 this.showError("فشل في الاتصال بخادم البث. " + error.message);
+            }
+        }
+    },
+
+    async stopLiveWebRTC(courseId) {
+        if (this.localTracks.audio) {
+            this.localTracks.audio.close();
+            this.localTracks.audio = null;
+        }
+        if (this.localTracks.video) {
+            this.localTracks.video.close();
+            this.localTracks.video = null;
+        }
+        if (this.agoraClient) {
+            await this.agoraClient.leave();
+        }
+        
+        const liveDiv = document.getElementById('agora-local-live');
+        if (liveDiv) {
+            liveDiv.style.display = 'none';
+        }
+        
+        jhomeDb.collection('courses').doc(courseId).update({
+            isLive: false
+        });
+        
+        document.getElementById('btn-start-agora').style.display = 'block';
+        document.getElementById('btn-stop-agora').style.display = 'none';
+        alert('تم إنهاء البث المباشر.');
+    },
+    
+    toggleMic() {
+        if (this.localTracks.audio) {
+            const isMuted = !this.localTracks.audio.muted;
+            this.localTracks.audio.setMuted(isMuted);
+            return isMuted;
+        }
+        return false;
+    },
+    
+    async switchCamera() {
+        if (this.localTracks.video) {
+            const devices = await window.AgoraRTC.getCameras();
+            if (devices.length > 1) {
+                // Simplified switch, usually we find 'facingMode' but Agora SDK 4.x handles it mostly via setDevice
+                const currentId = this.localTracks.video.getTrackLabel();
+                const nextDevice = devices.find(d => d.label !== currentId) || devices[0];
+                await this.localTracks.video.setDevice(nextDevice.deviceId);
             }
         }
     },

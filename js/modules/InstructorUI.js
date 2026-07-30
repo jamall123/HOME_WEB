@@ -70,6 +70,37 @@ export class InstructorUIClass {
                                 <span style="font-size: 0.9rem;">نمط القناة</span>
                             </button>
                         </div>
+                        
+                        <!-- Video Control Sub-panel -->
+                        <div id="inst-video-controls" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+                            <h4 style="color: #60a5fa; margin: 0 0 1rem 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;"><i class="fas fa-video"></i> تحكم الفيديو والبث</h4>
+                            
+                            <!-- Tabs for Video / Live -->
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; padding: 0.2rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                                <button class="btn btn-sm btn-primary" id="v-tab-recorded" onclick="window.InstructorAPI.toggleVideoTab('recorded')" style="flex: 1; border-radius: 6px;">مسجل</button>
+                                <button class="btn btn-sm btn-dark" id="v-tab-live" onclick="window.InstructorAPI.toggleVideoTab('live')" style="flex: 1; border-radius: 6px;">بث حي</button>
+                            </div>
+                            
+                            <!-- Recorded Video Controls -->
+                            <div id="v-panel-recorded" style="display: block;">
+                                <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.promptVideoUpload()" style="width: 100%; margin-bottom: 0.5rem; border-radius: 8px;"><i class="fas fa-upload"></i> رفع / اختيار فيديو</button>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.playVideo()" style="flex: 1; color: #34d399; border-radius: 8px;"><i class="fas fa-play"></i> تشغيل</button>
+                                    <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.pauseVideo()" style="flex: 1; color: #fbbf24; border-radius: 8px;"><i class="fas fa-pause"></i> إيقاف</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Live Stream Controls -->
+                            <div id="v-panel-live" style="display: none;">
+                                <button class="btn btn-sm btn-primary" id="btn-start-agora" onclick="window.InstructorAPI.startAgoraLive()" style="width: 100%; margin-bottom: 0.5rem; border-radius: 8px;"><i class="fas fa-satellite-dish"></i> بدء البث الحي</button>
+                                <button class="btn btn-sm btn-danger" id="btn-stop-agora" onclick="window.InstructorAPI.stopAgoraLive()" style="display: none; width: 100%; margin-bottom: 0.5rem; border-radius: 8px;"><i class="fas fa-stop-circle"></i> إنهاء البث</button>
+                                
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn btn-sm btn-dark" id="btn-agora-mic" onclick="window.InstructorAPI.toggleAgoraMic()" style="flex: 1; border-radius: 8px;"><i class="fas fa-microphone"></i> كتم المايك</button>
+                                    <button class="btn btn-sm btn-dark" id="btn-agora-cam" onclick="window.InstructorAPI.switchAgoraCamera()" style="flex: 1; border-radius: 8px;"><i class="fas fa-sync-alt"></i> تدوير الكاميرا</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Room Management -->
@@ -154,6 +185,23 @@ export class InstructorUIClass {
         `;
     }
 
+    toggleVideoTabUI(tab) {
+        // Update tab buttons
+        const recordedTab = document.getElementById('v-tab-recorded');
+        const liveTab = document.getElementById('v-tab-live');
+        if (tab === 'recorded') {
+            recordedTab.className = 'btn btn-sm btn-primary';
+            liveTab.className = 'btn btn-sm btn-dark';
+            document.getElementById('v-panel-recorded').style.display = 'block';
+            document.getElementById('v-panel-live').style.display = 'none';
+        } else {
+            recordedTab.className = 'btn btn-sm btn-dark';
+            liveTab.className = 'btn btn-sm btn-primary';
+            document.getElementById('v-panel-recorded').style.display = 'none';
+            document.getElementById('v-panel-live').style.display = 'block';
+        }
+    }
+
     attachListeners() {
         if (!this.mountPoint) return;
         
@@ -161,6 +209,13 @@ export class InstructorUIClass {
         window.InstructorAPI = {
             setMode: (mode) => {
                 this.controller.setTeachingMode(mode);
+                
+                // Toggle video controls visibility based on mode
+                const videoControls = document.getElementById('inst-video-controls');
+                if (videoControls) {
+                    videoControls.style.display = (mode === 'video') ? 'block' : 'none';
+                }
+                
                 // Update UI active state visually
                 const modeBtns = this.mountPoint.querySelectorAll('.inst-mode-btn');
                 modeBtns.forEach(b => {
@@ -180,7 +235,15 @@ export class InstructorUIClass {
                 if (confirm('هل أنت متأكد من إنهاء الدرس الحالي وبدء دورة درس جديدة؟')) {
                     import('./CurriculumController.js').then(({CurriculumController}) => CurriculumController.endCurrentLesson());
                 }
-            }
+            },
+            toggleVideoTab: (tab) => this.toggleVideoTabUI(tab),
+            promptVideoUpload: () => this.controller.promptVideoUpload(),
+            playVideo: () => this.controller.playVideo(),
+            pauseVideo: () => this.controller.pauseVideo(),
+            startAgoraLive: () => this.controller.startAgoraLive(),
+            stopAgoraLive: () => this.controller.stopAgoraLive(),
+            toggleAgoraMic: () => this.controller.toggleAgoraMic(),
+            switchAgoraCamera: () => this.controller.switchAgoraCamera()
         };
 
         const navBtns = this.mountPoint.querySelectorAll('.inst-nav');

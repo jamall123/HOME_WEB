@@ -60,6 +60,74 @@ class InstructorControllerClass {
         }
     }
 
+    // --- VIDEO & LIVE STREAM CONTROLS ---
+
+    async promptVideoUpload() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'video/mp4,video/webm,video/ogg';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Upload to Firebase Storage
+            try {
+                // We should show a loader in UI ideally
+                const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/videos`);
+                
+                // Once uploaded, set mode and broadcast the video URL
+                await TeachingModes.setMode('video', { 
+                    isLive: false, 
+                    videoUrl: url,
+                    status: 'playing',
+                    timestamp: 0
+                });
+                
+                alert('تم رفع الفيديو وتعيينه للعرض بنجاح.');
+            } catch (error) {
+                alert('فشل رفع الفيديو: ' + error.message);
+            }
+        };
+        input.click();
+    }
+
+    async playVideo() {
+        await TeachingModes.setMode('video', { status: 'playing' }); // Simplified, we should fetch current metadata and update
+        // We will improve this via RoomEngine syncing. Let's just update the document for now.
+        InstructorService.updateTeachingMode(this.engine.courseId, {
+            mode: 'video',
+            metadata: { status: 'playing' }
+        });
+    }
+
+    async pauseVideo() {
+        InstructorService.updateTeachingMode(this.engine.courseId, {
+            mode: 'video',
+            metadata: { status: 'paused' }
+        });
+    }
+
+    async startAgoraLive() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        MediaEngine.startLiveWebRTC(this.engine.courseId);
+    }
+
+    async stopAgoraLive() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        MediaEngine.stopLiveWebRTC(this.engine.courseId);
+    }
+
+    async toggleAgoraMic() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        const isMuted = MediaEngine.toggleMic();
+        document.getElementById('btn-agora-mic').innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i> تم الكتم' : '<i class="fas fa-microphone"></i> كتم المايك';
+    }
+
+    async switchAgoraCamera() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        MediaEngine.switchCamera();
+    }
+
     async setTeachingMode(modeName, metadata = {}) {
         await TeachingModes.setMode(modeName, metadata);
     }
