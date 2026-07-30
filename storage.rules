@@ -75,6 +75,18 @@ service firebase.storage {
       allow write: if true;
     }
 
+    // Course Slides
+    match /courses/{courseId}/slides/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Course Channel
+    match /courses/{courseId}/channel/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+
     // Phase 8: Enterprise Course Resources
     match /courses/{courseId}/resources/{lessonId}/{fileName} {
       function isAllowedType() {
