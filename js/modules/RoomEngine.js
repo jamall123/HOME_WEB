@@ -240,9 +240,24 @@ class RoomEngineClass {
     }
 
     processRenderQueue() {
-        if (this.renderQueue.has('room') || this.renderQueue.has('network')) {
+        if (this.renderQueue.has('room') || this.renderQueue.has('network') || this.renderQueue.has('presentation')) {
             TeachingRenderer.renderMode(this.state.room.mode, this.state.network.lowBandwidth);
             TeachingRenderer.updateLiveBadge(this.state.room.isLive);
+            
+            if (this.state.room.mode === 'video' && this.state.presentation.videoUrl) {
+                const playerVideo = document.getElementById('player-video');
+                if (playerVideo) {
+                    if (playerVideo.src !== this.state.presentation.videoUrl) {
+                        playerVideo.src = this.state.presentation.videoUrl;
+                        playerVideo.load();
+                    }
+                    if (this.state.presentation.status === 'playing') {
+                        playerVideo.play().catch(e => console.log('Playback prevented', e));
+                    } else if (this.state.presentation.status === 'paused') {
+                        playerVideo.pause();
+                    }
+                }
+            }
         }
 
         if (this.renderQueue.has('layout')) {
@@ -372,11 +387,12 @@ class RoomEngineClass {
                     this.updateState({
                         room: {
                             mode: data.mode || 'video',
-                            isLive: data.isLive || false
+                            isLive: (data.metadata && data.metadata.isLive) || data.isLive || false
                         },
                         presentation: {
-                            videoUrl: data.videoUrl,
-                            currentSlideUrl: data.currentSlideUrl,
+                            videoUrl: (data.metadata && data.metadata.videoUrl) || data.videoUrl,
+                            status: (data.metadata && data.metadata.status) || 'playing',
+                            currentSlideUrl: (data.metadata && data.metadata.currentSlideUrl) || data.currentSlideUrl,
                             channelTimestamp: data.channelUpdate ? data.channelUpdate.timestamp : 0
                         },
                         permissions: {
