@@ -167,10 +167,25 @@ class InstructorControllerClass {
                     this.selectedSlides = this.selectedSlides.filter(s => s !== url);
                     img.style.borderColor = 'transparent';
                 } else {
-                    if (this.selectedSlides.length >= 5) {
-                        alert('يمكنك اختيار 5 صور كحد أقصى.');
-                        return;
+                    const layoutSelect = document.getElementById('inst-slides-layout');
+                    const layout = layoutSelect ? layoutSelect.value : 'slides-layout-1';
+                    
+                    let maxImages = 1;
+                    if (layout === 'slides-layout-2') maxImages = 2;
+                    else if (layout === 'slides-layout-3') maxImages = 3;
+                    else if (layout === 'slides-layout-4') maxImages = 4;
+                    else if (layout === 'slides-layout-5') maxImages = 5;
+
+                    if (this.selectedSlides.length >= maxImages) {
+                        const removedUrl = this.selectedSlides.shift();
+                        const allImgs = gallery.querySelectorAll('img');
+                        allImgs.forEach(imgEl => {
+                            if (imgEl.src === removedUrl) {
+                                imgEl.style.borderColor = 'transparent';
+                            }
+                        });
                     }
+                    
                     this.selectedSlides.push(url);
                     img.style.borderColor = '#34d399';
                 }
@@ -200,6 +215,31 @@ class InstructorControllerClass {
         } catch (error) {
             console.error("Failed to upload slides:", error);
             alert("فشل رفع الصور: " + error.message);
+        }
+    }
+
+    handleSlideLayoutChange(e) {
+        const layout = e.target.value;
+        let maxImages = 1;
+        if (layout === 'slides-layout-2') maxImages = 2;
+        else if (layout === 'slides-layout-3') maxImages = 3;
+        else if (layout === 'slides-layout-4') maxImages = 4;
+        else if (layout === 'slides-layout-5') maxImages = 5;
+
+        // If currently selected images exceed the new layout's max, truncate the array
+        if (this.selectedSlides && this.selectedSlides.length > maxImages) {
+            const numToRemove = this.selectedSlides.length - maxImages;
+            const removedUrls = this.selectedSlides.splice(0, numToRemove); // remove from beginning (oldest)
+
+            const gallery = document.getElementById('inst-slides-gallery');
+            if (gallery) {
+                const allImgs = gallery.querySelectorAll('img');
+                allImgs.forEach(imgEl => {
+                    if (removedUrls.includes(imgEl.src)) {
+                        imgEl.style.borderColor = 'transparent';
+                    }
+                });
+            }
         }
     }
 
@@ -306,7 +346,7 @@ class InstructorControllerClass {
         
         try {
             const { InstructorService } = await import('./InstructorService.js');
-            const url = await InstructorService.uploadResource(file, this.engine.courseId, 'channel');
+            const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
             
             await TeachingModes.setMode('channel', {
                 lastMessage: {

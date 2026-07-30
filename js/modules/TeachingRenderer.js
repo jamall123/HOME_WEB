@@ -106,5 +106,44 @@ export const TeachingRenderer = {
                 }
             });
         }
+    },
+
+    /**
+     * Renders a channel message in the channel feed.
+     * @param {Object} message - { type, content, url, timestamp }
+     */
+    renderChannelMessage(message) {
+        const feed = document.getElementById('channel-feed');
+        if (!feed) return;
+
+        // Prevent duplicate rendering of the same message based on timestamp
+        const lastMsgEl = feed.lastElementChild;
+        if (lastMsgEl && lastMsgEl.dataset.timestamp === String(message.timestamp)) {
+            return;
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.style.background = 'rgba(255,255,255,0.05)';
+        msgDiv.style.padding = '1rem';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.borderLeft = '4px solid var(--primary-color)';
+        msgDiv.dataset.timestamp = message.timestamp;
+
+        const timeString = new Date(message.timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute:'2-digit' });
+
+        let contentHtml = '';
+        if (message.type === 'text') {
+            contentHtml = `<p style="color: white; margin: 0 0 0.5rem 0; font-size: 1.1rem;">${message.content}</p>`;
+        } else if (message.type === 'image') {
+            contentHtml = `<img src="${message.url}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 0.5rem;" alt="صورة القناة">`;
+        }
+
+        msgDiv.innerHTML = `
+            ${contentHtml}
+            <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fas fa-clock"></i> ${timeString}</div>
+        `;
+
+        feed.appendChild(msgDiv);
+        feed.scrollTop = feed.scrollHeight;
     }
 };

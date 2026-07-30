@@ -264,6 +264,10 @@ class RoomEngineClass {
                 TeachingRenderer.renderSlidesLayout(this.state.presentation.slides, this.state.presentation.layout);
             }
 
+            if (this.state.room.mode === 'channel' && this.state.presentation.lastChannelMessage) {
+                TeachingRenderer.renderChannelMessage(this.state.presentation.lastChannelMessage);
+            }
+
             // Agora Student Subscriptions (Audio or Video)
             if (this.state.room.mode === 'live' && !this.isInstructor) {
                 import('./MediaEngine.js').then(({ MediaEngine }) => {
@@ -423,7 +427,7 @@ class RoomEngineClass {
                             slides: (data.metadata && data.metadata.slides) || [],
                             layout: (data.metadata && data.metadata.layout) || 'slides-layout-1',
                             audioStream: (data.metadata && data.metadata.audioStream) || false,
-                            channelTimestamp: data.channelUpdate ? data.channelUpdate.timestamp : 0
+                            lastChannelMessage: (data.metadata && data.metadata.lastMessage) ? data.metadata.lastMessage : null
                         },
                         permissions: {
                             chatLocked: data.permissions ? data.permissions.chatLocked : false,

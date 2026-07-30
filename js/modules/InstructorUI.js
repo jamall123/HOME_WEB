@@ -115,7 +115,7 @@ export class InstructorUIClass {
                             
                             <div style="margin-bottom: 1rem;">
                                 <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">قالب العرض الشاشة:</label>
-                                <select id="inst-slides-layout" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                <select id="inst-slides-layout" class="form-input" style="width: 100%; padding: 0.5rem;" onchange="window.InstructorAPI.handleSlideLayoutChange(event)">
                                     <option value="slides-layout-1">صورة واحدة (Full)</option>
                                     <option value="slides-layout-2">صورتان (1x2)</option>
                                     <option value="slides-layout-3">٣ صور (كبيرة و٢ صغار)</option>
@@ -298,6 +298,7 @@ export class InstructorUIClass {
                 }
             },
             toggleVideoTab: (tab) => this.toggleVideoTabUI(tab),
+            handleSlideLayoutChange: (e) => this.controller.handleSlideLayoutChange(e),
             promptVideoUpload: () => this.controller.promptVideoUpload(),
             playVideo: () => this.controller.playVideo(),
             pauseVideo: () => this.controller.pauseVideo(),
