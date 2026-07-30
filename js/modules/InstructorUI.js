@@ -131,6 +131,30 @@ export class InstructorUIClass {
                                 <button class="btn btn-sm btn-danger" id="btn-slides-mic-stop" onclick="window.InstructorAPI.stopSlidesAudio()" style="display: none; flex: 1; border-radius: 8px;"><i class="fas fa-microphone-slash"></i> إيقاف الصوت</button>
                             </div>
                         </div>
+
+                        <!-- Audio Control Sub-panel -->
+                        <div id="inst-audio-controls" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; border: 1px solid rgba(167, 139, 250, 0.2);">
+                            <h4 style="color: #a78bfa; margin: 0 0 1rem 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;"><i class="fas fa-podcast"></i> البث الصوتي</h4>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-primary" id="btn-audio-start" onclick="window.InstructorAPI.startAudioOnly()" style="flex: 1; border-radius: 8px; background: #a78bfa; color: black; font-weight: bold;"><i class="fas fa-microphone"></i> بدء البث الصوتي</button>
+                                <button class="btn btn-sm btn-danger" id="btn-audio-stop" onclick="window.InstructorAPI.stopAudioOnly()" style="display: none; flex: 1; border-radius: 8px;"><i class="fas fa-stop-circle"></i> إنهاء البث</button>
+                            </div>
+                        </div>
+
+                        <!-- Channel Control Sub-panel -->
+                        <div id="inst-channel-controls" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.2);">
+                            <h4 style="color: #fbbf24; margin: 0 0 1rem 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;"><i class="fas fa-bullhorn"></i> نمط القناة</h4>
+                            <div style="margin-bottom: 1rem;">
+                                <textarea id="inst-channel-text" class="form-input" style="width: 100%; height: 80px; padding: 0.5rem; resize: none; margin-bottom: 0.5rem;" placeholder="اكتب رسالة نصية..."></textarea>
+                                <button class="btn btn-sm btn-primary" onclick="window.InstructorAPI.sendChannelMessage()" style="width: 100%; border-radius: 8px; background: #fbbf24; color: black; font-weight: bold;"><i class="fas fa-paper-plane"></i> إرسال النص</button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-dark" onclick="document.getElementById('inst-channel-image').click()" style="border-radius: 8px;"><i class="fas fa-image"></i> إرسال صورة</button>
+                                <input type="file" id="inst-channel-image" accept="image/*" style="display: none;" onchange="window.InstructorAPI.sendChannelImage(event)">
+                                
+                                <button class="btn btn-sm btn-dark" id="btn-channel-voice" onclick="window.InstructorAPI.toggleChannelVoice()" style="border-radius: 8px;"><i class="fas fa-microphone"></i> تسجيل صوتي</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Room Management -->
@@ -247,6 +271,12 @@ export class InstructorUIClass {
                 const slidesControls = document.getElementById('inst-slides-controls');
                 if (slidesControls) slidesControls.style.display = (mode === 'slides') ? 'block' : 'none';
                 
+                const audioControls = document.getElementById('inst-audio-controls');
+                if (audioControls) audioControls.style.display = (mode === 'audio') ? 'block' : 'none';
+
+                const channelControls = document.getElementById('inst-channel-controls');
+                if (channelControls) channelControls.style.display = (mode === 'channel') ? 'block' : 'none';
+                
                 // Update UI active state visually
                 const modeBtns = this.mountPoint.querySelectorAll('.inst-mode-btn');
                 modeBtns.forEach(b => {
@@ -300,7 +330,16 @@ export class InstructorUIClass {
             uploadSlides: (e) => this.controller.uploadSlides(e),
             presentSelectedSlides: () => this.controller.presentSelectedSlides(),
             startSlidesAudio: () => this.controller.startSlidesAudio(),
-            stopSlidesAudio: () => this.controller.stopSlidesAudio()
+            stopSlidesAudio: () => this.controller.stopSlidesAudio(),
+            
+            // Audio mode
+            startAudioOnly: () => this.controller.startAudioOnly(),
+            stopAudioOnly: () => this.controller.stopAudioOnly(),
+            
+            // Channel mode
+            sendChannelMessage: () => this.controller.sendChannelMessage(),
+            sendChannelImage: (e) => this.controller.sendChannelImage(e),
+            toggleChannelVoice: () => this.controller.toggleChannelVoice()
         };
 
         const navBtns = this.mountPoint.querySelectorAll('.inst-nav');

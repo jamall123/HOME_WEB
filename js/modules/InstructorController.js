@@ -250,6 +250,96 @@ class InstructorControllerClass {
         
         MediaEngine.stopLiveWebRTC(this.engine.courseId);
     }
+    
+    // --- AUDIO MODE CONTROLS ---
+    
+    async startAudioOnly() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        this.isAudioOnlyActive = true;
+        
+        document.getElementById('btn-audio-start').style.display = 'none';
+        document.getElementById('btn-audio-stop').style.display = 'block';
+        
+        await TeachingModes.setMode('audio', {
+            audioStream: true
+        });
+        
+        MediaEngine.startAudioOnlyWebRTC(this.engine.courseId);
+    }
+
+    async stopAudioOnly() {
+        const { MediaEngine } = await import('./MediaEngine.js');
+        this.isAudioOnlyActive = false;
+        
+        document.getElementById('btn-audio-start').style.display = 'block';
+        document.getElementById('btn-audio-stop').style.display = 'none';
+        
+        await TeachingModes.setMode('audio', {
+            audioStream: false
+        });
+        
+        MediaEngine.stopLiveWebRTC(this.engine.courseId);
+    }
+
+    // --- CHANNEL MODE CONTROLS ---
+
+    async sendChannelMessage() {
+        const textInput = document.getElementById('inst-channel-text');
+        if (!textInput || !textInput.value.trim()) return;
+        
+        const message = textInput.value.trim();
+        textInput.value = '';
+        
+        await TeachingModes.setMode('channel', {
+            lastMessage: {
+                type: 'text',
+                content: message,
+                timestamp: Date.now()
+            }
+        });
+    }
+
+    async sendChannelImage(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = '';
+        
+        try {
+            const { InstructorService } = await import('./InstructorService.js');
+            const url = await InstructorService.uploadResource(file, this.engine.courseId, 'channel');
+            
+            await TeachingModes.setMode('channel', {
+                lastMessage: {
+                    type: 'image',
+                    content: url,
+                    timestamp: Date.now()
+                }
+            });
+        } catch (error) {
+            console.error("Failed to upload channel image:", error);
+            alert("فشل رفع الصورة: " + error.message);
+        }
+    }
+
+    async toggleChannelVoice() {
+        // Simple toggle logic for voice recording
+        const btn = document.getElementById('btn-channel-voice');
+        if (!this.isRecordingVoice) {
+            this.isRecordingVoice = true;
+            btn.innerHTML = '<i class="fas fa-stop-circle"></i> إيقاف التسجيل';
+            btn.classList.replace('btn-dark', 'btn-danger');
+            
+            // start MediaRecorder (simulated for now)
+            // ...
+        } else {
+            this.isRecordingVoice = false;
+            btn.innerHTML = '<i class="fas fa-microphone"></i> تسجيل صوتي';
+            btn.classList.replace('btn-danger', 'btn-dark');
+            
+            // stop MediaRecorder and upload (simulated for now)
+            alert('تم تسجيل المقطع الصوتي وسيتم دعمه قريباً باستخدام MediaRecorder API.');
+        }
+    }
 }
 
 export const InstructorController = new InstructorControllerClass();
