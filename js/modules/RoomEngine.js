@@ -259,6 +259,16 @@ class RoomEngineClass {
                     }
                 }
             }
+
+            if (this.state.room.mode === 'live' && !this.isInstructor) {
+                import('./MediaEngine.js').then(({ MediaEngine }) => {
+                    MediaEngine.joinLiveWebRTC('course-test');
+                });
+            } else if (this.prevState && this.prevState.room.mode === 'live' && this.state.room.mode !== 'live' && !this.isInstructor) {
+                import('./MediaEngine.js').then(({ MediaEngine }) => {
+                    MediaEngine.leaveLiveWebRTC();
+                });
+            }
         }
 
         if (this.renderQueue.has('layout')) {

@@ -10,6 +10,7 @@ export const TeachingRenderer = {
     init() {
         this.elements = {
             videoLayer: document.getElementById('layer-video'),
+            liveLayer: document.getElementById('layer-live'),
             slidesLayer: document.getElementById('layer-slides'),
             channelLayer: document.getElementById('layer-channel'),
             audioLayer: document.getElementById('layer-audio-only'),
@@ -48,6 +49,9 @@ export const TeachingRenderer = {
 
         // Activate specific layer
         switch (mode) {
+            case 'live':
+                if (this.elements.liveLayer) this.elements.liveLayer.classList.add('active');
+                break;
             case 'video':
             case 'link':
                 this.elements.videoLayer.classList.add('active');

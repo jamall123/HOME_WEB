@@ -101,11 +101,13 @@ class InstructorControllerClass {
 
     async startAgoraLive() {
         const { MediaEngine } = await import('./MediaEngine.js');
+        await TeachingModes.setMode('live', { isLive: true });
         MediaEngine.startLiveWebRTC(this.engine.courseId);
     }
 
     async stopAgoraLive() {
         const { MediaEngine } = await import('./MediaEngine.js');
+        await TeachingModes.setMode('video', { isLive: false }); // Fallback to video mode when stopped
         MediaEngine.stopLiveWebRTC(this.engine.courseId);
     }
 

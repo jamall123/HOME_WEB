@@ -206,6 +206,65 @@ export const MediaEngine = {
         }
     },
 
+    async joinLiveWebRTC(channel) {
+        if (!window.AgoraRTC) {
+            this.showError("مكتبة البث المباشر (Agora) غير محملة.");
+            return;
+        }
+
+        try {
+            if (!this.agoraClient) {
+                this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            }
+            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
+            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
+            const uid = Math.floor(Math.random() * 100000);
+
+            this.agoraClient.on("user-published", async (user, mediaType) => {
+                await this.agoraClient.subscribe(user, mediaType);
+                if (mediaType === "video") {
+                    const videoTrack = user.videoTrack;
+                    let liveDiv = document.getElementById('agora-student-live');
+                    if (!liveDiv) {
+                        const container = document.getElementById('agora-live-container');
+                        if (container) {
+                            liveDiv = document.createElement('div');
+                            liveDiv.id = 'agora-student-live';
+                            liveDiv.style.width = '100%';
+                            liveDiv.style.height = '100%';
+                            container.appendChild(liveDiv);
+                        }
+                    }
+                    if (liveDiv) {
+                        videoTrack.play(liveDiv.id);
+                    }
+                }
+                if (mediaType === "audio") {
+                    user.audioTrack.play();
+                }
+            });
+
+            this.agoraClient.on("user-unpublished", (user) => {
+                // handle unpublish if needed
+            });
+
+            await this.agoraClient.join(APP_ID, channel, token, uid);
+        } catch (error) {
+            console.error("[MediaEngine] Failed to join live stream:", error);
+        }
+    },
+
+    async leaveLiveWebRTC() {
+        if (this.agoraClient) {
+            try {
+                await this.agoraClient.leave();
+            } catch (e) {}
+            this.agoraClient = null;
+        }
+        const liveDiv = document.getElementById('agora-student-live');
+        if (liveDiv) liveDiv.remove();
+    },
+
     async stopLiveWebRTC(courseId) {
         if (this.localTracks.audio) {
             this.localTracks.audio.close();
@@ -217,16 +276,14 @@ export const MediaEngine = {
         }
         if (this.agoraClient) {
             await this.agoraClient.leave();
+            this.agoraClient = null;
         }
         
         const liveDiv = document.getElementById('agora-local-live');
         if (liveDiv) {
             liveDiv.style.display = 'none';
         }
-        
-        jhomeDb.collection('courses').doc(courseId).update({
-            isLive: false
-        });
+
         
         document.getElementById('btn-start-agora').style.display = 'block';
         document.getElementById('btn-stop-agora').style.display = 'none';
