@@ -15,7 +15,7 @@ export class InstructorUIClass {
     cacheDOM() {
         this.mountPoint = document.getElementById('instructor-dashboard-mount');
         // This button exists in course-room.html
-        this.tabBtn = document.getElementById('tab-btn-instructor'); 
+        this.tabBtn = document.getElementById('tab-btn-instructor-side'); 
     }
 
     renderDashboardLayout() {
