@@ -101,6 +101,36 @@ export class InstructorUIClass {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Slides Control Sub-panel -->
+                        <div id="inst-slides-controls" style="display: none; margin-top: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; border: 1px solid rgba(52, 211, 153, 0.2);">
+                            <h4 style="color: #34d399; margin: 0 0 1rem 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;"><i class="fas fa-images"></i> إدارة الشاشة والشرائح</h4>
+                            
+                            <button class="btn btn-sm btn-dark" onclick="document.getElementById('inst-slides-upload').click()" style="width: 100%; margin-bottom: 1rem; border-radius: 8px;"><i class="fas fa-upload"></i> إضافة صور للمعرض</button>
+                            <input type="file" id="inst-slides-upload" multiple accept="image/*" style="display: none;" onchange="window.InstructorAPI.uploadSlides(event)">
+                            
+                            <div id="inst-slides-gallery" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; max-height: 150px; overflow-y: auto;">
+                                <!-- Uploaded images will appear here -->
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">قالب العرض الشاشة:</label>
+                                <select id="inst-slides-layout" class="form-input" style="width: 100%; padding: 0.5rem;">
+                                    <option value="slides-layout-1">صورة واحدة (Full)</option>
+                                    <option value="slides-layout-2">صورتان (1x2)</option>
+                                    <option value="slides-layout-3">٣ صور (كبيرة و٢ صغار)</option>
+                                    <option value="slides-layout-4">٤ صور (شبكة 2x2)</option>
+                                    <option value="slides-layout-5">٥ صور (شبكة 3x2)</option>
+                                </select>
+                            </div>
+                            
+                            <button class="btn btn-sm btn-primary" onclick="window.InstructorAPI.presentSelectedSlides()" style="width: 100%; margin-bottom: 0.5rem; border-radius: 8px; background: #34d399; color: black; font-weight: bold;"><i class="fas fa-tv"></i> عرض الصور المحددة</button>
+                            
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-dark" id="btn-slides-mic-start" onclick="window.InstructorAPI.startSlidesAudio()" style="flex: 1; border-radius: 8px; color: #a78bfa;"><i class="fas fa-microphone"></i> بدء الشرح الصوتي</button>
+                                <button class="btn btn-sm btn-danger" id="btn-slides-mic-stop" onclick="window.InstructorAPI.stopSlidesAudio()" style="display: none; flex: 1; border-radius: 8px;"><i class="fas fa-microphone-slash"></i> إيقاف الصوت</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Room Management -->
@@ -210,11 +240,12 @@ export class InstructorUIClass {
             setMode: (mode) => {
                 this.controller.setTeachingMode(mode);
                 
-                // Toggle video controls visibility based on mode
+                // Toggle video and slides controls visibility based on mode
                 const videoControls = document.getElementById('inst-video-controls');
-                if (videoControls) {
-                    videoControls.style.display = (mode === 'video') ? 'block' : 'none';
-                }
+                if (videoControls) videoControls.style.display = (mode === 'video') ? 'block' : 'none';
+                
+                const slidesControls = document.getElementById('inst-slides-controls');
+                if (slidesControls) slidesControls.style.display = (mode === 'slides') ? 'block' : 'none';
                 
                 // Update UI active state visually
                 const modeBtns = this.mountPoint.querySelectorAll('.inst-mode-btn');
@@ -240,10 +271,36 @@ export class InstructorUIClass {
             promptVideoUpload: () => this.controller.promptVideoUpload(),
             playVideo: () => this.controller.playVideo(),
             pauseVideo: () => this.controller.pauseVideo(),
-            startAgoraLive: () => this.controller.startAgoraLive(),
-            stopAgoraLive: () => this.controller.stopAgoraLive(),
-            toggleAgoraMic: () => this.controller.toggleAgoraMic(),
-            switchAgoraCamera: () => this.controller.switchAgoraCamera()
+            startAgoraLive: () => {
+                this.controller.startAgoraLive();
+                document.getElementById('btn-start-agora').style.display = 'none';
+                document.getElementById('btn-stop-agora').style.display = 'block';
+            },
+            stopAgoraLive: () => {
+                this.controller.stopAgoraLive();
+                document.getElementById('btn-start-agora').style.display = 'block';
+                document.getElementById('btn-stop-agora').style.display = 'none';
+            },
+            toggleAgoraMic: async () => {
+                const { MediaEngine } = await import('./MediaEngine.js');
+                const isMuted = MediaEngine.toggleMic();
+                const btn = document.getElementById('btn-agora-mic');
+                if (isMuted) {
+                    btn.innerHTML = '<i class="fas fa-microphone-slash"></i> تم الكتم';
+                    btn.classList.add('btn-danger');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-microphone"></i> كتم المايك';
+                    btn.classList.remove('btn-danger');
+                }
+            },
+            switchAgoraCamera: async () => {
+                const { MediaEngine } = await import('./MediaEngine.js');
+                MediaEngine.switchCamera();
+            },
+            uploadSlides: (e) => this.controller.uploadSlides(e),
+            presentSelectedSlides: () => this.controller.presentSelectedSlides(),
+            startSlidesAudio: () => this.controller.startSlidesAudio(),
+            stopSlidesAudio: () => this.controller.stopSlidesAudio()
         };
 
         const navBtns = this.mountPoint.querySelectorAll('.inst-nav');

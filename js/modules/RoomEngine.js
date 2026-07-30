@@ -260,14 +260,30 @@ class RoomEngineClass {
                 }
             }
 
+            if (this.state.room.mode === 'slides' && this.state.presentation.slides) {
+                TeachingRenderer.renderSlidesLayout(this.state.presentation.slides, this.state.presentation.layout);
+            }
+
+            // Agora Student Subscriptions (Audio or Video)
             if (this.state.room.mode === 'live' && !this.isInstructor) {
                 import('./MediaEngine.js').then(({ MediaEngine }) => {
                     MediaEngine.joinLiveWebRTC('course-test');
                 });
-            } else if (this.prevState && this.prevState.room.mode === 'live' && this.state.room.mode !== 'live' && !this.isInstructor) {
+            } else if (this.state.room.mode === 'slides' && this.state.presentation.audioStream && !this.isInstructor) {
                 import('./MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.leaveLiveWebRTC();
+                    MediaEngine.joinLiveWebRTC('course-test'); // Subscribes to audio
                 });
+            } else if (this.prevState) {
+                const wasLiveOrAudio = (this.prevState.room.mode === 'live') || 
+                                       (this.prevState.room.mode === 'slides' && this.prevState.presentation.audioStream);
+                const isLiveOrAudio = (this.state.room.mode === 'live') || 
+                                      (this.state.room.mode === 'slides' && this.state.presentation.audioStream);
+                                      
+                if (wasLiveOrAudio && !isLiveOrAudio && !this.isInstructor) {
+                    import('./MediaEngine.js').then(({ MediaEngine }) => {
+                        MediaEngine.leaveLiveWebRTC();
+                    });
+                }
             }
         }
 
@@ -404,6 +420,9 @@ class RoomEngineClass {
                             videoUrl: (data.metadata && data.metadata.videoUrl) || data.videoUrl,
                             status: (data.metadata && data.metadata.status) || 'playing',
                             currentSlideUrl: (data.metadata && data.metadata.currentSlideUrl) || data.currentSlideUrl,
+                            slides: (data.metadata && data.metadata.slides) || [],
+                            layout: (data.metadata && data.metadata.layout) || 'slides-layout-1',
+                            audioStream: (data.metadata && data.metadata.audioStream) || false,
                             channelTimestamp: data.channelUpdate ? data.channelUpdate.timestamp : 0
                         },
                         permissions: {

@@ -15,7 +15,7 @@ export const TeachingRenderer = {
             channelLayer: document.getElementById('layer-channel'),
             audioLayer: document.getElementById('layer-audio-only'),
             playerVideo: document.getElementById('player-video'),
-            playerSlide: document.getElementById('player-slide'),
+            slidesContainer: document.getElementById('slides-container'),
             liveBadgeDot: document.getElementById('live-badge-dot'),
             liveBadgeText: document.getElementById('live-badge-text')
         };
@@ -78,6 +78,33 @@ export const TeachingRenderer = {
         } else {
             this.elements.liveBadgeDot.style.color = '#ccc';
             this.elements.liveBadgeText.textContent = 'OFFLINE';
+        }
+    },
+
+    /**
+     * Renders multiple images in a specified layout.
+     * @param {Array<string>} images - Array of image URLs
+     * @param {string} layout - The CSS layout class (e.g., 'slides-layout-1')
+     */
+    renderSlidesLayout(images, layout = 'slides-layout-1') {
+        if (!this.elements.slidesContainer) return;
+        
+        // Ensure layout is valid or default to 1
+        const validLayout = layout && layout.startsWith('slides-layout-') ? layout : 'slides-layout-1';
+        
+        // Reset classes
+        this.elements.slidesContainer.className = 'slides-container ' + validLayout;
+        this.elements.slidesContainer.innerHTML = '';
+        
+        if (images && Array.isArray(images)) {
+            images.forEach(url => {
+                if (url) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = "شريحة عرض";
+                    this.elements.slidesContainer.appendChild(img);
+                }
+            });
         }
     }
 };

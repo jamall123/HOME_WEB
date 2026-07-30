@@ -9,6 +9,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=7">
     <link rel="stylesheet" href="css/academy.css?v=1">
+    <style>
+        /* Slide Layouts */
+        .slides-container {
+            display: grid;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .slides-layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .slides-layout-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+        .slides-layout-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+        .slides-layout-3 img:nth-child(1) { grid-row: 1 / span 2; }
+        .slides-layout-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .slides-layout-5 { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .slides-layout-5 img:nth-child(1) { grid-column: 1 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(2) { grid-column: 3 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(3) { grid-column: 5 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(4) { grid-column: 2 / span 2; grid-row: 2; }
+        .slides-layout-5 img:nth-child(5) { grid-column: 4 / span 2; grid-row: 2; }
+
+        .slides-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body style="overflow: hidden;"> <!-- Prevent global scrolling in the room layout -->
 
@@ -145,7 +176,9 @@
                     </div>
 
                     <div id="layer-slides" class="renderer-layer">
-                        <img id="player-slide" src="" alt="Presentation Slide">
+                        <div id="slides-container" class="slides-container slides-layout-1">
+                            <!-- Images injected via JS -->
+                        </div>
                     </div>
 
                     <div id="layer-channel" class="renderer-layer" style="background: #0f172a; flex-direction: column; align-items: stretch;">

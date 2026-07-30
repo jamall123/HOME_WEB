@@ -253,6 +253,32 @@ export const MediaEngine = {
             console.error("[MediaEngine] Failed to join live stream:", error);
         }
     },
+    
+    async startAudioOnlyWebRTC(courseId) {
+        if (!window.AgoraRTC) {
+            this.showError("مكتبة البث (Agora) غير متوفرة.");
+            return;
+        }
+        
+        try {
+            if (!this.agoraClient) {
+                this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            }
+            
+            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
+            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
+            
+            await this.agoraClient.join(APP_ID, 'course-test', token, null);
+            
+            // Create only audio track
+            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
+            await this.agoraClient.publish([this.localTracks.audio]);
+            
+        } catch (error) {
+            console.error("[MediaEngine] Audio WebRTC Error:", error);
+            this.showError("فشل في بدء البث الصوتي. " + error.message);
+        }
+    },
 
     async leaveLiveWebRTC() {
         if (this.agoraClient) {
