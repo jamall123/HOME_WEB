@@ -62,6 +62,19 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // Instructor Profiles
+    match /profiles/{uid}/{fileName} {
+      allow read: if true;
+      // Allow user to write to their own profile, or Admin
+      allow write: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Course Videos
+    match /courses/{courseId}/videos/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
     // Phase 8: Enterprise Course Resources
     match /courses/{courseId}/resources/{lessonId}/{fileName} {
       function isAllowedType() {
