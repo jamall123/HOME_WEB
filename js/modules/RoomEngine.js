@@ -247,8 +247,9 @@ class RoomEngineClass {
             if (this.state.room.mode === 'video' && this.state.presentation.videoUrl) {
                 const playerVideo = document.getElementById('player-video');
                 if (playerVideo) {
-                    if (playerVideo.src !== this.state.presentation.videoUrl) {
+                    if (playerVideo.getAttribute('src') !== this.state.presentation.videoUrl) {
                         playerVideo.src = this.state.presentation.videoUrl;
+                        playerVideo.setAttribute('src', this.state.presentation.videoUrl);
                         playerVideo.load();
                     }
                     if (this.state.presentation.status === 'playing') {

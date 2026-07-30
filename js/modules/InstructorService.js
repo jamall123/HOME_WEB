@@ -56,15 +56,30 @@ export class InstructorServiceClass {
         });
     }
 
-    /**
-     * Updates the active teaching mode in active_sessions collection.
-     */
     async updateTeachingMode(courseId, modePayload) {
         const payload = {
-            ...modePayload,
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         };
-        await this.db.collection('active_sessions').doc(courseId).set(payload, { merge: true });
+        
+        // Flatten payload for Firestore to do a true deep merge
+        for (const [key, value] of Object.entries(modePayload)) {
+            if (key === 'metadata' && typeof value === 'object') {
+                for (const [metaKey, metaValue] of Object.entries(value)) {
+                    payload[`metadata.${metaKey}`] = metaValue;
+                }
+            } else {
+                payload[key] = value;
+            }
+        }
+        
+        await this.db.collection('active_sessions').doc(courseId).update(payload).catch(async (e) => {
+             // If doc doesn't exist, create it
+             const initialPayload = {
+                 ...modePayload,
+                 updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+             };
+             await this.db.collection('active_sessions').doc(courseId).set(initialPayload, { merge: true });
+        });
     }
 
     /**

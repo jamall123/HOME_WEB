@@ -92,19 +92,11 @@ class InstructorControllerClass {
     }
 
     async playVideo() {
-        await TeachingModes.setMode('video', { status: 'playing' }); // Simplified, we should fetch current metadata and update
-        // We will improve this via RoomEngine syncing. Let's just update the document for now.
-        InstructorService.updateTeachingMode(this.engine.courseId, {
-            mode: 'video',
-            metadata: { status: 'playing' }
-        });
+        await TeachingModes.setMode('video', { status: 'playing' });
     }
 
     async pauseVideo() {
-        InstructorService.updateTeachingMode(this.engine.courseId, {
-            mode: 'video',
-            metadata: { status: 'paused' }
-        });
+        await TeachingModes.setMode('video', { status: 'paused' });
     }
 
     async startAgoraLive() {
