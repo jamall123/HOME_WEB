@@ -19,6 +19,19 @@ export class InstructorServiceClass {
     }
 
     /**
+     * Updates the instructor's profile specifically on the course document.
+     */
+    async updateCourseProfile(courseId, profileData) {
+        if (!courseId) throw new Error("No courseId provided");
+        await this.db.collection('courses').doc(courseId).set({
+            instructor: profileData.name || null,
+            instructorSpecialty: profileData.specialty || null,
+            instructorBio: profileData.bio || null,
+            instructorPhoto: profileData.photo || null
+        }, { merge: true });
+    }
+
+    /**
      * Uploads media to Firebase Storage and returns the download URL.
      * Supports resumable uploads and progress callbacks.
      */

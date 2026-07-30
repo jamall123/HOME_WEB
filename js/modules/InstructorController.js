@@ -52,6 +52,7 @@ class InstructorControllerClass {
     async updateProfile(profileData) {
         try {
             await InstructorService.updateProfile(this.engine.currentUser.uid, profileData);
+            await InstructorService.updateCourseProfile(this.engine.courseId, profileData);
             // Optionally notify UI of success
         } catch (error) {
             console.error("Profile update failed", error);

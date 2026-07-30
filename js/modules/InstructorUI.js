@@ -140,11 +140,11 @@ export class InstructorUIClass {
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div>
                                 <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;">صورة شخصية</label>
-                                <input type="file" class="form-input" accept="image/*" style="width: 100%; font-size: 0.8rem; padding: 0.5rem;">
+                                <input type="file" id="inst-prof-photo" class="form-input" accept="image/*" style="width: 100%; font-size: 0.8rem; padding: 0.5rem;">
                             </div>
                             <div>
                                 <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;">السيرة الذاتية (CV)</label>
-                                <input type="file" class="form-input" accept=".pdf" style="width: 100%; font-size: 0.8rem; padding: 0.5rem;">
+                                <input type="file" id="inst-prof-cv" class="form-input" accept=".pdf" style="width: 100%; font-size: 0.8rem; padding: 0.5rem;">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 8px; margin-top: 0.5rem;"><i class="fas fa-save"></i> حفظ البيانات</button>
@@ -202,6 +202,53 @@ export class InstructorUIClass {
                 if (targetView) targetView.style.display = 'block';
             });
         });
+
+        // Profile Form Submission
+        const profileForm = this.mountPoint.querySelector('#inst-profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = profileForm.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                btn.disabled = true;
+
+                const profileData = {
+                    name: document.getElementById('inst-prof-name').value.trim(),
+                    specialty: document.getElementById('inst-prof-spec').value.trim(),
+                    bio: document.getElementById('inst-prof-bio').value.trim()
+                };
+
+                const photoFile = document.getElementById('inst-prof-photo').files[0];
+                const cvFile = document.getElementById('inst-prof-cv').files[0];
+
+                try {
+                    // Lazy load InstructorService for direct media upload
+                    const { InstructorService } = await import('./InstructorService.js');
+
+                    if (photoFile) {
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصورة...';
+                        profileData.photo = await InstructorService.uploadMedia(photoFile, `profiles/${this.controller.engine.currentUser.uid}`);
+                    }
+                    if (cvFile) {
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع السيرة...';
+                        profileData.cv = await InstructorService.uploadMedia(cvFile, `profiles/${this.controller.engine.currentUser.uid}`);
+                    }
+
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    await this.controller.updateProfile(profileData);
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 3000);
+                } catch (error) {
+                    alert('حدث خطأ أثناء حفظ البيانات');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
     }
 }
 
