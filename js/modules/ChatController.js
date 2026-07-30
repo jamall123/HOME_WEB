@@ -35,7 +35,7 @@ class ChatControllerClass {
         this.engine = engine;
         this.activeLessonId = null;
         
-        import('../core/EventBus.js').then(({ EventBus, Events }) => {
+        import('./EventBus.js').then(({ EventBus, Events }) => {
             EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
                 if (lesson && lesson.id) {
                     this.setLessonId(lesson.id);

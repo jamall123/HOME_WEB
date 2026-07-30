@@ -310,7 +310,7 @@ class CurriculumControllerClass {
             NotificationManager.show("تم إنهاء الدرس بنجاح وبدء دورة جديدة", "success");
             
             // Notify other controllers to clear their caches
-            import('../core/EventBus.js').then(({ EventBus, Events }) => {
+            import('./EventBus.js').then(({ EventBus, Events }) => {
                 EventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
             });
             
