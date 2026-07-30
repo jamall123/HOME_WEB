@@ -70,9 +70,9 @@ service firebase.storage {
     }
 
     // Course Videos
-    match /courses/{courseId}/videos/{fileName} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+    match /courses/{courseId}/videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // Phase 8: Enterprise Course Resources
