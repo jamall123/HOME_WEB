@@ -242,21 +242,20 @@
     border-right: 1px solid var(--room-border); /* RTL */
 }
 
-/* Center Area: Teaching + Bottom Workspace */
+/* Center Area: Teaching */
 .room-center {
-    display: grid;
-    /* Rows: Teaching Renderer auto, Bottom Workspace 1fr */
-    grid-template-rows: auto 1fr;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     overflow: hidden;
     position: relative;
     background: #000;
 }
 
-/* Teaching Renderer (Aspect Ratio Box) */
+/* Teaching Renderer */
 .teaching-renderer {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    flex: 1;
     position: relative;
     background: #000;
     overflow: hidden;
