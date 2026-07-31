@@ -12,7 +12,7 @@ import { PermissionEngine } from './PermissionEngine.js';
 export const MediaEngine = {
     agoraClient: null,
     localTracks: { video: null, audio: null },
-    mainContainer: '#main-video-container',
+    mainContainer: '#teaching-renderer',
     
     init() {
         EventBus.subscribe(Events.MEDIA_MODE_CHANGED, (payload) => {
@@ -142,8 +142,12 @@ export const MediaEngine = {
     },
 
     async startLiveWebRTC(courseId) {
+        alert("MediaEngine: startLiveWebRTC triggered!");
+        console.log("[MediaEngine] startLiveWebRTC triggered with courseId:", courseId);
         if (!window.AgoraRTC) {
-            this.showError("مكتبة البث المباشر (Agora) غير محملة.");
+            let msg = "مكتبة البث المباشر (Agora) غير محملة. قد يكون هناك مانع إعلانات يمنع تحميلها.";
+            this.showError(msg);
+            alert(msg);
             return;
         }
 
@@ -164,7 +168,7 @@ export const MediaEngine = {
             await this.agoraClient.publish(Object.values(this.localTracks));
             
             // Show video in the instructor dashboard immediately (InstructorUI handles button toggles)
-            const videoContainer = document.getElementById('player-video'); // use the existing video player container
+            const videoContainer = document.getElementById('agora-live-container'); // FIX: Use the agora container
             if (videoContainer) {
                 // We need to append the Agora video track to a div, not a <video> element.
                 // Let's create an overlay or replace the video element
@@ -178,7 +182,7 @@ export const MediaEngine = {
                     liveDiv.style.top = '0';
                     liveDiv.style.left = '0';
                     liveDiv.style.zIndex = '5';
-                    videoContainer.parentElement.appendChild(liveDiv);
+                    videoContainer.appendChild(liveDiv); // FIX: append directly to container
                 }
                 liveDiv.style.display = 'block';
                 this.localTracks.video.play(liveDiv.id);
@@ -198,11 +202,12 @@ export const MediaEngine = {
             alert('تم بدء البث المباشر بنجاح!');
         } catch (error) {
             console.error("[MediaEngine] WebRTC Error:", error);
-            if (error.code === 'PERMISSION_DENIED') {
-                this.showError("يرجى السماح بالوصول إلى الكاميرا والميكروفون لبدء البث.");
-            } else {
-                this.showError("فشل في الاتصال بخادم البث. " + error.message);
+            let errMsg = "فشل في الاتصال بخادم البث. " + (error.message || "");
+            if (error.code === 'PERMISSION_DENIED' || (error.message && error.message.includes('Permission denied'))) {
+                errMsg = "يرجى السماح بالوصول إلى الكاميرا والميكروفون من إعدادات المتصفح لبدء البث.";
             }
+            this.showError(errMsg);
+            alert("حدث خطأ أثناء الاتصال: " + errMsg);
         }
     },
 

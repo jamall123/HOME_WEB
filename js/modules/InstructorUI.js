@@ -306,7 +306,10 @@ export class InstructorUIClass {
             playVideo: () => this.controller.playVideo(),
             pauseVideo: () => this.controller.pauseVideo(),
             startAgoraLive: () => {
-                this.controller.startAgoraLive();
+                alert("Start button clicked. Attempting to start broadcast...");
+                this.controller.startAgoraLive().catch(err => {
+                    alert("Controller error: " + err);
+                });
                 document.getElementById('btn-start-agora').style.display = 'none';
                 document.getElementById('btn-stop-agora').style.display = 'block';
             },
