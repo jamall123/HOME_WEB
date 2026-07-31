@@ -362,22 +362,56 @@ class InstructorControllerClass {
     }
 
     async toggleChannelVoice() {
-        // Simple toggle logic for voice recording
         const btn = document.getElementById('btn-channel-voice');
         if (!this.isRecordingVoice) {
-            this.isRecordingVoice = true;
-            btn.innerHTML = '<i class="fas fa-stop-circle"></i> إيقاف التسجيل';
-            btn.classList.replace('btn-dark', 'btn-danger');
-            
-            // start MediaRecorder (simulated for now)
-            // ...
+            try {
+                this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.mediaRecorder = new MediaRecorder(this.audioStream);
+                this.audioChunks = [];
+
+                this.mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        this.audioChunks.push(event.data);
+                    }
+                };
+
+                this.mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                    const file = new File([audioBlob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
+                    
+                    try {
+                        const { InstructorService } = await import('./InstructorService.js');
+                        const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel_audio`);
+                        
+                        await TeachingModes.setMode('channel', {
+                            lastMessage: {
+                                type: 'audio',
+                                content: url,
+                                timestamp: Date.now()
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Failed to upload audio:", error);
+                        alert("فشل رفع المقطع الصوتي: " + error.message);
+                    }
+                };
+
+                this.mediaRecorder.start();
+                this.isRecordingVoice = true;
+                btn.innerHTML = '<i class="fas fa-stop-circle"></i> إيقاف التسجيل';
+                btn.classList.replace('btn-dark', 'btn-danger');
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+                alert("لم نتمكن من الوصول إلى الميكروفون. يرجى التأكد من منح الصلاحيات.");
+            }
         } else {
+            this.mediaRecorder.stop();
+            if (this.audioStream) {
+                this.audioStream.getTracks().forEach(track => track.stop());
+            }
             this.isRecordingVoice = false;
             btn.innerHTML = '<i class="fas fa-microphone"></i> تسجيل صوتي';
             btn.classList.replace('btn-danger', 'btn-dark');
-            
-            // stop MediaRecorder and upload (simulated for now)
-            alert('تم تسجيل المقطع الصوتي وسيتم دعمه قريباً باستخدام MediaRecorder API.');
         }
     }
 }

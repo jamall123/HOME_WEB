@@ -135,7 +135,9 @@ export const TeachingRenderer = {
         if (message.type === 'text') {
             contentHtml = `<p style="color: white; margin: 0 0 0.5rem 0; font-size: 1.1rem;">${message.content}</p>`;
         } else if (message.type === 'image') {
-            contentHtml = `<img src="${message.url}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 0.5rem;" alt="صورة القناة">`;
+            contentHtml = `<img src="${message.content}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 0.5rem;" alt="صورة القناة">`;
+        } else if (message.type === 'audio') {
+            contentHtml = `<audio src="${message.content}" controls style="width: 100%; margin-bottom: 0.5rem;"></audio>`;
         }
 
         msgDiv.innerHTML = `
