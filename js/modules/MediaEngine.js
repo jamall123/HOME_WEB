@@ -154,12 +154,17 @@ export const MediaEngine = {
         this.showLoader('جاري الاتصال بالبث المباشر...');
 
         try {
-            this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = null; // Using App ID only (Testing Mode)
-            const channel = courseId; // Use courseId as the unique channel name
-            const uid = Math.floor(Math.random() * 100000);
+            // Fetch dynamic token from Firebase Functions
+            const generateAgoraToken = window.firebase.functions().httpsCallable('api_v1_media_agora');
+            const response = await generateAgoraToken({ channelName: courseId });
             
+            const APP_ID = response.data.appId;
+            const token = response.data.token;
+            const channel = response.data.channel;
+            const uid = response.data.uid || Math.floor(Math.random() * 100000);
+
+            this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+
             await this.agoraClient.join(APP_ID, channel, token, uid);
             
             this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
@@ -218,12 +223,17 @@ export const MediaEngine = {
         }
 
         try {
+            // Fetch dynamic token from Firebase Functions
+            const generateAgoraToken = window.firebase.functions().httpsCallable('api_v1_media_agora');
+            const response = await generateAgoraToken({ channelName: channel });
+            
+            const APP_ID = response.data.appId;
+            const token = response.data.token;
+            const uid = response.data.uid || Math.floor(Math.random() * 100000);
+
             if (!this.agoraClient) {
                 this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
-            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = null; // App ID only
-            const uid = Math.floor(Math.random() * 100000);
 
             this.agoraClient.on("user-published", async (user, mediaType) => {
                 await this.agoraClient.subscribe(user, mediaType);
@@ -266,14 +276,17 @@ export const MediaEngine = {
         }
         
         try {
+            // Fetch dynamic token from Firebase Functions
+            const generateAgoraToken = window.firebase.functions().httpsCallable('api_v1_media_agora');
+            const response = await generateAgoraToken({ channelName: courseId });
+            
+            const APP_ID = response.data.appId;
+            const token = response.data.token;
+            const channel = response.data.channel;
+            
             if (!this.agoraClient) {
                 this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
-            
-            const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = null;
-            const channel = courseId;
-            
             await this.agoraClient.join(APP_ID, channel, token, null);
             
             // Create only audio track

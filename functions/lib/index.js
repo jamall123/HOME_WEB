@@ -24,6 +24,9 @@ export const api_v1_users = users;
 // ── V1 API Gateway: Contact ──────────────────────────────────────────────────
 import { contact } from './api/v1/contact/contact.js';
 export const api_v1_contact = contact;
+// ── V1 API Gateway: Media ────────────────────────────────────────────────────
+import { generateAgoraToken } from './api/v1/media/agora.js';
+export const api_v1_media_agora = generateAgoraToken;
 // ── Health Check ─────────────────────────────────────────────────────────────
 export const healthCheck = functions.https.onRequest((request, response) => {
     DI.logger.info('Health check pinged', { ip: request.ip });
