@@ -319,7 +319,7 @@ export class InstructorUIClass {
                 document.getElementById('btn-stop-agora').style.display = 'none';
             },
             toggleAgoraMic: async () => {
-                const { MediaEngine } = await import('./MediaEngine.js');
+                const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
                 const isMuted = MediaEngine.toggleMic();
                 const btn = document.getElementById('btn-agora-mic');
                 if (isMuted) {
@@ -331,7 +331,7 @@ export class InstructorUIClass {
                 }
             },
             switchAgoraCamera: async () => {
-                const { MediaEngine } = await import('./MediaEngine.js');
+                const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
                 MediaEngine.switchCamera();
             },
             uploadSlides: (e) => this.controller.uploadSlides(e),

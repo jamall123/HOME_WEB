@@ -102,7 +102,7 @@ class InstructorControllerClass {
     async startAgoraLive() {
         alert("InstructorController: startAgoraLive called");
         try {
-            const { MediaEngine } = await import('./MediaEngine.js');
+            const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
             alert("InstructorController: MediaEngine imported");
             await TeachingModes.setMode('live', { isLive: true });
             alert("InstructorController: TeachingMode set");
@@ -114,19 +114,19 @@ class InstructorControllerClass {
     }
 
     async stopAgoraLive() {
-        const { MediaEngine } = await import('./MediaEngine.js');
+        const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
         await TeachingModes.setMode('video', { isLive: false }); // Fallback to video mode when stopped
         MediaEngine.stopLiveWebRTC(this.engine.courseId);
     }
 
     async toggleAgoraMic() {
-        const { MediaEngine } = await import('./MediaEngine.js');
+        const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
         const isMuted = MediaEngine.toggleMic();
         document.getElementById('btn-agora-mic').innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i> تم الكتم' : '<i class="fas fa-microphone"></i> كتم المايك';
     }
 
     async switchAgoraCamera() {
-        const { MediaEngine } = await import('./MediaEngine.js');
+        const { MediaEngine } = await import('./MediaEngine.js?v=' + Date.now());
         MediaEngine.switchCamera();
     }
 
