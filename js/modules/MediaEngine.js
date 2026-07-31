@@ -65,8 +65,8 @@ export const MediaEngine = {
         `;
         
         // Hide all inner mode containers
-        container.querySelectorAll('> div').forEach(el => {
-            if (el.id !== 'media-loader-overlay') el.style.opacity = '0';
+        Array.from(container.children).forEach(el => {
+            if (el.tagName === 'DIV' && el.id !== 'media-loader-overlay') el.style.opacity = '0';
         });
         
         container.insertAdjacentHTML('beforeend', errorHtml);
@@ -87,8 +87,8 @@ export const MediaEngine = {
         }
 
         // Fade out others
-        parent.querySelectorAll('> div').forEach(el => {
-            if (el.id !== containerId && el.id !== 'media-loader-overlay') {
+        Array.from(parent.children).forEach(el => {
+            if (el.tagName === 'DIV' && el.id !== containerId && el.id !== 'media-loader-overlay') {
                 el.style.opacity = '0';
                 setTimeout(() => { if(el.style.opacity === '0') el.style.display = 'none'; }, 500);
             }
