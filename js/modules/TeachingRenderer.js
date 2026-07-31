@@ -123,26 +123,44 @@ export const TeachingRenderer = {
         }
 
         const msgDiv = document.createElement('div');
-        msgDiv.style.background = 'rgba(255,255,255,0.05)';
-        msgDiv.style.padding = '1rem';
-        msgDiv.style.borderRadius = '8px';
-        msgDiv.style.borderLeft = '4px solid var(--primary-color)';
+        msgDiv.className = 'channel-message-card';
+        msgDiv.style.background = 'linear-gradient(145deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.9) 100%)';
+        msgDiv.style.padding = '1.2rem';
+        msgDiv.style.borderRadius = '12px';
+        msgDiv.style.border = '1px solid rgba(255,255,255,0.05)';
+        msgDiv.style.borderRight = '4px solid var(--primary-color)';
+        msgDiv.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        msgDiv.style.position = 'relative';
+        msgDiv.style.overflow = 'hidden';
         msgDiv.dataset.timestamp = message.timestamp;
 
         const timeString = new Date(message.timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute:'2-digit' });
 
         let contentHtml = '';
+        let downloadHtml = '';
+        
         if (message.type === 'text') {
-            contentHtml = `<p style="color: white; margin: 0 0 0.5rem 0; font-size: 1.1rem;">${message.content}</p>`;
+            contentHtml = `<p style="color: #f8fafc; margin: 0 0 0.8rem 0; font-size: 1.15rem; line-height: 1.6;">${message.content}</p>`;
         } else if (message.type === 'image') {
-            contentHtml = `<img src="${message.content}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 0.5rem;" alt="صورة القناة">`;
+            contentHtml = `<div style="text-align: center; margin-bottom: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.5rem;"><img src="${message.content}" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 6px;" alt="صورة توضيحية"></div>`;
+            downloadHtml = `<a href="${message.content}" target="_blank" download="صورة_المحاضرة.jpg" class="btn btn-sm btn-dark" style="display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.85rem; text-decoration: none; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-download"></i> تحميل الصورة</a>`;
         } else if (message.type === 'audio') {
-            contentHtml = `<audio src="${message.content}" controls style="width: 100%; margin-bottom: 0.5rem;"></audio>`;
+            contentHtml = `<div style="margin-bottom: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.8rem; display: flex; align-items: center; gap: 1rem;"><i class="fas fa-headphones" style="font-size: 1.5rem; color: #a78bfa;"></i><audio src="${message.content}" controls style="flex: 1; height: 36px; outline: none;"></audio></div>`;
+            downloadHtml = `<a href="${message.content}" target="_blank" download="تسجيل_صوتي.webm" class="btn btn-sm btn-dark" style="display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.85rem; text-decoration: none; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-download"></i> تحميل الصوت</a>`;
+        } else if (message.type === 'video') {
+            contentHtml = `<div style="text-align: center; margin-bottom: 0.8rem; background: rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden;"><video src="${message.content}" controls style="max-width: 100%; max-height: 400px; width: 100%; outline: none;" playsinline></video></div>`;
+            downloadHtml = `<a href="${message.content}" target="_blank" download="فيديو_المحاضرة.mp4" class="btn btn-sm btn-dark" style="display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.85rem; text-decoration: none; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-download"></i> تحميل الفيديو</a>`;
         }
 
         msgDiv.innerHTML = `
             ${contentHtml}
-            <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fas fa-clock"></i> ${timeString}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.5rem;">
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem;">
+                    <i class="fas fa-clock" style="color: var(--primary-light);"></i> ${timeString}
+                </div>
+                ${downloadHtml}
+            </div>
+            <div style="position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: linear-gradient(to bottom, var(--primary-color), transparent);"></div>
         `;
 
         feed.appendChild(msgDiv);

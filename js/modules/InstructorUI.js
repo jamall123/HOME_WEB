@@ -152,7 +152,10 @@ export class InstructorUIClass {
                                 <button class="btn btn-sm btn-dark" onclick="document.getElementById('inst-channel-image').click()" style="border-radius: 8px;"><i class="fas fa-image"></i> إرسال صورة</button>
                                 <input type="file" id="inst-channel-image" accept="image/*" style="display: none;" onchange="window.InstructorAPI.sendChannelImage(event)">
                                 
-                                <button class="btn btn-sm btn-dark" id="btn-channel-voice" onclick="window.InstructorAPI.toggleChannelVoice()" style="border-radius: 8px;"><i class="fas fa-microphone"></i> تسجيل صوتي</button>
+                                <button class="btn btn-sm btn-dark" onclick="document.getElementById('inst-channel-video').click()" style="border-radius: 8px;"><i class="fas fa-video"></i> إرسال فيديو</button>
+                                <input type="file" id="inst-channel-video" accept="video/*" style="display: none;" onchange="window.InstructorAPI.sendChannelVideo(event)">
+                                
+                                <button class="btn btn-sm btn-dark" id="btn-channel-voice" onclick="window.InstructorAPI.toggleChannelVoice()" style="border-radius: 8px; grid-column: span 2;"><i class="fas fa-microphone"></i> تسجيل صوتي</button>
                             </div>
                         </div>
                     </div>
@@ -340,6 +343,7 @@ export class InstructorUIClass {
             // Channel mode
             sendChannelMessage: () => this.controller.sendChannelMessage(),
             sendChannelImage: (e) => this.controller.sendChannelImage(e),
+            sendChannelVideo: (e) => this.controller.sendChannelVideo(e),
             toggleChannelVoice: () => this.controller.toggleChannelVoice()
         };
 

@@ -361,6 +361,28 @@ class InstructorControllerClass {
         }
     }
 
+    async sendChannelVideo(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = '';
+        
+        try {
+            const { InstructorService } = await import('./InstructorService.js');
+            const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
+            
+            await TeachingModes.setMode('channel', {
+                lastMessage: {
+                    type: 'video',
+                    content: url,
+                    timestamp: Date.now()
+                }
+            });
+        } catch (error) {
+            console.error("Failed to upload channel video:", error);
+            alert("فشل رفع الفيديو: " + error.message);
+        }
+    }
+
     async toggleChannelVoice() {
         const btn = document.getElementById('btn-channel-voice');
         if (!this.isRecordingVoice) {
