@@ -467,7 +467,43 @@ class RoomEngineClass {
             });
             
         // Additional listeners (chat, resources, presence) will be initialized here by their managers
+
+        // 3. Real-time Online Users Count
+        this.listeners.presence = db.collection('courses').doc(this.courseId)
+            .collection('connected_users')
+            .onSnapshot(snapshot => {
+                // Filter to users with a recent heartbeat (last 90 seconds)
+                const now = Date.now();
+                let activeCount = 0;
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.lastSeen) {
+                        const lastSeenMs = data.lastSeen.toMillis ? data.lastSeen.toMillis() : now;
+                        if ((now - lastSeenMs) < 90000) activeCount++;
+                    } else {
+                        activeCount++; // count if no timestamp yet
+                    }
+                });
+
+                // Update the chat header count
+                const countEl = document.getElementById('chat-online-count');
+                if (countEl) {
+                    countEl.innerHTML = `<i class="fas fa-users"></i> ${activeCount}`;
+                }
+
+                // Update the sidebar stats count if exists
+                const sidebarCount = document.getElementById('online-students-count');
+                if (sidebarCount) sidebarCount.textContent = activeCount;
+
+                // Update header "متصل الآن" count
+                const headerCount = document.querySelector('.active-students-count');
+                if (headerCount) headerCount.textContent = activeCount;
+
+            }, err => {
+                console.warn('[RoomEngine] Presence listener error:', err);
+            });
     }
+
 
     destroy() {
         // Clean up all Firestore listeners

@@ -17,7 +17,20 @@ export class StudentManagerClass {
                 const tbody = document.getElementById('instructor-student-list');
                 if (!tbody) return;
 
-                if (snapshot.empty) {
+                // Filter to only recent heartbeats (within 90 seconds)
+                const now = Date.now();
+                const activeStudents = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.lastSeen) {
+                        const ms = data.lastSeen.toMillis ? data.lastSeen.toMillis() : now;
+                        if ((now - ms) < 90000) activeStudents.push(data);
+                    } else {
+                        activeStudents.push(data);
+                    }
+                });
+
+                if (activeStudents.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 1rem;">لا يوجد طلاب متصلين حالياً.</td></tr>';
                     return;
                 }
@@ -25,9 +38,7 @@ export class StudentManagerClass {
                 // Batch DOM updates
                 const fragment = document.createDocumentFragment();
 
-                snapshot.forEach(doc => {
-                    const student = doc.data();
-                    
+                activeStudents.forEach(student => {
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                     tr.innerHTML = `

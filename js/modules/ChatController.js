@@ -34,6 +34,12 @@ class ChatControllerClass {
     init(engine) {
         this.engine = engine;
         this.activeLessonId = null;
+
+        // Subscribe immediately using courseId for LIVE mode chat
+        // lessonId will override when a specific lesson is selected
+        if (engine.courseId) {
+            this.switchChannel('public');
+        }
         
         import('./EventBus.js').then(({ EventBus, Events }) => {
             EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
@@ -72,13 +78,12 @@ class ChatControllerClass {
         this.cache.activeChannel = channelName;
         this.cache.unreadCounts[channelName] = 0;
         
-        if (!this.activeLessonId) {
-            // Cannot subscribe without an active lesson
-            return;
-        }
+        // Use courseId as fallback for LIVE mode (no specific lesson selected)
+        const lessonId = this.activeLessonId || this.engine?.courseId;
+        if (!lessonId) return;
 
         ChatService.subscribeToChannel(
-            this.activeLessonId, 
+            lessonId, 
             channelName, 
             30, 
             (messages) => this.handleNewMessages(channelName, messages)
@@ -128,11 +133,13 @@ class ChatControllerClass {
             return;
         }
 
-        if (!this.activeLessonId) return;
+        // Use courseId as fallback for LIVE mode
+        const lessonId = this.activeLessonId || this.engine?.courseId;
+        if (!lessonId) return;
 
         try {
             await ChatService.sendMessage(
-                this.activeLessonId,
+                lessonId,
                 this.engine.currentUser.uid,
                 this.engine.currentUser.name,
                 this.engine.currentUser.role || 'student',
