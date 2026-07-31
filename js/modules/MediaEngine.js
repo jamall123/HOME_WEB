@@ -1,4 +1,3 @@
-import AgoraRTC from "agora-rtc-sdk-ng";
 /**
  * MediaEngine.js
  * Centralized handler for all multimedia modes (Live Video, Pre-recorded, Slides, Channel).
@@ -145,7 +144,7 @@ export const MediaEngine = {
     async startLiveWebRTC(courseId) {
         alert("MediaEngine: startLiveWebRTC triggered!");
         console.log("[MediaEngine] startLiveWebRTC triggered with courseId:", courseId);
-        if (!AgoraRTC) {
+        if (!window.AgoraRTC) {
             let msg = "مكتبة البث المباشر (Agora) غير محملة. قد يكون هناك مانع إعلانات يمنع تحميلها.";
             this.showError(msg);
             alert(msg);
@@ -155,7 +154,7 @@ export const MediaEngine = {
         this.showLoader('جاري الاتصال بالبث المباشر...');
 
         try {
-            this.agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
             const token = null; // Using App ID only (Testing Mode)
             const channel = courseId; // Use courseId as the unique channel name
@@ -163,8 +162,8 @@ export const MediaEngine = {
             
             await this.agoraClient.join(APP_ID, channel, token, uid);
             
-            this.localTracks.audio = await AgoraRTC.createMicrophoneAudioTrack();
-            this.localTracks.video = await AgoraRTC.createCameraVideoTrack();
+            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
+            this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack();
             
             await this.agoraClient.publish(Object.values(this.localTracks));
             
@@ -213,14 +212,14 @@ export const MediaEngine = {
     },
 
     async joinLiveWebRTC(channel) {
-        if (!AgoraRTC) {
+        if (!window.AgoraRTC) {
             this.showError("مكتبة البث المباشر (Agora) غير محملة.");
             return;
         }
 
         try {
             if (!this.agoraClient) {
-                this.agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+                this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
             const token = null; // App ID only
@@ -261,14 +260,14 @@ export const MediaEngine = {
     },
     
     async startAudioOnlyWebRTC(courseId) {
-        if (!AgoraRTC) {
+        if (!window.AgoraRTC) {
             this.showError("مكتبة البث (Agora) غير متوفرة.");
             return;
         }
         
         try {
             if (!this.agoraClient) {
-                this.agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+                this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
             
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
@@ -278,7 +277,7 @@ export const MediaEngine = {
             await this.agoraClient.join(APP_ID, channel, token, null);
             
             // Create only audio track
-            this.localTracks.audio = await AgoraRTC.createMicrophoneAudioTrack();
+            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
             await this.agoraClient.publish([this.localTracks.audio]);
             
         } catch (error) {
@@ -334,7 +333,7 @@ export const MediaEngine = {
     
     async switchCamera() {
         if (this.localTracks.video) {
-            const devices = await AgoraRTC.getCameras();
+            const devices = await window.AgoraRTC.getCameras();
             if (devices.length > 1) {
                 // Simplified switch, usually we find 'facingMode' but Agora SDK 4.x handles it mostly via setDevice
                 const currentId = this.localTracks.video.getTrackLabel();

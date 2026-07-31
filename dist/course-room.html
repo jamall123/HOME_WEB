@@ -38,15 +38,15 @@
             border-radius: 8px;
         }
     </style>
-  <script type="module" crossorigin src="/assets/courseRoom-CdrNRBBj.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-b3L32Ng1.js">
+  <script type="module" crossorigin src="/assets/courseRoom-DXt8cbxs.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
   <link rel="modulepreload" crossorigin href="/assets/ThemeManager-CfTkPl2F.js">
   <link rel="modulepreload" crossorigin href="/assets/academy-C5avEFtB.js">
-  <link rel="modulepreload" crossorigin href="/assets/EventBus-D-TnwjxE.js">
+  <link rel="modulepreload" crossorigin href="/assets/EventBus-C86EHaQu.js">
   <link rel="modulepreload" crossorigin href="/assets/NotificationManager-DweDfF-8.js">
   <link rel="modulepreload" crossorigin href="/assets/preload-helper-BATLnrmA.js">
-  <link rel="modulepreload" crossorigin href="/assets/ChatService-CZiyqMQh.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-B8D4gMny.js">
+  <link rel="modulepreload" crossorigin href="/assets/ChatService-BWPbgAmi.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-DI2Fj8iV.js">
   <link rel="stylesheet" crossorigin href="/assets/ThemeManager-gkO_wF-V.css">
   <link rel="stylesheet" crossorigin href="/assets/courseRoom-DWI9eHFt.css">
 </head>
@@ -243,7 +243,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
-    <!-- Phase 5 WebRTC integration: Agora SDK bundled via NPM inside MediaEngine -->
+    <!-- Phase 5 WebRTC integration: Agora SDK loaded as global (stream-core.js = renamed AgoraRTC SDK) -->
+    <script src="/js/stream-core.js"></script>
 
     <!-- New ES Modules Architecture (Phase 3 Integration) -->
     <script>
