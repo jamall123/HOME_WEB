@@ -264,18 +264,14 @@ class RoomEngineClass {
                 TeachingRenderer.renderSlidesLayout(this.state.presentation.slides, this.state.presentation.layout);
             }
 
-            if (this.state.room.mode === 'channel' && this.state.presentation.lastChannelMessage) {
-                TeachingRenderer.renderChannelMessage(this.state.presentation.lastChannelMessage);
-            }
-
             // Agora Student Subscriptions (Audio or Video)
             if (this.state.room.mode === 'live' && !this.isInstructor) {
                 import('./MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.joinLiveWebRTC('course-test');
+                    MediaEngine.joinLiveWebRTC(this.courseId);
                 });
             } else if (this.state.room.mode === 'slides' && this.state.presentation.audioStream && !this.isInstructor) {
                 import('./MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.joinLiveWebRTC('course-test'); // Subscribes to audio
+                    MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
                 });
             } else if (this.prevState) {
                 const wasLiveOrAudio = (this.prevState.room.mode === 'live') || 
@@ -448,6 +444,26 @@ class RoomEngineClass {
                 if(err.code !== 'permission-denied') {
                     NotificationManager.show('خطأ في مزامنة الغرفة', 'error');
                 }
+            });
+            
+        // 2. Channel Messages Sync
+        this.listeners.channel = db.collection('courses').doc(this.courseId).collection('channelMessages')
+            .orderBy('timestamp', 'asc')
+            .onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const data = change.doc.data();
+                        TeachingRenderer.renderChannelMessage(data);
+                        
+                        this.updateState({
+                            presentation: {
+                                lastChannelMessage: data
+                            }
+                        });
+                    }
+                });
+            }, err => {
+                console.error("[RoomEngine] Channel Sync Error:", err);
             });
             
         // Additional listeners (chat, resources, presence) will be initialized here by their managers

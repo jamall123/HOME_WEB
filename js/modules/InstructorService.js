@@ -82,6 +82,11 @@ export class InstructorServiceClass {
         });
     }
 
+    async addChannelMessage(courseId, message) {
+        if (!courseId) throw new Error("No courseId provided");
+        await this.db.collection('courses').doc(courseId).collection('channelMessages').add(message);
+    }
+
     /**
      * Updates classroom locks/permissions.
      */

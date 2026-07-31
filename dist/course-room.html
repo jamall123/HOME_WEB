@@ -7,14 +7,48 @@
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/courseRoom-DEs9fNfR.js"></script>
+    <style>
+        /* Slide Layouts */
+        .slides-container {
+            display: grid;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .slides-layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .slides-layout-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+        .slides-layout-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+        .slides-layout-3 img:nth-child(1) { grid-row: 1 / span 2; }
+        .slides-layout-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .slides-layout-5 { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .slides-layout-5 img:nth-child(1) { grid-column: 1 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(2) { grid-column: 3 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(3) { grid-column: 5 / span 2; grid-row: 1; }
+        .slides-layout-5 img:nth-child(4) { grid-column: 2 / span 2; grid-row: 2; }
+        .slides-layout-5 img:nth-child(5) { grid-column: 4 / span 2; grid-row: 2; }
+
+        .slides-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/courseRoom-Cl7TWyy2.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
-  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-BtJn4tbK.js">
-  <link rel="modulepreload" crossorigin href="/assets/academy-CCui3mxp.js">
+  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-CfTkPl2F.js">
+  <link rel="modulepreload" crossorigin href="/assets/academy-C5avEFtB.js">
+  <link rel="modulepreload" crossorigin href="/assets/EventBus-C86EHaQu.js">
+  <link rel="modulepreload" crossorigin href="/assets/NotificationManager-DweDfF-8.js">
   <link rel="modulepreload" crossorigin href="/assets/preload-helper-BATLnrmA.js">
-  <link rel="modulepreload" crossorigin href="/assets/ChatService-DMBR5Wu-.js">
+  <link rel="modulepreload" crossorigin href="/assets/ChatService-BWPbgAmi.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-1rxM-QSj.js">
   <link rel="stylesheet" crossorigin href="/assets/ThemeManager-gkO_wF-V.css">
-  <link rel="stylesheet" crossorigin href="/assets/courseRoom-Bdt-Wq5P.css">
+  <link rel="stylesheet" crossorigin href="/assets/courseRoom-DWI9eHFt.css">
 </head>
 <body style="overflow: hidden;"> <!-- Prevent global scrolling in the room layout -->
 
@@ -23,7 +57,7 @@
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: center; padding: 3rem 2rem;">
             <div style="margin-bottom: 2rem;">
                 <i class="fas fa-door-open" style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة (v3)</h2>
+                <h2 class="display-3" style="font-size: 1.8rem;">بوابة الدخول للغرفة</h2>
                 <p class="text-muted">الرجاء تسجيل الدخول لدخول الغرفة.</p>
             </div>
             
@@ -38,7 +72,7 @@
                     <label>كلمة المرور</label>
                     <input type="password" id="unified-pass" class="form-input" dir="ltr">
                 </div>
-                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;" onmousedown="this.style.backgroundColor='red'; alert('Button MouseDown Fired!');" onclick="handleLoginClick(this)"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
+                <button id="login-submit-btn" class="btn btn-primary" style="width: 100%;" onclick="handleLoginClick(this)"><i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة</button>
             </div>
         </div>
     </div>
@@ -71,15 +105,55 @@
         <!-- Main Workspace -->
         <div class="room-workspace" id="workspace">
             
-            <!-- 1. Curriculum Panel -->
-            <aside class="room-panel panel-curriculum scrollable" id="panel-curriculum">
-                <div style="padding: 1.5rem; border-bottom: 1px solid var(--room-border);">
-                    <h3 style="font-size: 1.1rem; margin: 0;"><i class="fas fa-book-open" style="margin-left: 0.5rem; color: var(--primary-light);"></i> المنهج الدراسي</h3>
+            <!-- 1. Curriculum & Instructor Panel -->
+            <aside class="room-panel panel-curriculum scrollable" id="panel-curriculum" style="display: flex; flex-direction: column; overflow: hidden;">
+                <div class="side-tabs" style="display: flex; border-bottom: 1px solid var(--room-border); flex-wrap: wrap; background: rgba(0,0,0,0.2);">
+                    <div class="side-tab active" data-target="curriculum" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid var(--primary-color); font-size: 0.9rem;"><i class="fas fa-book-open"></i> المنهج</div>
+                    <div class="side-tab" data-target="overview" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> تفاصيل</div>
+                    <div class="side-tab" data-target="resources" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-paperclip"></i> الملحقات</div>
+                    <div class="side-tab" data-target="instructor-side" id="tab-btn-instructor-side" style="display: none; color: var(--warning); flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-tools"></i> الإدارة</div>
                 </div>
-                <div id="curriculum-container" style="padding: 1rem;">
-                    <!-- Rendered by CurriculumUI.js -->
-                    <div class="skeleton-loader" style="height: 40px; margin-bottom: 10px;"></div>
-                    <div class="skeleton-loader" style="height: 40px; margin-bottom: 10px;"></div>
+                
+                <div class="side-workspace-content" style="flex: 1; overflow-y: auto; position: relative;">
+                    <div id="side-content-curriculum" class="side-tab-content active animate-fade">
+                        <div id="curriculum-container" style="padding: 1rem;">
+                            <!-- Rendered by CurriculumUI.js -->
+                            <div class="skeleton-loader" style="height: 40px; margin-bottom: 10px;"></div>
+                            <div class="skeleton-loader" style="height: 40px; margin-bottom: 10px;"></div>
+                        </div>
+                    </div>
+
+                    <div id="side-content-overview" class="side-tab-content animate-fade" style="display: none; padding: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <h2 id="info-title" style="font-size: 1.5rem; margin: 0;">الدرس الأول</h2>
+                            <button id="btn-edit-lesson-name" class="btn btn-icon" style="display: none; color: var(--primary-light); background: rgba(255,255,255,0.1); border: none; border-radius: 5px; cursor: pointer; padding: 0.5rem;"><i class="fas fa-edit"></i></button>
+                        </div>
+                        <p id="info-desc" class="text-muted" style="line-height: 1.6; margin-bottom: 1.5rem;"></p>
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid var(--room-border);">
+                            <img id="info-instructor-photo" src="assets/images/avatar.png" alt="Instructor" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <div id="info-instructor-name" style="font-weight: bold; font-size: 1.1rem;">المدرب</div>
+                                <div id="info-instructor-specialty" style="font-size: 0.85rem; color: var(--primary-light);"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="side-content-resources" class="side-tab-content animate-fade" style="display: none; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0;">الملفات المرفقة</h3>
+                            <span style="font-size: 0.8rem; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill);" id="resources-count">0 ملفات</span>
+                        </div>
+                        <div id="resources-container" style="display: grid; gap: 1rem;">
+                            <!-- Rendered by ResourceViewer.js -->
+                        </div>
+                    </div>
+
+                    <div id="side-content-instructor-side" class="side-tab-content animate-fade" style="display: none;">
+                        <!-- Instructor Dashboard will be mounted here dynamically or kept simple for now -->
+                        <div id="instructor-dashboard-mount">
+                            <p class="text-muted" style="padding: 1rem;">جاري تحميل لوحة تحكم المدرب...</p>
+                        </div>
+                    </div>
                 </div>
             </aside>
 
@@ -105,8 +179,15 @@
                         <video id="player-video" controls playsinline></video>
                     </div>
 
+                    <div id="layer-live" class="renderer-layer">
+                        <!-- Agora WebRTC Video Container -->
+                        <div id="agora-live-container" style="width:100%; height:100%; background: #000;"></div>
+                    </div>
+
                     <div id="layer-slides" class="renderer-layer">
-                        <img id="player-slide" src="" alt="Presentation Slide">
+                        <div id="slides-container" class="slides-container slides-layout-1">
+                            <!-- Images injected via JS -->
+                        </div>
                     </div>
 
                     <div id="layer-channel" class="renderer-layer" style="background: #0f172a; flex-direction: column; align-items: stretch;">
@@ -126,55 +207,7 @@
 
                 </div>
 
-                <!-- Bottom Workspace -->
-                <div class="bottom-workspace scrollable" id="bottom-workspace">
-                    <!-- Mobile Drag Handle -->
-                    <div class="d-lg-none" style="padding: 1rem; display: flex; justify-content: center; cursor: pointer; border-bottom: 1px solid var(--room-border);" id="close-bottom-sheet">
-                        <div style="width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px;"></div>
-                    </div>
 
-                    <!-- Tabs Header -->
-                    <div class="room-tabs" id="workspace-tabs" style="display: flex; overflow-x: auto; scrollbar-width: none;">
-                        <div class="room-tab active" data-tab="overview">نظرة عامة</div>
-                        <div class="room-tab" data-tab="resources">الملحقات</div>
-                        <div class="room-tab" data-tab="instructor" id="tab-btn-instructor" style="display: none; color: var(--warning);">أدوات المدرب</div>
-                    </div>
-
-                    <!-- Tabs Content -->
-                    <div class="workspace-content" style="position: relative; flex: 1;">
-                        
-                        <div id="tab-content-overview" class="room-tab-content active animate-fade">
-                            <h2 id="info-title" style="font-size: 1.5rem; margin-bottom: 1rem;">جاري تحميل بيانات الدرس...</h2>
-                            <p id="info-desc" class="text-muted" style="line-height: 1.6; margin-bottom: 1.5rem;"></p>
-                            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid var(--room-border);">
-                                <img id="info-instructor-photo" src="assets/images/avatar.png" alt="Instructor" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
-                                <div>
-                                    <div id="info-instructor-name" style="font-weight: bold; font-size: 1.1rem;">المدرب</div>
-                                    <div id="info-instructor-specialty" style="font-size: 0.85rem; color: var(--primary-light);"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="tab-content-resources" class="room-tab-content animate-fade">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                                <h3 style="margin: 0;">الملفات المرفقة</h3>
-                                <span style="font-size: 0.8rem; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill);" id="resources-count">0 ملفات</span>
-                            </div>
-                            <div id="resources-container" style="display: grid; gap: 1rem;">
-                                <!-- Rendered by ResourceViewer.js -->
-                            </div>
-                        </div>
-
-                        <div id="tab-content-instructor" class="room-tab-content animate-fade">
-                            <!-- Instructor Dashboard will be mounted here dynamically or kept simple for now -->
-                            <div id="instructor-dashboard-mount">
-                                <!-- Placeholders for the dashboard panels -->
-                                <p class="text-muted">جاري تحميل لوحة تحكم المدرب...</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
 
             </main>
 
@@ -210,8 +243,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
-    <!-- Phase 5 WebRTC integration will go here -->
-    
+    <!-- Phase 5 WebRTC integration (Agora SDK) -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.2.js"></script>
 
     <!-- New ES Modules Architecture (Phase 3 Integration) -->
     <script>
@@ -243,6 +276,38 @@
             const ev = new CustomEvent('DO_LOGIN', { detail: { email, pass, btn } });
             document.dispatchEvent(ev);
         };
+    </script>
+    <script>
+        // Side tabs logic for Instructor/Curriculum panels
+        document.addEventListener('DOMContentLoaded', () => {
+            const sideTabs = document.querySelectorAll('.side-tab');
+            const sideContents = document.querySelectorAll('.side-tab-content');
+            
+            sideTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active from all
+                    sideTabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.borderBottomColor = 'transparent';
+                    });
+                    sideContents.forEach(c => {
+                        c.classList.remove('active');
+                        c.style.display = 'none';
+                    });
+                    
+                    // Set active
+                    tab.classList.add('active');
+                    tab.style.borderBottomColor = 'var(--primary-color)';
+                    
+                    const target = tab.getAttribute('data-target');
+                    const content = document.getElementById('side-content-' + target);
+                    if(content) {
+                        content.classList.add('active');
+                        content.style.display = 'block';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

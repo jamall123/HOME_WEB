@@ -330,13 +330,22 @@ class InstructorControllerClass {
         const message = textInput.value.trim();
         textInput.value = '';
         
-        await TeachingModes.setMode('channel', {
-            lastMessage: {
-                type: 'text',
-                content: message,
-                timestamp: Date.now()
-            }
-        });
+        const msgData = {
+            type: 'text',
+            content: message,
+            timestamp: Date.now()
+        };
+
+        try {
+            const { InstructorService } = await import('./InstructorService.js');
+            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
+
+            await TeachingModes.setMode('channel', {
+                lastMessage: msgData
+            });
+        } catch (error) {
+            console.error("Failed to send channel text:", error);
+        }
     }
 
     async sendChannelImage(e) {
@@ -348,12 +357,15 @@ class InstructorControllerClass {
             const { InstructorService } = await import('./InstructorService.js');
             const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
             
+            const msgData = {
+                type: 'image',
+                content: url,
+                timestamp: Date.now()
+            };
+            
+            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
             await TeachingModes.setMode('channel', {
-                lastMessage: {
-                    type: 'image',
-                    content: url,
-                    timestamp: Date.now()
-                }
+                lastMessage: msgData
             });
         } catch (error) {
             console.error("Failed to upload channel image:", error);
@@ -370,12 +382,15 @@ class InstructorControllerClass {
             const { InstructorService } = await import('./InstructorService.js');
             const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
             
+            const msgData = {
+                type: 'video',
+                content: url,
+                timestamp: Date.now()
+            };
+
+            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
             await TeachingModes.setMode('channel', {
-                lastMessage: {
-                    type: 'video',
-                    content: url,
-                    timestamp: Date.now()
-                }
+                lastMessage: msgData
             });
         } catch (error) {
             console.error("Failed to upload channel video:", error);
@@ -403,14 +418,17 @@ class InstructorControllerClass {
                     
                     try {
                         const { InstructorService } = await import('./InstructorService.js');
-                        const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel_audio`);
+                        const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
                         
+                        const msgData = {
+                            type: 'audio',
+                            content: url,
+                            timestamp: Date.now()
+                        };
+
+                        await InstructorService.addChannelMessage(this.engine.courseId, msgData);
                         await TeachingModes.setMode('channel', {
-                            lastMessage: {
-                                type: 'audio',
-                                content: url,
-                                timestamp: Date.now()
-                            }
+                            lastMessage: msgData
                         });
                     } catch (error) {
                         console.error("Failed to upload audio:", error);
@@ -428,12 +446,15 @@ class InstructorControllerClass {
             }
         } else {
             this.mediaRecorder.stop();
-            if (this.audioStream) {
-                this.audioStream.getTracks().forEach(track => track.stop());
-            }
             this.isRecordingVoice = false;
             btn.innerHTML = '<i class="fas fa-microphone"></i> تسجيل صوتي';
             btn.classList.replace('btn-danger', 'btn-dark');
+            
+            // Stop mic tracks
+            if (this.audioStream) {
+                this.audioStream.getTracks().forEach(track => track.stop());
+                this.audioStream = null;
+            }
         }
     }
 }

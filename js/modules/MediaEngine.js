@@ -152,8 +152,8 @@ export const MediaEngine = {
         try {
             this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
-            const channel = 'course-test';
+            const token = null; // Using App ID only (Testing Mode)
+            const channel = courseId; // Use courseId as the unique channel name
             const uid = Math.floor(Math.random() * 100000);
             
             await this.agoraClient.join(APP_ID, channel, token, uid);
@@ -217,7 +217,7 @@ export const MediaEngine = {
                 this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
+            const token = null; // App ID only
             const uid = Math.floor(Math.random() * 100000);
 
             this.agoraClient.on("user-published", async (user, mediaType) => {
@@ -266,9 +266,10 @@ export const MediaEngine = {
             }
             
             const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
-            const token = '007eJxTYJDYp/me9f6jww3Pb/OYSu+teDr3sOSSb7ttdJP8uFw/rF6vwGBiYmCQkpySZG6UlGaSkmyYlJySnGSUlmpsnpaYbJCa9nRWVFZDICPD7Rt3WBgZIBDE52ZIzi8tKk7VLUktLmFgAAARFiYj';
+            const token = null;
+            const channel = courseId;
             
-            await this.agoraClient.join(APP_ID, 'course-test', token, null);
+            await this.agoraClient.join(APP_ID, channel, token, null);
             
             // Create only audio track
             this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
