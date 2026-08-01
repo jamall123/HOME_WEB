@@ -2,7 +2,7 @@ import"./ThemeManager-Df5bj4E3.js";import{t as p}from"./GlobalController-Df_3lCa
                         <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
                             <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
                         </div>
-                    </div>`:c=`<img src="${this.escapeHtml(l)}" alt="${this.escHtml(e.title||"")}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`,o.innerHTML=`
+                    </div>`:c=`<img src="${this.escHtml(l)}" alt="${this.escHtml(e.title||"")}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`,o.innerHTML=`
                     <a href="${`post.html?slug=${encodeURIComponent(e.slug||a.id)}`}" class="glass-panel course-card" data-card-type="post" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; background: transparent; box-shadow: none; border: none; text-decoration: none; color: inherit; transition: transform 0.3s ease;">
                         ${c}
                         <div style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 2rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; margin-top: -30px; position: relative; z-index: 2; box-shadow: var(--elevation-2);">
@@ -21,7 +21,7 @@ import"./ThemeManager-Df5bj4E3.js";import{t as p}from"./GlobalController-Df_3lCa
                         <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
                             <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
                         </div>
-                    </div>`:l=`<img src="${this.escapeHtml(s)}" alt="${this.escHtml(e.personName||"")}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`,o.innerHTML=`
+                    </div>`:l=`<img src="${this.escHtml(s)}" alt="${this.escHtml(e.personName||"")}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`,o.innerHTML=`
                     <div class="glass-panel course-card" data-card-type="story" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; background: transparent; box-shadow: none; border: none;">
                         ${l}
                         <div style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 2rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; margin-top: -30px; position: relative; z-index: 2; box-shadow: var(--elevation-2);">

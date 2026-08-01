@@ -55,7 +55,7 @@ class BlogUIClass {
                         </div>
                     </div>`;
                 } else {
-                    imageHtml = `<img src="${this.escapeHtml(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
+                    imageHtml = `<img src="${this.escHtml(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
                 }
                 
                 const postUrl = `post.html?slug=${encodeURIComponent(data.slug || item.id)}`;
@@ -94,7 +94,7 @@ class BlogUIClass {
                         </div>
                     </div>`;
                 } else {
-                    storyImageHtml = `<img src="${this.escapeHtml(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
+                    storyImageHtml = `<img src="${this.escHtml(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
                 }
 
                 wrapper.innerHTML = `
