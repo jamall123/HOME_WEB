@@ -237,7 +237,8 @@
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
 }
 
-.course-card__media {
+.course-card__media { 
+    border-radius: 24px;
     position: relative;
     height: 210px;
     overflow: hidden;
@@ -1027,4 +1028,27 @@
 @keyframes skeleton-pulse {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* Fallback Logo for missing cover image */
+.fallback-cover-logo {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+  font-size: 3rem;
+  font-family: var(--font-en, 'Outfit', sans-serif);
+  font-weight: 800;
+  letter-spacing: -2px;
+  z-index: 1;
+}
+
+.fallback-cover-logo span:first-child {
+  color: var(--primary-light, #A5B4FC);
+}
+
+.fallback-cover-logo span:last-child {
+  color: #ffffff;
 }

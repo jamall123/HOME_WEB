@@ -41,8 +41,9 @@ class PostUIClass {
           </div>
         ` : '';
 
-        const coverHtml = post.coverImage 
-            ? `<img src="${this.escapeHtml(post.coverImage)}" alt="${this.escapeHtml(post.title)}" fetchpriority="high" decoding="async">` 
+        const actualCover = post.coverImage || post.image || post.cover;
+        const coverHtml = actualCover 
+            ? `<img src="${this.escapeHtml(actualCover)}" alt="${this.escapeHtml(post.title)}" fetchpriority="high" decoding="async" onerror="this.style.display='none';">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
 
         this.container.innerHTML = `

@@ -43,8 +43,9 @@ class StoriesUIClass {
             const article = document.createElement('article');
             article.className = 'story-card glass-card';
             
-            const coverImgHtml = story.coverImage
-                ? `<img src="${this.escapeHtml(story.coverImage)}" alt="${this.escapeHtml(story.personName || '')}" loading="lazy" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`
+            const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
+            const coverImgHtml = actualCover
+                ? `<img src="${this.escapeHtml(actualCover)}" alt="${this.escapeHtml(story.personName || '')}" loading="lazy" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none';">`
                 : '';
             
             const metricHtml = story.metricValue ? `
@@ -104,8 +105,9 @@ class StoriesUIClass {
 
         const initials = (story.personName || '؟').split(' ').slice(0, 2).map(s => s[0]).join('');
 
-        const coverHtml = story.coverImage 
-            ? `<img src="${this.escapeHtml(story.coverImage)}" alt="Cover" loading="lazy" decoding="async">` 
+        const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
+        const coverHtml = actualCover 
+            ? `<img src="${this.escapeHtml(actualCover)}" alt="Cover" loading="lazy" decoding="async" onerror="this.style.display='none';">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
 
         container.innerHTML = `

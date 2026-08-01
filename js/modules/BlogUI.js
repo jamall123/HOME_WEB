@@ -41,20 +41,19 @@ class BlogUIClass {
                 const rawExcerpt = data.excerpt || (data.content ? data.content.replace(/<[^>]*>/g, '').slice(0, 120) + '...' : '');
                 const excerpt = this.escHtml(rawExcerpt);
                 
-                let imageUrl = data.coverImage || data.image;
+                let rawCover = data.coverImage || data.image || data.cover;
+                let imageUrl = rawCover;
                 if (!imageUrl || imageUrl.includes('placeholder.jpg') || imageUrl.includes('default-avatar.png') || imageUrl.includes('blog-placeholder.jpg')) {
-                    imageUrl = 'assets/images/favicon.png';
+                    imageUrl = 'fallback';
                 }
 
                 let imageHtml = '';
-                if (imageUrl === 'assets/images/favicon.png') {
-                    imageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
-                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
-                        </div>
+                if (imageUrl === 'fallback') {
+                    imageHtml = `<div class="fallback-cover-logo" style="position: relative; height: 220px; z-index: 0;">
+                        <span>J</span><span>home</span>
                     </div>`;
                 } else {
-                    imageHtml = `<img src="${encodeURI(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
+                    imageHtml = `<img src="${encodeURI(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
                 }
                 
                 const postUrl = `post.html?slug=${encodeURIComponent(data.slug || item.id)}`;
@@ -79,25 +78,24 @@ class BlogUIClass {
                 const data = item.data;
                 const storyUrl = `story.html?id=${encodeURIComponent(item.id)}`;
 
-                let imageUrl = data.coverImage || data.personAvatar;
-                if (!imageUrl || imageUrl.includes('placeholder.jpg') || imageUrl.includes('default-avatar.png') || imageUrl.includes('blog-placeholder.jpg')) {
-                    imageUrl = 'assets/images/favicon.png';
+                let rawStoryCover = data.coverImage || data.image || data.cover || data.personAvatar;
+                let storyImageUrl = rawStoryCover;
+                if (!storyImageUrl || storyImageUrl.includes('placeholder.jpg') || storyImageUrl.includes('default-avatar.png') || storyImageUrl.includes('blog-placeholder.jpg')) {
+                    storyImageUrl = 'fallback';
                 }
 
-                let imageHtml = '';
-                if (imageUrl === 'assets/images/favicon.png') {
-                    imageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
-                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
-                        </div>
+                let storyImageHtml = '';
+                if (storyImageUrl === 'fallback') {
+                    storyImageHtml = `<div class="fallback-cover-logo" style="position: relative; height: 220px; z-index: 0;">
+                        <span>J</span><span>home</span>
                     </div>`;
                 } else {
-                    imageHtml = `<img src="${encodeURI(imageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
+                    storyImageHtml = `<img src="${encodeURI(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
                 }
 
                 wrapper.innerHTML = `
                     <div class="glass-panel course-card" data-card-type="story" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; background: transparent; box-shadow: none; border: none;">
-                        ${imageHtml}
+                        ${storyImageHtml}
                         <div style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 2rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; margin-top: -30px; position: relative; z-index: 2; box-shadow: var(--elevation-2);">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
                                 <h3 style="margin: 0; font-size: 1.4rem;">${this.escHtml(data.personName)}</h3>

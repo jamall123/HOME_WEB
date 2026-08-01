@@ -100,8 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const duration = course.duration ? `${course.duration} يوم` : 'غير محدد';
                 const title = course.title || 'دورة بدون عنوان';
                 const description = course.description || 'لا يوجد وصف متاح.';
-                const cover = course.cover || 'https://via.placeholder.com/600x400/0B162C/A5B4FC?text=Jhome+Course';
-                
+                const rawCover = course.cover || course.coverImage || course.image || course.thumbnail || course.photo;
+                const cover = rawCover && rawCover.trim() !== '' ? rawCover : null;
                 const isLive = !!course.isLive;
                 const badge = course.isPaid ? 
                     `<span class="course-card__badge course-card__badge--paid"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
@@ -109,13 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const livePill = isLive ? `<span class="course-card__pill course-card__pill--live"><i class="fas fa-circle"></i> مباشر الآن</span>` : '';
 
                 grid.innerHTML += `
-                <article class="glass-panel course-card" data-category="${category}">
+                <article class="course-card" data-category="${category}" style="display: flex; flex-direction: column; background: transparent; border: none; box-shadow: none; overflow: visible;">
                     <div class="course-card__media">
-                        <img src="${cover}" alt="${title}" loading="lazy" decoding="async" onerror="this.style.display='none';">
+                        ${cover ? `<img src="${cover}" alt="${title}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`}
                         ${badge}
                         ${livePill}
                     </div>
-                    <div class="course-card__content">
+                    <div class="course-card__content glass-panel" style="margin-top: -30px; position: relative; z-index: 2; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08);">
                         <div class="course-card__meta">
                             <span class="caption-meta" style="color: var(--primary-light);">${level}</span>
                             <span class="caption-meta en-text" style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">${duration}</span>

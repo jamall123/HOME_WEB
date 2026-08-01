@@ -382,3 +382,26 @@ footer {
 @media (min-width: 768px) {
     .grid-cards { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 }
+
+/* Global Fallback Logo for missing cover images */
+.fallback-cover-logo {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+  font-size: 3rem;
+  font-family: var(--font-en, 'Outfit', sans-serif);
+  font-weight: 800;
+  letter-spacing: -2px;
+  z-index: 1;
+}
+
+.fallback-cover-logo span:first-child {
+  color: var(--primary, #4f8deb);
+}
+
+.fallback-cover-logo span:last-child {
+  color: #ffffff;
+}
