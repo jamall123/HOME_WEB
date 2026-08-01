@@ -164,14 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
-            const heroImage = data.cover || 'assets/images/courses/placeholder.jpg';
+            const rawCover = data.cover || data.coverImage || data.image || data.thumbnail || data.photo;
+            const heroImage = (rawCover && rawCover.trim() !== '') ? rawCover : 'assets/images/courses/placeholder.jpg';
             const heroBadge = data.isPaid ? 'دورة مدفوعة' : 'دورة مجانية';
             const heroSubtitle = data.isLive ? 'الجلسة مفتوحة الآن' : 'محتوى عملي ومتابعة مستمرة';
+            
+            const levelStr = data.level || 'عام';
+            const durationStr = data.duration ? `${data.duration} يوم` : 'غير محدد';
+            const studentsStr = data.students || data.studentsCount || 0;
+            const instructorNameStr = data.instructorName || data.instructor || 'جمال احمد';
 
             modalBody.innerHTML = `
                 <div class="course-modal-shell">
                     <div class="modal-hero">
-                        <img class="modal-hero__image" src="${heroImage}" alt="${data.title}">
+                        <img class="modal-hero__image" src="${heroImage}" alt="${data.title}" onerror="this.style.display='none';">
                         <div class="modal-hero__content">
                             <span class="modal-badge"><i class="fas fa-play-circle"></i> ${heroBadge}</span>
                             <h2>${data.title}</h2>
@@ -182,28 +188,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="modal-details-container">
-                        <p class="body-large text-muted">${data.description}</p>
+                        <p class="body-large text-muted">${data.description || 'لا يوجد وصف متاح.'}</p>
                         
                         <div class="course-meta-grid">
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <span>المدة</span>
-                                <strong>${data.duration}</strong>
+                                <strong>${durationStr}</strong>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-signal"></i>
                                 <span>المستوى</span>
-                                <strong>${data.level}</strong>
+                                <strong>${levelStr}</strong>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-users"></i>
                                 <span>المشتركين</span>
-                                <strong>${data.students} طالب</strong>
+                                <strong>${studentsStr} طالب</strong>
                             </div>
                             <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.id}')">
                                 <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>
                                 <span style="color: #A5B4FC;">المقدم</span>
-                                <strong style="color: white; margin-top: 0.25rem; display: block;">${data.instructor}</strong>
+                                <strong style="color: white; margin-top: 0.25rem; display: block;">${instructorNameStr}</strong>
                             </button>
                         </div>
                     </div>
