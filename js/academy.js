@@ -89,6 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const coursesCountEl = document.getElementById('courses-count');
+            if (coursesCountEl) {
+                coursesCountEl.innerText = snap.docs.length;
+            }
+
             snap.docs.forEach(doc => {
                 const course = doc.data();
                 course.id = doc.id;
