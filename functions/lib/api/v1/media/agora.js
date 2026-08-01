@@ -3,7 +3,7 @@ import agoraPkg from 'agora-access-token';
 const { RtcTokenBuilder, RtcRole } = agoraPkg;
 import { DI } from '../../../shared/di.js';
 // The App ID and Certificate from the Agora Console
-const APP_ID = 'fb0027bb7df140ed9981a640622f0e74';
+const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
 const APP_CERTIFICATE = 'a888daacd5494b53b94b0a0cc0e7172d';
 export const generateAgoraToken = functions.https.onCall((data, context) => {
     // Make sure the user is authenticated (Optional but recommended for security)
