@@ -49,8 +49,8 @@ class BlogUIClass {
 
                 let imageHtml = '';
                 if (imageUrl === 'fallback') {
-                    imageHtml = `<div class="fallback-cover-logo" style="position: relative; height: 220px; z-index: 0;">
-                        <span>J</span><span>home</span>
+                    imageHtml = `<div style="position: relative; height: 220px; width: 100%; overflow: hidden;">
+                        <div class="fallback-cover-logo"><span>J</span><span>home</span></div>
                     </div>`;
                 } else {
                     imageHtml = `<img src="${encodeURI(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
@@ -86,8 +86,8 @@ class BlogUIClass {
 
                 let storyImageHtml = '';
                 if (storyImageUrl === 'fallback') {
-                    storyImageHtml = `<div class="fallback-cover-logo" style="position: relative; height: 220px; z-index: 0;">
-                        <span>J</span><span>home</span>
+                    storyImageHtml = `<div style="position: relative; height: 220px; width: 100%; overflow: hidden;">
+                        <div class="fallback-cover-logo"><span>J</span><span>home</span></div>
                     </div>`;
                 } else {
                     storyImageHtml = `<img src="${encodeURI(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
