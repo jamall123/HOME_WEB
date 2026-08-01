@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 grid.innerHTML += `
                 <article class="glass-panel course-card" data-category="${category}">
                     <div class="course-card__media">
-                        <img src="${cover}" alt="${title}" loading="lazy" decoding="async">
+                        <img src="${cover}" alt="${title}" loading="lazy" decoding="async" onerror="this.style.display='none';">
                         ${badge}
                         ${livePill}
                     </div>
