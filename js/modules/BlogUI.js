@@ -49,11 +49,13 @@ class BlogUIClass {
 
                 let imageHtml = '';
                 if (imageUrl === 'fallback') {
-                    imageHtml = `<div style="position: relative; height: 220px; width: 100%; overflow: hidden;">
-                        <div class="fallback-cover-logo"><span>J</span><span>home</span></div>
+                    imageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
+                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
+                        </div>
                     </div>`;
                 } else {
-                    imageHtml = `<img src="${encodeURI(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
+                    imageHtml = `<img src="${this.escapeHtml(imageUrl)}" alt="${this.escHtml(data.title || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
                 }
                 
                 const postUrl = `post.html?slug=${encodeURIComponent(data.slug || item.id)}`;
@@ -86,11 +88,13 @@ class BlogUIClass {
 
                 let storyImageHtml = '';
                 if (storyImageUrl === 'fallback') {
-                    storyImageHtml = `<div style="position: relative; height: 220px; width: 100%; overflow: hidden;">
-                        <div class="fallback-cover-logo"><span>J</span><span>home</span></div>
+                    storyImageHtml = `<div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.15)); height: 220px; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <div style="font-size: 3rem; font-family: var(--font-en, 'Outfit', sans-serif); font-weight: 800; letter-spacing: -1px;">
+                            <span style="color: var(--primary, #4f8deb);">J</span><span style="color: var(--text-main, #ffffff);">home</span>
+                        </div>
                     </div>`;
                 } else {
-                    storyImageHtml = `<img src="${encodeURI(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;" onerror="this.style.display='none';">`;
+                    storyImageHtml = `<img src="${this.escapeHtml(storyImageUrl)}" alt="${this.escHtml(data.personName || '')}" loading="lazy" decoding="async" style="width:100%; height: 220px; object-fit: cover; display:block; position: relative;">`;
                 }
 
                 wrapper.innerHTML = `

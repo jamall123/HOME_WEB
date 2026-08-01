@@ -45,7 +45,7 @@ class StoriesUIClass {
             
             const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
             const coverImgHtml = actualCover
-                ? `<img src="${this.escapeHtml(actualCover)}" alt="${this.escapeHtml(story.personName || '')}" loading="lazy" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none';">`
+                ? `<img src="${this.escapeHtml(actualCover)}" alt="${this.escapeHtml(story.personName || '')}" loading="lazy" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`
                 : '';
             
             const metricHtml = story.metricValue ? `
@@ -107,7 +107,7 @@ class StoriesUIClass {
 
         const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
         const coverHtml = actualCover 
-            ? `<img src="${this.escapeHtml(actualCover)}" alt="Cover" loading="lazy" decoding="async" onerror="this.style.display='none';">` 
+            ? `<img src="${this.escapeHtml(actualCover)}" alt="Cover" loading="lazy" decoding="async">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
 
         container.innerHTML = `
