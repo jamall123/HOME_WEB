@@ -16,15 +16,10 @@ class StoriesServiceClass {
             if (category !== 'all') {
                 q = q.where('category', '==', category);
             }
-            
+            q = q.orderBy('createdAt', 'desc').limit(limit);
+
             const snap = await q.get();
-            const stories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            return stories.sort((a, b) => {
-                const dateA = a.publishedAt?.seconds || 0;
-                const dateB = b.publishedAt?.seconds || 0;
-                return dateB - dateA;
-            }).slice(0, limit);
+            return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (e) {
             Logger.error('StoriesService: Error fetching stories', e);
             throw e;

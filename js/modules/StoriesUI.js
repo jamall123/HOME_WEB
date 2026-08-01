@@ -43,7 +43,9 @@ class StoriesUIClass {
             const article = document.createElement('article');
             article.className = 'story-card glass-card';
             
-            const coverStyle = story.coverImage ? `style="background-image: url('${this.escapeHtml(story.coverImage)}')"` : '';
+            const coverImgHtml = story.coverImage
+                ? `<img src="${this.escapeHtml(story.coverImage)}" alt="${this.escapeHtml(story.personName || '')}" loading="lazy" decoding="async" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">`
+                : '';
             
             const metricHtml = story.metricValue ? `
                 <div class="story-metric">
@@ -59,7 +61,8 @@ class StoriesUIClass {
             const linkHtml = story.profileLink ? `<a href="${encodeURI(story.profileLink)}" target="_blank" class="cta-button secondary" style="margin-top: 15px; text-align: center; font-size: 0.9rem; padding: 0.5rem;"><i class="fas fa-external-link-alt"></i> مشاهدة ملف الحرفي</a>` : '';
 
             article.innerHTML = `
-                <div class="story-cover" ${coverStyle}>
+                <div class="story-cover">
+                    ${coverImgHtml}
                     <div class="story-overlay">
                         ${metricHtml}
                     </div>
@@ -102,7 +105,7 @@ class StoriesUIClass {
         const initials = (story.personName || '؟').split(' ').slice(0, 2).map(s => s[0]).join('');
 
         const coverHtml = story.coverImage 
-            ? `<img src="${this.escapeHtml(story.coverImage)}" alt="Cover">` 
+            ? `<img src="${this.escapeHtml(story.coverImage)}" alt="Cover" loading="lazy" decoding="async">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
 
         container.innerHTML = `

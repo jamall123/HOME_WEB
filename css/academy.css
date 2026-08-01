@@ -38,18 +38,412 @@
     box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
 }
 
-/* 2. Course Cards */
+/* 2. Academy Hero & Course Cards */
+.academy-showcase {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.academy-showcase__card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    padding: 1.2rem;
+    backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.academy-showcase__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(79,70,229,0.25), rgba(16,185,129,0.16));
+    color: #E0E7FF;
+    margin-bottom: 0.75rem;
+}
+
+.academy-showcase__card h3 {
+    color: white;
+    margin-bottom: 0.45rem;
+    font-size: 1.05rem;
+}
+
+.academy-showcase__card p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+.academy-journey {
+    background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(17,24,39,0.78));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 1.4rem;
+    margin-bottom: 2rem;
+}
+
+.academy-journey__header {
+    margin-bottom: 1rem;
+}
+
+.academy-journey__header h2 {
+    margin: 0.4rem 0 0;
+    font-size: 1.35rem;
+    color: white;
+}
+
+.academy-journey__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.academy-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    padding: 1rem;
+}
+
+.academy-step span {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0.65rem;
+}
+
+.academy-step h4 {
+    color: white;
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+}
+
+.academy-step p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    font-size: 0.92rem;
+}
+
+.academy-hero {
+    display: grid;
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: 2rem;
+    align-items: center;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.8));
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.academy-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.28), transparent 42%);
+    pointer-events: none;
+}
+
+.academy-hero__content {
+    position: relative;
+    z-index: 1;
+}
+
+.academy-hero__pill {
+    display: inline-flex;
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: rgba(147, 51, 234, 0.16);
+    color: #E9D5FF;
+    border: 1px solid rgba(147, 51, 234, 0.32);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.academy-hero__content h1 {
+    margin-bottom: 1rem;
+    font-size: clamp(2rem, 4vw, 3.15rem);
+    line-height: 1.2;
+}
+
+.academy-hero__content .body-large {
+    max-width: 610px;
+    margin: 0 0 1.25rem;
+    color: var(--text-secondary);
+}
+
+.academy-hero__actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.academy-hero__quick-link {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.academy-hero__metrics {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.academy-metric-card {
+    padding: 1rem 1.15rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+}
+
+.academy-metric-card strong {
+    display: block;
+    font-size: 1.15rem;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.academy-metric-card span {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
 .course-card {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, opacity 0.3s ease;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    min-height: 100%;
 }
 
 .course-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: translateY(-6px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.course-card__media {
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(79,70,229,0.2), rgba(16,185,129,0.14));
+}
+
+.course-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.course-card:hover .course-card__media img {
+    transform: scale(1.04);
+}
+
+.course-card__badge,
+.course-card__pill {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    color: white;
+    z-index: 2;
+}
+
+.course-card__badge {
+    top: 1rem;
+    right: 1rem;
+}
+
+.course-card__badge--paid {
+    background: rgba(245, 158, 11, 0.82);
+}
+
+.course-card__badge--free {
+    background: rgba(16, 185, 129, 0.82);
+}
+
+.course-card__pill {
+    left: 1rem;
+    bottom: 1rem;
+    background: rgba(2, 6, 23, 0.72);
+}
+
+.course-card__pill--live {
+    color: #A7F3D0;
+}
+
+.course-card__content {
+    padding: 1.25rem 1.25rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.course-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.course-card__title {
+    margin: 0;
+    font-size: 1.22rem;
+    color: white;
+    line-height: 1.4;
+}
+
+.course-card__description {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.course-card__actions {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 0.2rem;
+}
+
+.course-card__actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+.course-card__actions .btn-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 .course-card.hidden {
     display: none;
+}
+
+.course-modal-shell {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-hero {
+    position: relative;
+    min-height: 240px;
+    display: flex;
+    align-items: flex-end;
+    padding: 2rem;
+    overflow: hidden;
+}
+
+.modal-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,70,229,0.85), rgba(3,4,11,0.55));
+    z-index: 1;
+}
+
+.modal-hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7);
+}
+
+.modal-hero__content {
+    position: relative;
+    z-index: 2;
+    color: white;
+}
+
+.modal-hero__content h2 {
+    margin: 0.35rem 0 0.45rem;
+    font-size: 1.8rem;
+}
+
+.modal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.8rem;
+}
+
+.modal-cta-stack {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+}
+
+.modal-cta-stack .btn {
+    flex: 1;
+    min-width: 180px;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .academy-hero {
+        grid-template-columns: 1fr;
+        padding: 1.45rem;
+    }
+
+    .academy-hero__metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .academy-showcase,
+    .academy-journey__steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .academy-hero__metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .course-card__actions {
+        flex-direction: column;
+    }
+
+    .modal-cta-stack {
+        flex-direction: column;
+    }
+
+    .academy-journey,
+    .academy-showcase__card {
+        padding: 1rem;
+    }
 }
 
 /* 3. Interactive Modal Overlay */

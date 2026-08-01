@@ -11,8 +11,10 @@ export * from './shared/monitoring/analytics.js';
 // ── V1 API Gateway: Academy ───────────────────────────────────────────────────
 import { courses } from './api/v1/academy/courses.js';
 import { enrollments } from './api/v1/academy/enrollments.js';
+import { login } from './api/v1/academy/login.js';
 export const api_v1_academy_courses = courses;
 export const api_v1_academy_enrollments = enrollments;
+export const api_v1_academy_login = login;
 // ── V1 API Gateway: CMS ───────────────────────────────────────────────────────
 import { content } from './api/v1/cms/content.js';
 import { settings } from './api/v1/cms/settings.js';
@@ -37,6 +39,7 @@ export const healthCheck = functions.https.onRequest((request, response) => {
         functions: [
             'api_v1_academy_courses',
             'api_v1_academy_enrollments',
+            'api_v1_academy_login',
             'api_v1_cms_content',
             'api_v1_cms_settings',
             'api_v1_users',

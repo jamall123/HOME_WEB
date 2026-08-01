@@ -550,40 +550,50 @@ window.RegistrationEngine = {
                 receiptUrl = await this.uploadReceipt(this.selectedReceiptFile);
             }
 
-            const db = firebase.firestore();
-            
-            // Generate unique request number (e.g. REQ-12345678)
             const requestNumber = 'REQ-' + Math.floor(10000000 + Math.random() * 90000000);
 
-            // Build the payload matching the schema
             const payload = {
-                requestNumber: requestNumber,
-                courseId: this.currentCourseId,
-                courseTitle: this.currentCourseTitle,
-                fullName: this.elements.name.value.trim(),
-                phone: this.elements.phone.value.trim(),
-                email: this.elements.email.value.trim() || null,
-                age: parseInt(this.elements.age.value),
-                gender: this.elements.gender.value,
-                country: this.elements.country.value.trim(),
-                city: this.elements.city.value.trim(),
-                paymentStatus: this.isPaidCourse ? 'paid' : 'free',
-                receiptUrl: receiptUrl,
-                status: 'pending',
-                education: this.elements.education.value,
-                specialization: this.elements.specialization.value.trim() || null,
-                reason: this.elements.reason.value.trim(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                action: 'request',
+                payload: {
+                    courseId: this.currentCourseId,
+                    email: this.elements.email.value.trim() || null,
+                    name: this.elements.name.value.trim(),
+                    student: {
+                        fullName: this.elements.name.value.trim(),
+                        phone: this.elements.phone.value.trim(),
+                        age: parseInt(this.elements.age.value),
+                        gender: this.elements.gender.value,
+                        country: this.elements.country.value.trim(),
+                        city: this.elements.city.value.trim(),
+                        education: this.elements.education.value,
+                        specialization: this.elements.specialization.value.trim() || null,
+                        reason: this.elements.reason.value.trim(),
+                        requestNumber,
+                        paymentStatus: this.isPaidCourse ? 'paid' : 'free',
+                        receiptUrl,
+                        courseTitle: this.currentCourseTitle
+                    }
+                },
+                apiVersion: 'v1',
+                metadata: {
+                    correlationId: crypto.randomUUID(),
+                    clientTimestamp: new Date().toISOString()
+                }
             };
 
-            // Direct write to Firestore since Cloud Functions are not active
-            await db.collection('enrollmentRequests').add(payload);
+            const { backendGateway } = await import('../core/BackendGateway.js');
+            await backendGateway.execute({
+                domain: 'academy_enrollments',
+                action: 'request',
+                entity: undefined,
+                payload: payload.payload
+            });
             
             this.showStep(this.elements.successStep);
 
         } catch (error) {
-            console.error("Final submission failed:", error);
-            this.showError("فشل التسجيل", "لم نتمكن من حفظ بياناتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مجدداً.");
+            console.error('Final submission failed:', error);
+            this.showError('فشل التسجيل', 'لم نتمكن من حفظ بياناتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مجدداً.');
         }
     },
 

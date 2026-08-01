@@ -7,13 +7,30 @@
 import { EventBus, Events } from './EventBus.js';
 import { StateStore } from './StateStore.js';
 import { jhomeDb } from './FirebaseAdapter.js';
-import { PermissionEngine } from './PermissionEngine.js';
 
 export const MediaEngine = {
     agoraClient: null,
     localTracks: { video: null, audio: null },
     mainContainer: '#teaching-renderer',
-    
+    lastNetworkWarningAt: 0,
+
+    /**
+     * Reacts to Agora's per-second network quality report (1 = excellent, 6 = down).
+     * Surfaces a lightweight, throttled notice instead of spamming the user.
+     */
+    handleNetworkQuality(stats) {
+        const quality = stats && stats.downlinkNetworkQuality;
+        if (!quality || quality < 5) return;
+
+        const now = Date.now();
+        if (now - this.lastNetworkWarningAt < 30000) return; // Throttle to once per 30s
+        this.lastNetworkWarningAt = now;
+
+        import('./NotificationManager.js').then(({ NotificationManager }) => {
+            NotificationManager.show('اتصالك بالإنترنت ضعيف، تم تقليل جودة البث تلقائياً لضمان استمرارية المشاهدة.', 'info');
+        }).catch(() => {});
+    },
+
     init() {
         EventBus.subscribe(Events.MEDIA_MODE_CHANGED, (payload) => {
             this.handleModeChange(payload.mode, payload.data);
@@ -166,10 +183,24 @@ export const MediaEngine = {
             this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
             await this.agoraClient.join(APP_ID, channel, token, uid);
-            
-            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
-            this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack();
-            
+
+            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack({
+                AEC: true, ANS: true, AGC: true
+            });
+            this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack({
+                // Moderate default bitrate/resolution keeps the main stream light on data.
+                encoderConfig: '480p_1'
+            });
+
+            // Publish both a high and a low quality stream so viewers on weak
+            // connections automatically receive the lighter stream (adaptive bitrate).
+            try {
+                await this.agoraClient.enableDualStream();
+                this.agoraClient.setLowStreamParameter({ width: 160, height: 120, framerate: 10, bitrate: 80 });
+            } catch (dualStreamError) {
+                console.warn('[MediaEngine] Dual stream not available:', dualStreamError);
+            }
+
             await this.agoraClient.publish(Object.values(this.localTracks));
             
             // Show video in the instructor dashboard immediately (InstructorUI handles button toggles)
@@ -235,9 +266,22 @@ export const MediaEngine = {
                 this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
 
+            // Continuously monitor connection quality and auto-switch this viewer
+            // to the low-quality/audio-only stream when the network is weak, then
+            // recover automatically once conditions improve (saves data, avoids buffering).
+            this.agoraClient.on("network-quality", (stats) => {
+                this.handleNetworkQuality(stats);
+            });
+
             this.agoraClient.on("user-published", async (user, mediaType) => {
                 await this.agoraClient.subscribe(user, mediaType);
                 if (mediaType === "video") {
+                    // Let Agora automatically fall back to the low stream, then audio-only,
+                    // when this viewer's downlink quality degrades (adaptive bitrate).
+                    try {
+                        await this.agoraClient.setStreamFallbackOption(user.uid, 2);
+                    } catch (e) { /* Fallback option not critical if it fails */ }
+
                     const videoTrack = user.videoTrack;
                     let liveDiv = document.getElementById('agora-student-live');
                     if (!liveDiv) {
@@ -360,7 +404,7 @@ export const MediaEngine = {
         return new Promise((resolve) => {
             const container = this.transitionToContainer('mode-recorded-video');
             container.innerHTML = `
-                <video id="recorded-player" controls playsinline style="width:100%; height:100%; object-fit:contain; background:#000;">
+                <video id="recorded-player" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000;">
                     <source src="${url}" type="video/mp4">
                     متصفحك لا يدعم تشغيل الفيديو.
                 </video>

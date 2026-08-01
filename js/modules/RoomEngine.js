@@ -122,6 +122,7 @@ class RoomEngineClass {
             ArchiveManager.init(this);
         });
 
+        this.detectNetworkConditions();
         this.restoreLocalState();
 
         this.attachGlobalListeners();
@@ -243,6 +244,15 @@ class RoomEngineClass {
         if (this.renderQueue.has('room') || this.renderQueue.has('network') || this.renderQueue.has('presentation')) {
             TeachingRenderer.renderMode(this.state.room.mode, this.state.network.lowBandwidth);
             TeachingRenderer.updateLiveBadge(this.state.room.isLive);
+
+            if (this.renderQueue.has('network')) {
+                const btnLowBandwidth = document.getElementById('btn-low-bandwidth');
+                if (btnLowBandwidth) {
+                    btnLowBandwidth.style.background = this.state.network.lowBandwidth
+                        ? 'var(--primary-color)'
+                        : 'rgba(0,0,0,0.4)';
+                }
+            }
             
             if (this.state.room.mode === 'video' && this.state.presentation.videoUrl) {
                 const playerVideo = document.getElementById('player-video');
@@ -321,6 +331,32 @@ class RoomEngineClass {
             }
         } catch (e) {
             console.error("[RoomEngine] Failed to restore local state", e);
+        }
+    }
+
+    /**
+     * Auto-enables data-saving mode on first visit when the browser reports a
+     * slow connection (2G/3G) or the user has "Data Saver" turned on.
+     * Only applies on the very first visit to this room; afterwards the
+     * user's own choice (restored above) always takes priority.
+     */
+    detectNetworkConditions() {
+        try {
+            const alreadyVisited = !!localStorage.getItem(`room_state_${this.courseId}`);
+            if (alreadyVisited) return;
+
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (!connection) return;
+
+            const isSlow = connection.saveData === true ||
+                ['slow-2g', '2g', '3g'].includes(connection.effectiveType);
+
+            if (isSlow) {
+                this.updateState({ network: { lowBandwidth: true } });
+                NotificationManager.show('تم تفعيل وضع توفير البيانات تلقائياً بسبب ضعف الاتصال. يمكنك إيقافه من الأعلى.', 'info', 5000);
+            }
+        } catch (e) {
+            // Network Information API not supported; ignore silently.
         }
     }
 

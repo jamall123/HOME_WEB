@@ -22,10 +22,15 @@ class PostServiceClass {
             
             const post = { id: snap.docs[0].id, ...snap.docs[0].data() };
 
-            // Increment views asynchronously without blocking
-            this.db.collection('posts').doc(post.id).update({
-                views: window.firebase.firestore.FieldValue.increment(1)
-            }).catch(e => Logger.warn('Failed to increment views', e));
+            // Only count one view per post per browser session to avoid
+            // inflating counts (and Firestore write costs) on refresh/back navigation.
+            const viewedKey = `jhome_viewed_post_${post.id}`;
+            if (!sessionStorage.getItem(viewedKey)) {
+                sessionStorage.setItem(viewedKey, '1');
+                this.db.collection('posts').doc(post.id).update({
+                    views: window.firebase.firestore.FieldValue.increment(1)
+                }).catch(e => Logger.warn('Failed to increment views', e));
+            }
 
             return post;
         } catch (e) {

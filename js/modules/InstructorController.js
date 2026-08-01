@@ -100,15 +100,14 @@ class InstructorControllerClass {
     }
 
     async startAgoraLive() {
-        alert("InstructorController: startAgoraLive called");
         try {
             const { MediaEngine } = await import('./MediaEngine.js');
-            alert("InstructorController: MediaEngine imported");
             await TeachingModes.setMode('live', { isLive: true });
-            alert("InstructorController: TeachingMode set");
-            MediaEngine.startLiveWebRTC(this.engine.courseId);
+            await MediaEngine.startLiveWebRTC(this.engine.courseId);
         } catch(e) {
-            alert("InstructorController error: " + e.message);
+            console.error('[InstructorController] Failed to start live stream:', e);
+            const { NotificationManager } = await import('./NotificationManager.js');
+            NotificationManager.show('تعذر بدء البث المباشر: ' + e.message, 'error');
             throw e;
         }
     }

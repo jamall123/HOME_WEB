@@ -42,7 +42,7 @@ class PostUIClass {
         ` : '';
 
         const coverHtml = post.coverImage 
-            ? `<img src="${this.escapeHtml(post.coverImage)}" alt="${this.escapeHtml(post.title)}">` 
+            ? `<img src="${this.escapeHtml(post.coverImage)}" alt="${this.escapeHtml(post.title)}" fetchpriority="high" decoding="async">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;
 
         this.container.innerHTML = `

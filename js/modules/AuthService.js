@@ -3,36 +3,25 @@
  * Handles standard Firebase Authentication and triggers EventBus auth states.
  */
 
-import { auth, jhomeAuth, jhomeDb } from './FirebaseAdapter.js';
+import { jhomeAuth } from './FirebaseAdapter.js';
 import { EventBus, Events } from './EventBus.js';
 import { StateStore } from './StateStore.js';
 
 export const AuthService = {
 
     init() {
-        const customUserStr = sessionStorage.getItem('custom_course_user');
-        if (customUserStr) {
-            try {
-                const customUser = JSON.parse(customUserStr);
-                StateStore.setState('user', customUser);
-                // Delay emit slightly to allow other modules to attach listeners
-                setTimeout(() => EventBus.emit(Events.AUTH_STATE_CHANGED, customUser), 50);
-            } catch(e) {}
-        }
-
-        // Listen for standard Firebase Auth changes
+        // Listen for standard Firebase Auth changes. Legacy course-credential
+        // logins now sign in through signInWithCustomToken() (see login()),
+        // so they surface here too — no separate mock-user code path needed.
         jhomeAuth.onAuthStateChanged((user) => {
             if (user) {
-                sessionStorage.removeItem('custom_course_user');
                 StateStore.setState('user', user);
                 EventBus.emit(Events.AUTH_STATE_CHANGED, user);
                 this.loadPermissions(user.uid);
             } else {
-                if (!sessionStorage.getItem('custom_course_user')) {
-                    StateStore.setState('user', null);
-                    StateStore.setState('permissions', []);
-                    EventBus.emit(Events.AUTH_STATE_CHANGED, null);
-                }
+                StateStore.setState('user', null);
+                StateStore.setState('permissions', []);
+                EventBus.emit(Events.AUTH_STATE_CHANGED, null);
             }
         });
     },
@@ -59,47 +48,28 @@ export const AuthService = {
         try {
             return await jhomeAuth.signInWithEmailAndPassword(email, password);
         } catch(e) {
-            if (courseId && jhomeDb) {
-                const snapshot = await jhomeDb.collection('courses_credentials')
-                    .where('courseId', '==', courseId)
-                    .where('username', '==', email)
-                    .where('password', '==', password)
-                    .get();
-                if (!snapshot.empty) {
-                    const credDoc = snapshot.docs[0];
-                    const credData = credDoc.data();
-                    
-                    // Update login stats (non-critical — don't block login if rules deny write)
-                    try {
-                        await credDoc.ref.update({
-                            lastLogin: new Date(),
-                            loginCount: (credData.loginCount || 0) + 1
-                        });
-                    } catch(updateErr) {
-                        console.warn('تعذّر تحديث إحصائيات الدخول (Firestore rules):', updateErr.message);
-                    }
+            if (courseId) {
+                // Legacy course credentials are now verified server-side via
+                // the api_v1_academy_login Cloud Function (Admin SDK) — the
+                // client never reads/compares the password directly anymore.
+                const { backendGateway } = await import('../core/BackendGateway.js');
+                const result = await backendGateway.execute({
+                    domain: 'academy_login',
+                    action: 'login',
+                    payload: { username: email, password, courseId }
+                });
 
-                    const mockUser = {
-                        uid: credDoc.id,
-                        email: email,
-                        courseId: courseId,
-                        isCustomAuth: true,
-                        role: credData.role || 'student',
-                        name: credData.name || email,
-                    };
-                    
-                    sessionStorage.setItem('custom_course_user', JSON.stringify(mockUser));
-                    StateStore.setState('user', mockUser);
-                    EventBus.emit(Events.AUTH_STATE_CHANGED, mockUser);
-                    return mockUser;
-                }
+                const { token } = result.data;
+                const credential = await jhomeAuth.signInWithCustomToken(token);
+                // onAuthStateChanged (registered in init()) picks up the real
+                // Firebase Auth user and emits AUTH_STATE_CHANGED normally.
+                return credential;
             }
             throw e;
         }
     },
 
     async logout() {
-        sessionStorage.removeItem('custom_course_user');
         StateStore.setState('user', null);
         EventBus.emit(Events.AUTH_STATE_CHANGED, null);
         return jhomeAuth.signOut();

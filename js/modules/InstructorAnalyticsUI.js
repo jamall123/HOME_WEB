@@ -80,7 +80,7 @@ export class InstructorAnalyticsUIClass {
                             <canvas id="course-completion-chart" width="400" height="200" style="width: 100%; max-width: 100%;"></canvas>
                         </div>
                         <div style="background: var(--surface); padding: 1.5rem; border-radius: 8px;">
-                            <h3 style="margin-top:0;">إحصائيات الملفات (تنزيلات)</h3>
+                            <h3 style="margin-top:0;">توزيع ملفات الموارد المرفوعة</h3>
                             <canvas id="course-resources-chart" width="400" height="200" style="width: 100%; max-width: 100%;"></canvas>
                         </div>
                     </div>
@@ -93,15 +93,55 @@ export class InstructorAnalyticsUIClass {
                 ]);
             });
 
-            // Native Canvas Rendering
+            // Native Canvas Rendering (completion chart uses real analytics data)
             setTimeout(() => {
                 ChartsAdapter.renderDoughnutChart('course-completion-chart', [data.averageCompletion, 100 - data.averageCompletion], ['#2ecc71', '#e74c3c']);
-                ChartsAdapter.renderBarChart('course-resources-chart', [5, 12, 8, 20], ['ملف 1', 'ملف 2', 'ملف 3', 'ملف 4'], '#9b59b6');
             }, 100);
+
+            // Resource chart pulls the real uploaded resource list for this course, grouped by file type
+            this.renderResourcesChart(container);
 
         } catch (error) {
             container.innerHTML = '<div style="color:var(--danger); padding: 1rem;">حدث خطأ أثناء تحميل البيانات</div>';
             console.error(error);
+        }
+    }
+
+    async renderResourcesChart(container) {
+        const canvas = container.querySelector('#course-resources-chart');
+        if (!canvas) return;
+
+        try {
+            const snap = await window.firebase.firestore()
+                .collection('courses').doc(this.engine.courseId)
+                .collection('resources').get();
+
+            if (snap.empty) {
+                canvas.replaceWith(Object.assign(document.createElement('p'), {
+                    style: 'color:#888; text-align:center; padding: 2rem 0; margin:0;',
+                    textContent: 'لا توجد ملفات موارد مرفوعة بعد لهذه الدورة.'
+                }));
+                return;
+            }
+
+            const counts = {};
+            snap.docs.forEach(doc => {
+                const { url = '', name = '' } = doc.data();
+                const ext = (url.split('?')[0].split('.').pop() || name.split('.').pop() || 'أخرى').toLowerCase();
+                counts[ext] = (counts[ext] || 0) + 1;
+            });
+
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+            setTimeout(() => {
+                ChartsAdapter.renderBarChart('course-resources-chart', values, labels, '#9b59b6');
+            }, 0);
+        } catch (error) {
+            console.error('[InstructorAnalyticsUI] Failed to load resources chart', error);
+            canvas.replaceWith(Object.assign(document.createElement('p'), {
+                style: 'color:var(--danger); text-align:center; padding: 2rem 0; margin:0;',
+                textContent: 'تعذر تحميل بيانات الملفات.'
+            }));
         }
     }
 }

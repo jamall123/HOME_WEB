@@ -8,12 +8,12 @@
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/assets/courses-BlIiCGPo.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-CfTkPl2F.js">
-  <link rel="modulepreload" crossorigin href="/assets/GlobalController-CV3m3GX1.js">
-  <link rel="modulepreload" crossorigin href="/assets/academy-C5avEFtB.js">
-  <link rel="stylesheet" crossorigin href="/assets/ThemeManager-gkO_wF-V.css">
-  <link rel="stylesheet" crossorigin href="/assets/courseRoom-DWI9eHFt.css">
+  <script type="module" crossorigin src="/assets/courses-DQVVKJJZ.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-DVdnSx32.js">
+  <link rel="modulepreload" crossorigin href="/assets/GlobalController-BgGYEAUO.js">
+  <link rel="modulepreload" crossorigin href="/assets/academy-DPwzA8Aa.js">
+  <link rel="stylesheet" crossorigin href="/assets/ThemeManager-DzONDGXG.css">
+  <link rel="stylesheet" crossorigin href="/assets/courseRoom-CzvAGA5s.css">
 </head>
 <body>
 
@@ -88,21 +88,83 @@
     <main class="container section" style="padding-top: 150px; min-height: 80vh;">
         
         <!-- Hero Section -->
-        <div class="section-title animate-fade-up" style="text-align: center; margin-bottom: 3rem;">
-            <span style="display: inline-block; padding: 0.4rem 1rem; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); color: #D8B4FE; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.9rem; margin-bottom: 1.5rem;">Jhome Academy</span>
-            <h1 class="display-1" style="font-size: 3.5rem;">نبني <span class="text-gradient">العقول</span> التي تبني <span class="text-gradient-accent">التكنولوجيا</span></h1>
-            <p class="body-large" style="max-width: 600px; margin: 1.5rem auto 0;">
-                معسكرات تدريبية مكثفة مصممة لتخريج مهندسين جاهزين لسوق العمل وبناء مشاريع حقيقية.
-            </p>
-        </div>
+        <section class="academy-hero animate-fade-up">
+            <div class="academy-hero__content">
+                <span class="academy-hero__pill">Jhome Academy</span>
+                <h1 class="display-1">نبني <span class="text-gradient">العقول</span> التي تبني <span class="text-gradient-accent">التكنولوجيا</span></h1>
+                <p class="body-large">
+                    معسكرات تدريبية مكثفة مصممة لتخريج مهندسين جاهزين لسوق العمل وبناء مشاريع حقيقية، مع بيئة تعليمية ممتدة من الدروس إلى الفصول التفاعلية.
+                </p>
+                <div class="academy-hero__actions">
+                    <a href="#courses-grid" class="btn btn-primary">استكشف الدورات</a>
+                    <button type="button" class="btn btn-secondary academy-hero__quick-link" onclick="document.querySelector('.filter-btn[data-filter=all]').click()">تصفية الدورات</button>
+                </div>
+            </div>
+            <div class="academy-hero__metrics">
+                <div class="academy-metric-card">
+                    <strong>+20</strong>
+                    <span>دورة عملية</span>
+                </div>
+                <div class="academy-metric-card">
+                    <strong>24/7</strong>
+                    <span>دعم وتوجيه</span>
+                </div>
+                <div class="academy-metric-card">
+                    <strong>100%</strong>
+                    <span>مشاريع حقيقية</span>
+                </div>
+            </div>
+        </section>
 
         <!-- Filter System -->
-        <div class="academy-filters animate-fade-up delay-100" style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap;">
+        <div class="academy-filters animate-fade-up delay-100">
             <button class="filter-btn active" data-filter="all">الكل</button>
             <button class="filter-btn" data-filter="engineering">هندسة البرمجيات</button>
             <button class="filter-btn" data-filter="design">تصميم الواجهات (UI/UX)</button>
             <button class="filter-btn" data-filter="ai">الذكاء الاصطناعي</button>
         </div>
+
+        <section class="academy-showcase animate-fade-up delay-150">
+            <div class="academy-showcase__card">
+                <div class="academy-showcase__icon"><i class="fas fa-bolt"></i></div>
+                <h3>تعلم عملي من أول يوم</h3>
+                <p>لا تقتصر الدورات على الشرح النظري، بل تتضمن مشاريع حقيقية وتطبيقات مباشرة تُنقلك من المتعلم إلى الممارس.</p>
+            </div>
+            <div class="academy-showcase__card">
+                <div class="academy-showcase__icon"><i class="fas fa-users"></i></div>
+                <h3>دعم مستمر</h3>
+                <p>تتبعك الأكاديمية من خلال التوجيه والمراجعة والتواصل، حتى لو كنت تبدأ من الصفر.</p>
+            </div>
+            <div class="academy-showcase__card">
+                <div class="academy-showcase__icon"><i class="fas fa-medal"></i></div>
+                <h3>نتائج قابلة للقياس</h3>
+                <p>كل مسار مصمم لتطوير مهارة عملية، وإعدادك لسوق العمل أو لبناء مشروعك الخاص بثقة.</p>
+            </div>
+        </section>
+
+        <section class="academy-journey animate-fade-up delay-200">
+            <div class="academy-journey__header">
+                <span class="academy-hero__pill">كيف تسير الرحلة؟</span>
+                <h2>من أول خطوة إلى أول مشروع احترافي</h2>
+            </div>
+            <div class="academy-journey__steps">
+                <div class="academy-step">
+                    <span>1</span>
+                    <h4>اختيار المسار</h4>
+                    <p>نختار لك المسار الأنسب وفق اهتماماتك ومدى خبرتك الحالية.</p>
+                </div>
+                <div class="academy-step">
+                    <span>2</span>
+                    <h4>التعلم العملي</h4>
+                    <p>تتضمن كل دورة تمارين ومشاريع تُبني مهاراتك في الواقع وليس فقط في النظرية.</p>
+                </div>
+                <div class="academy-step">
+                    <span>3</span>
+                    <h4>الانتقال إلى التنفيذ</h4>
+                    <p>تخرج من الأكاديمية قادرًا على العمل أو بناء مشروعك الخاص بثقة.</p>
+                </div>
+            </div>
+        </section>
 
         <!-- Courses Grid -->
         <div class="grid-cards" id="courses-grid">

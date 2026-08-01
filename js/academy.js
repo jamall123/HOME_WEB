@@ -102,25 +102,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const description = course.description || 'لا يوجد وصف متاح.';
                 const cover = course.cover || 'https://via.placeholder.com/600x400/0B162C/A5B4FC?text=Jhome+Course';
                 
+                const isLive = !!course.isLive;
                 const badge = course.isPaid ? 
-                    `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(245, 158, 11, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
-                    : `<span style="position: absolute; top: 1rem; right: 1rem; background: rgba(16, 185, 129, 0.8); backdrop-filter: blur(4px); color: white; padding: 0.25rem 1rem; border-radius: var(--radius-pill); font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1);"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
-                    
+                    `<span class="course-card__badge course-card__badge--paid"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
+                    : `<span class="course-card__badge course-card__badge--free"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
+                const livePill = isLive ? `<span class="course-card__pill course-card__pill--live"><i class="fas fa-circle"></i> مباشر الآن</span>` : '';
+
                 grid.innerHTML += `
-                <div class="glass-panel course-card" data-category="${category}" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-                    <div style="background: url('${cover}') center/cover no-repeat; height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                <article class="glass-panel course-card" data-category="${category}">
+                    <div class="course-card__media">
+                        <img src="${cover}" alt="${title}" loading="lazy" decoding="async">
                         ${badge}
+                        ${livePill}
                     </div>
-                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div class="course-card__content">
+                        <div class="course-card__meta">
                             <span class="caption-meta" style="color: var(--primary-light);">${level}</span>
                             <span class="caption-meta en-text" style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">${duration}</span>
                         </div>
-                        <h3 class="display-3" style="font-size: 1.5rem; margin-bottom: 0.5rem;">${title}</h3>
-                        <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.6;">${description.substring(0, 80)}...</p>
-                        <button class="btn btn-secondary open-course-modal" onclick="openModal('${course.id}')" style="margin-top: auto; width: 100%;">التفاصيل</button>
+                        <h3 class="course-card__title">${title}</h3>
+                        <p class="course-card__description">${description.substring(0, 95)}${description.length > 95 ? '...' : ''}</p>
+                        <div class="course-card__actions">
+                            <button class="btn btn-secondary open-course-modal" onclick="openModal('${course.id}')">التفاصيل</button>
+                            <a href="course-room.html?type=paid&id=${course.id}" class="btn btn-primary">الدخول إلى الغرفة</a>
+                        </div>
                     </div>
-                </div>
+                </article>
                 `;
             });
         } catch(e) {
@@ -152,41 +159,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
-            // Populate Modal Content
+            const heroImage = data.cover || 'assets/images/courses/placeholder.jpg';
+            const heroBadge = data.isPaid ? 'دورة مدفوعة' : 'دورة مجانية';
+            const heroSubtitle = data.isLive ? 'الجلسة مفتوحة الآن' : 'محتوى عملي ومتابعة مستمرة';
+
             modalBody.innerHTML = `
-                <div class="modal-header-visual" style="background: url('${data.cover}') center/cover no-repeat; min-height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(11, 22, 44, 1), rgba(11, 22, 44, 0.4));"></div>
-                    <i class="fab ${data.icon}" style="font-size: 5rem; color: ${data.color}; opacity: 0.9; position: relative; z-index: 1;"></i>
-                </div>
-                <div class="modal-details-container">
-                    <h2 class="display-2" style="font-size: 2.2rem; margin-bottom: 1rem;">${data.title}</h2>
-                    <p class="body-large text-muted">${data.description}</p>
-                    
-                    <div class="course-meta-grid">
-                        <div class="meta-item">
-                            <i class="fas fa-clock"></i>
-                            <span>المدة</span>
-                            <strong>${data.duration}</strong>
+                <div class="course-modal-shell">
+                    <div class="modal-hero">
+                        <img class="modal-hero__image" src="${heroImage}" alt="${data.title}">
+                        <div class="modal-hero__content">
+                            <span class="modal-badge"><i class="fas fa-play-circle"></i> ${heroBadge}</span>
+                            <h2>${data.title}</h2>
+                            <p class="body-large" style="margin:0; max-width:560px; color: rgba(255,255,255,0.8);">${heroSubtitle}</p>
+                            <div class="modal-cta-stack">
+                                ${actionButtons}
+                            </div>
                         </div>
-                        <div class="meta-item">
-                            <i class="fas fa-signal"></i>
-                            <span>المستوى</span>
-                            <strong>${data.level}</strong>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-users"></i>
-                            <span>المشتركين</span>
-                            <strong>${data.students} طالب</strong>
-                        </div>
-                        <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.id}')">
-                            <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>
-                            <span style="color: #A5B4FC;">المقدم</span>
-                            <strong style="color: white; margin-top: 0.25rem; display: block;">${data.instructor}</strong>
-                        </button>
                     </div>
-                    
-                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                        ${actionButtons}
+                    <div class="modal-details-container">
+                        <p class="body-large text-muted">${data.description}</p>
+                        
+                        <div class="course-meta-grid">
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>المدة</span>
+                                <strong>${data.duration}</strong>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-signal"></i>
+                                <span>المستوى</span>
+                                <strong>${data.level}</strong>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>المشتركين</span>
+                                <strong>${data.students} طالب</strong>
+                            </div>
+                            <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.id}')">
+                                <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>
+                                <span style="color: #A5B4FC;">المقدم</span>
+                                <strong style="color: white; margin-top: 0.25rem; display: block;">${data.instructor}</strong>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -521,59 +535,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) { btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
         try {
-            const db = window.firebase.firestore();
+            // Credential verification now happens server-side via the
+            // api_v1_academy_login Cloud Function (Admin SDK) instead of
+            // reading/comparing the plaintext password in the browser.
+            const { backendGateway } = await import('./core/BackendGateway.js');
+            const result = await backendGateway.execute({
+                domain: 'academy_login',
+                action: 'login',
+                payload: { username: usernameRaw, password: passwordInput }
+            });
 
-            // Try all possible username formats for backward compatibility
-            const u = usernameRaw;
-            const uLow = u.toLowerCase();
-            const attempts = [...new Set([
-                u,                           // as typed
-                uLow,                        // lowercase
-                uLow + '@jhome.sd',          // old format with @jhome.sd
-                u + '@jhome.sd',             // old format (original case)
-            ])];
-            let doc = null;
+            const { token, role, courseId, displayName, username } = result.data;
 
-            for (const attempt of attempts) {
-                const result = await db.collection('courses_credentials').doc(attempt).get();
-                if (result.exists) {
-                    doc = result;
-                    console.log('Found user with key:', attempt);
-                    break;
-                }
-            }
-
-            if (!doc || !doc.exists) {
-                console.warn('User not found in courses_credentials. Tried:', attempts);
-                alert('اسم المستخدم غير موجود. تأكد من البيانات المُرسلة إليك.');
-                if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
-                return;
-            }
-
-            const data = doc.data();
-            console.log('User found, role:', data.role, 'courseId:', data.courseId);
-
-            // Compare password
-            if (data.password !== passwordInput) {
-                console.warn('Password mismatch for user:', doc.id);
-                alert('كلمة المرور غير صحيحة. تأكد من النسخ الصحيح.');
-                if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
-                return;
-            }
+            // Complete sign-in through the real Firebase Auth flow.
+            await window.firebase.auth().signInWithCustomToken(token);
 
             // ✅ Success
             window.currentUser = {
-                name: data.fullname || doc.id,
-                username: doc.id,
-                role: data.role || 'student',
-                courseId: data.courseId
+                name: displayName,
+                username: username,
+                role: role || 'student',
+                courseId: courseId
             };
             console.log('Login successful:', window.currentUser);
 
             // Add to connected users
             if (window.currentRoomCourseId) {
                 try {
-                    await db.collection('courses').doc(window.currentRoomCourseId).collection('connected_users').doc(window.currentUser.username).set({
+                    await window.firebase.firestore().collection('courses').doc(window.currentRoomCourseId).collection('connected_users').doc(window.currentUser.username).set({
                         name: window.currentUser.name,
                         username: window.currentUser.username,
                         role: window.currentUser.role,
@@ -625,7 +614,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch(e) {
             console.error('Login error:', e);
-            alert('حدث خطأ أثناء الاتصال بقاعدة البيانات: ' + e.message);
+            const message = e.errorCode === 'invalid-credentials'
+                ? e.message
+                : 'حدث خطأ أثناء الاتصال بالخادم: ' + e.message;
+            alert(message);
             if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
