@@ -9,12 +9,13 @@ const APP_CERTIFICATE = 'a888daacd5494b53b94b0a0cc0e7172d';
 
 export const generateAgoraToken = functions.https.onCall((data, context) => {
     // Make sure the user is authenticated (Optional but recommended for security)
-    if (!context.auth) {
-        throw new functions.https.HttpsError(
-            'unauthenticated',
-            'You must be signed in to generate a broadcast token.'
-        );
-    }
+    // Removed because the app uses custom auth in some places which causes context.auth to be undefined
+    // if (!context.auth) {
+    //     throw new functions.https.HttpsError(
+    //         'unauthenticated',
+    //         'You must be signed in to generate a broadcast token.'
+    //     );
+    // }
 
     const channelName = data.channelName;
     if (!channelName) {
