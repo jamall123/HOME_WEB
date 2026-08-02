@@ -12,7 +12,7 @@ export class MediaWorkflow {
                 DI.logger.info(`Successfully deleted physical file from storage: ${path}`);
             }
             else {
-                DI.logger.warning(`Physical file not found in storage: ${path}`);
+                DI.logger.warn(`Physical file not found in storage: ${path}`);
             }
             await DI.eventBus.publish({
                 type: EventType.MEDIA_DELETED,

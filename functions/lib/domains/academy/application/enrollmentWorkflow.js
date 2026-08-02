@@ -32,7 +32,7 @@ export class EnrollmentWorkflow {
                 }
             }
             catch (authErr) {
-                DI.logger.warning(`Could not update custom claims for ${requestData.userId}`, { error: authErr });
+                DI.logger.warn(`Could not update custom claims for ${requestData.userId}`, { error: authErr });
             }
             // 3. Emit Event - Let other domains (like notifications) handle email/system notifications
             await DI.eventBus.publish({

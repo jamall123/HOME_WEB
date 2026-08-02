@@ -61,7 +61,7 @@ export class RateLimiter {
       const allowed = await this.adapter.incrementAndCheck(key, maxRequests, windowMs);
       
       if (!allowed) {
-        DI.logger.warning(`Rate limit exceeded for ${identifier} on ${endpointName}`);
+        DI.logger.warn(`Rate limit exceeded for ${identifier} on ${endpointName}`);
         throw new functions.https.HttpsError('resource-exhausted', 'Too many requests, please try again later.');
       }
     };

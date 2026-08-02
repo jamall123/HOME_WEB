@@ -21,7 +21,7 @@ export class FeatureManager {
 
     const flag = this.flags.get(key);
     if (!flag) {
-      DI.logger.warning(`Feature flag '${key}' not found, defaulting to false.`);
+      DI.logger.warn(`Feature flag '${key}' not found, defaulting to false.`);
       return false;
     }
 

@@ -86,7 +86,7 @@ export const login = functions.https.onCall(async (rawData, context) => {
             }
         }
         const data = credDoc.data();
-        const uid = `legacy_${credDoc.id}`.replace(/[^a-zA-Z0-9_\-@.]/g, '_').slice(0, 128);
+        const uid = data.uid || `legacy_${credDoc.id}`.replace(/[^a-zA-Z0-9_\-@.]/g, '_').slice(0, 128);
         // Preserve the legacy lowercase role values ('student'/'instructor') the
         // frontend already checks against, rather than the RBAC enum casing.
         const role = data.role || 'student';

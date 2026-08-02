@@ -13,7 +13,7 @@ export interface AuthenticatedContext extends functions.https.CallableContext {
 export class AuthMiddleware {
   static requireAuth(context: functions.https.CallableContext): AuthenticatedContext {
     if (!context.auth) {
-      DI.logger.warning('Unauthenticated request rejected', { ip: context.rawRequest?.ip });
+      DI.logger.warn('Unauthenticated request rejected', { ip: context.rawRequest?.ip });
       throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.');
     }
 
@@ -29,7 +29,7 @@ export class AuthMiddleware {
         const authContext = AuthMiddleware.requireAuth(context);
         
         if (!RBAC.hasPermission(authContext.role, permission)) {
-          DI.logger.warning('Permission denied', { uid: authContext.auth.uid, role: authContext.role, permission });
+          DI.logger.warn('Permission denied', { uid: authContext.auth.uid, role: authContext.role, permission });
           throw new functions.https.HttpsError('permission-denied', 'You do not have permission to perform this action.');
         }
         

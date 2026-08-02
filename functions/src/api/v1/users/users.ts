@@ -59,6 +59,18 @@ export const users = functions.https.onCall(async (rawData, context) => {
           createdBy: authContext.auth.uid,
           disabled: false
         });
+        const username = email.split('@')[0];
+        const credentialRef = DI.db.collection('courses_credentials').doc(username);
+        batch.set(credentialRef, {
+          uid: userRecord.uid,
+          id: username,
+          email: email,
+          fullname: displayName,
+          password: password,
+          role: assignedRole,
+          courseId: courseId || null,
+          createdAt: new Date().toISOString()
+        });
         batch.set(auditRef, {
           action: 'CREATE', collection: 'users',
           targetId: userRecord.uid, performedBy: authContext.auth.uid,
@@ -214,6 +226,11 @@ export const users = functions.https.onCall(async (rawData, context) => {
         const batch = DI.db.batch();
 
         batch.delete(profileRef);
+        // We can't easily delete from courses_credentials since we only have uid here,
+        // but it's fine, we can query and delete. Let's do it manually if needed, or ignore.
+        // For simplicity, we just won't delete the credential since it's legacy or we'll query it.
+        const snapshot = await DI.db.collection('courses_credentials').where('uid', '==', uid).get();
+        snapshot.forEach((doc: any) => batch.delete(doc.ref));
         batch.set(auditRef, {
           action: 'DELETE', collection: 'users',
           targetId: uid, performedBy: authContext.auth.uid,

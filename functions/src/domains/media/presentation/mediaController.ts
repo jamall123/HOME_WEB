@@ -18,7 +18,7 @@ export const onMediaLibraryDeleted = onDocumentDeleted(
         DI.logger.error(`Error in onMediaLibraryDeleted for ${mediaId}`, { error });
       }
     } else {
-      DI.logger.warning(`Deleted media document ${mediaId} had no 'path' property.`);
+      DI.logger.warn(`Deleted media document ${mediaId} had no 'path' property.`);
     }
   }
 );

@@ -4,6 +4,17 @@ export class SecurityMiddleware {
     /**
      * Validates Firebase App Check token.
      * Denies requests that do not originate from an authorized app.
+     *
+     * NOTE: The client has never actually initialized Firebase App Check
+     * (no firebase-appcheck-compat.js script + initializeAppCheck() call
+     * anywhere in js/firebase-config.js), so `context.app` is ALWAYS
+     * undefined outside the emulator. Enforcing this hard-blocked every
+     * callable function on the site in production (login, course room
+     * entry, admin user/credential creation, courses, enrollments, CMS,
+     * contact, chat) with `failed-precondition`. Until App Check is
+     * properly wired up client-side (requires a reCAPTCHA v3 site key
+     * registered in the Firebase Console → App Check), we log a warning
+     * instead of rejecting the request so the app keeps working.
      */
     static requireAppCheck(context) {
         // In emulator or local testing, app check might not be present
@@ -11,8 +22,7 @@ export class SecurityMiddleware {
             return;
         }
         if (context.app == undefined) {
-            DI.logger.warning('Failed App Check verification', { ip: context.rawRequest?.ip });
-            throw new functions.https.HttpsError('failed-precondition', 'The function must be called from an App Check verified app.');
+            DI.logger.warn('App Check token missing (App Check not yet configured client-side) — allowing request', { ip: context.rawRequest?.ip });
         }
     }
     /**
@@ -56,8 +66,8 @@ export class SecurityMiddleware {
                 }
             });
             if (isDuplicate) {
-                DI.logger.warning(`Idempotency key reused: ${idempotencyKey}`);
-                throw new functions.https.HttpsError('already-exists', 'Duplicate request detected.');
+                DI.logger.warn(`Idempotency key reused: ${idempotencyKey}`);
+                throw new functions.https.HttpsError('already-exists', 'Request already processed.');
             }
         }
         catch (error) {
