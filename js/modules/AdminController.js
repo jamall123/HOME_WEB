@@ -533,7 +533,7 @@ class AdminControllerClass {
                 const roleInput = document.getElementById('new-user-role');
                 const courseInput = document.getElementById('new-user-course');
                 
-                const base = fullnameInput.value.replace(/\s+/g, '').toLowerCase();
+                const base = fullnameInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'user';
                 const unique = Math.floor(Math.random() * 10000).toString();
                 const creds = { username: base + unique, password: base + unique };
                 
@@ -545,7 +545,7 @@ class AdminControllerClass {
                         role: roleInput.value || 'STUDENT',
                         courseId: courseInput.value.trim() || null
                     });
-                    alert('تم إنشاء المستخدم بنجاح!');
+                    alert(`تم إنشاء الحساب بنجاح!\nاسم المستخدم: ${creds.username}\nكلمة المرور: ${creds.password}`);
                     userForm.reset();
                     this.loadUsers();
                 } catch (err) { alert('حدث خطأ أثناء إنشاء الحساب: ' + (err.message || '')); }
