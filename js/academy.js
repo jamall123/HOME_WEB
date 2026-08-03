@@ -649,6 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
                     }
                     
+                    const roomEntryGate = document.getElementById('room-entry-gate');
                     if (roomEntryGate) {
                         roomEntryGate.style.opacity = '0';
                         setTimeout(() => {
