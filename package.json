@@ -6,7 +6,6 @@
   "name": "home-web",
   "version": "1.0.0",
   "description": "",
-  "main": "check_requests.js",
   "devDependencies": {
     "esbuild": "^0.28.1",
     "vite": "^8.1.5"

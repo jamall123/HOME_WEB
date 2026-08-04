@@ -19,11 +19,28 @@ class PostUIClass {
     }
 
     updateSEO(post) {
-        document.getElementById('pageTitle').textContent = (post.seoTitle || post.title) + ' | Jhome';
-        document.getElementById('pageDescription').setAttribute('content', post.seoDescription || post.excerpt || '');
+        const title = (post.seoTitle || post.title) + ' | Jhome';
+        const description = post.seoDescription || post.excerpt || '';
+        const url = 'https://www.sudanfree.com/post.html?slug=' + encodeURIComponent(post.slug);
+
+        document.getElementById('pageTitle').textContent = title;
+        document.getElementById('pageDescription').setAttribute('content', description);
         document.getElementById('ogTitle').setAttribute('content', post.seoTitle || post.title);
-        document.getElementById('ogDescription').setAttribute('content', post.seoDescription || post.excerpt || '');
+        document.getElementById('ogDescription').setAttribute('content', description);
         if (post.coverImage) document.getElementById('ogImage').setAttribute('content', post.coverImage);
+
+        const canonical = document.getElementById('canonicalLink');
+        if (canonical) canonical.setAttribute('href', url);
+        const ogUrl = document.getElementById('ogUrl');
+        if (ogUrl) ogUrl.setAttribute('content', url);
+        const twitterTitle = document.getElementById('twitterTitle');
+        if (twitterTitle) twitterTitle.setAttribute('content', post.seoTitle || post.title);
+        const twitterDescription = document.getElementById('twitterDescription');
+        if (twitterDescription) twitterDescription.setAttribute('content', description);
+        if (post.coverImage) {
+            const twitterImage = document.getElementById('twitterImage');
+            if (twitterImage) twitterImage.setAttribute('content', post.coverImage);
+        }
     }
 
     renderPost(post) {

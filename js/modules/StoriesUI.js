@@ -97,15 +97,40 @@ class StoriesUIClass {
         const container = document.getElementById('postContent');
         if (!container) return;
 
-        document.getElementById('pageTitle').textContent = (story.seoTitle || story.title) + ' | Jhome';
-        
+        const title = (story.seoTitle || story.title) + ' | Jhome';
+        const excerpt = (story.story || '').replace(/<[^>]*>/g, '').slice(0, 180);
+        const description = story.seoDescription || excerpt;
+        const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
+        const url = 'https://www.sudanfree.com/story.html?id=' + encodeURIComponent(story.id || '');
+
+        document.getElementById('pageTitle').textContent = title;
+        const pageDescription = document.getElementById('pageDescription');
+        if (pageDescription) pageDescription.setAttribute('content', description);
+        const ogTitle = document.getElementById('ogTitle');
+        if (ogTitle) ogTitle.setAttribute('content', story.seoTitle || story.title);
+        const ogDescription = document.getElementById('ogDescription');
+        if (ogDescription) ogDescription.setAttribute('content', description);
+        if (actualCover) {
+            const ogImage = document.getElementById('ogImage');
+            if (ogImage) ogImage.setAttribute('content', actualCover);
+            const twitterImage = document.getElementById('twitterImage');
+            if (twitterImage) twitterImage.setAttribute('content', actualCover);
+        }
+        const canonical = document.getElementById('canonicalLink');
+        if (canonical) canonical.setAttribute('href', url);
+        const ogUrl = document.getElementById('ogUrl');
+        if (ogUrl) ogUrl.setAttribute('content', url);
+        const twitterTitle = document.getElementById('twitterTitle');
+        if (twitterTitle) twitterTitle.setAttribute('content', story.seoTitle || story.title);
+        const twitterDescription = document.getElementById('twitterDescription');
+        if (twitterDescription) twitterDescription.setAttribute('content', description);
+
         const date = story.publishedAt ? new Date(story.publishedAt.seconds * 1000).toLocaleDateString('ar-SD', {
             year: 'numeric', month: 'long', day: 'numeric'
         }) : '';
 
         const initials = (story.personName || '؟').split(' ').slice(0, 2).map(s => s[0]).join('');
 
-        const actualCover = story.coverImage || story.image || story.cover || story.personAvatar;
         const coverHtml = actualCover 
             ? `<img src="${this.escapeHtml(actualCover)}" alt="Cover" loading="lazy" decoding="async">` 
             : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`;

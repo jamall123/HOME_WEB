@@ -14,7 +14,6 @@ class GlobalControllerClass {
             
             this.initMotionDesign();
             this.loadDynamicData();
-            this.loadSettings();
             this.initPageLoaderExit();
         });
     }
@@ -52,27 +51,10 @@ class GlobalControllerClass {
     }
 
     async loadDynamicData() {
+        this.loadLiveStats();
+
         try {
-            const response = await fetch('data/config.json');
-            if (!response.ok) throw new Error('Failed to load config');
-            const data = await response.json();
-
-            // Populate Statistics Counters
-            const locCounter = document.getElementById('stat-loc');
-            if (locCounter) locCounter.setAttribute('data-target', data.metrics.lines_of_code);
-            
-            const projectsCounter = document.getElementById('stat-projects');
-            if (projectsCounter) projectsCounter.setAttribute('data-target', data.metrics.projects_completed);
-            
-            const usersCounter = document.getElementById('stat-users');
-            if (usersCounter) usersCounter.setAttribute('data-target', data.metrics.active_users_target);
-            
-            const uptimeCounter = document.getElementById('stat-uptime');
-            if (uptimeCounter) uptimeCounter.setAttribute('data-target', data.metrics.system_uptime);
-
-            this.initCounters(); // Initialize after data is set
-            
-            // Also load CMS Page Content (formerly dynamic-content.js)
+            // Load CMS Page Content (formerly dynamic-content.js)
             let pageKey = window.location.pathname.split('/').pop().replace('.html', '');
             if (!pageKey || pageKey === 'index' || pageKey === '') {
                 pageKey = 'home';
@@ -88,8 +70,13 @@ class GlobalControllerClass {
                             const elements = document.querySelectorAll(`[data-dynamic="${key}"]`);
                             elements.forEach(el => {
                                 const value = pageData.sections[key];
+                                // Don't let an empty/unfilled admin field blank out the static fallback copy.
+                                if (!value) return;
                                 if (el.tagName === 'IMG') {
                                     el.src = value;
+                                } else if (el.tagName === 'A' && el.hasAttribute('data-dynamic-mailto')) {
+                                    el.textContent = value;
+                                    el.href = 'mailto:' + value;
                                 } else if (el.tagName === 'A' && el.hasAttribute('data-dynamic-href')) {
                                     el.href = value;
                                 } else {
@@ -102,50 +89,54 @@ class GlobalControllerClass {
             }
             
         } catch (error) {
-            Logger.error('GlobalController', 'Error loading dynamic data: ' + (error.message || error), error.stack || '');
-            // On failure, hide the statistics block entirely
-            const statsSection = document.querySelector('.statistics-section');
-            if (statsSection) {
-                statsSection.style.display = 'none';
-            }
+            Logger.error('GlobalController', 'Error loading dynamic page content: ' + (error.message || error), error.stack || '');
         }
     }
 
-    async loadSettings() {
+    // Real, live counts from Firestore — no static/vanity numbers. All three
+    // collections queried here have `allow read: if true` in firestore.rules,
+    // so an anonymous count().get() aggregate query (cheap, no document
+    // downloads) is both safe and accurate. `stat-products` stays a static
+    // "2" in the HTML since it's a verifiable fact (SudanFree + Academy),
+    // not something that needs a database round-trip.
+    async loadLiveStats() {
+        const statsSection = document.querySelector('.statistics-section');
+        const db = window.firebase ? window.firebase.firestore() : null;
+        if (!db) {
+            if (statsSection) statsSection.style.display = 'none';
+            return;
+        }
+
         try {
-            const db = window.firebase ? window.firebase.firestore() : null;
-            if (!db) return;
-            const doc = await db.collection('settings').doc('global').get();
-            if (doc.exists) {
-                const data = doc.data();
+            const [coursesSnap, postsSnap, storiesSnap] = await Promise.all([
+                db.collection('courses').count().get(),
+                db.collection('posts').where('status', '==', 'published').count().get(),
+                db.collection('successStories').where('isPublished', '==', true).count().get()
+            ]);
 
-                // Populate index.html elements
-                const heroText = document.getElementById('dy-hero-text');
-                if(heroText && data.heroText) heroText.textContent = data.heroText;
+            const coursesCounter = document.getElementById('stat-courses');
+            if (coursesCounter) coursesCounter.setAttribute('data-target', coursesSnap.data().count);
 
-                // Populate about.html elements
-                const vision = document.getElementById('dy-vision');
-                if(vision && data.vision) vision.textContent = data.vision;
+            const postsCounter = document.getElementById('stat-posts');
+            if (postsCounter) postsCounter.setAttribute('data-target', postsSnap.data().count);
 
-                const mission = document.getElementById('dy-mission');
-                if(mission && data.mission) mission.textContent = data.mission;
+            const storiesCounter = document.getElementById('stat-stories');
+            if (storiesCounter) storiesCounter.setAttribute('data-target', storiesSnap.data().count);
 
-                const values = document.getElementById('dy-values');
-                if(values && data.values) values.textContent = data.values;
-
-                const founderName = document.getElementById('dy-founder-name');
-                if(founderName && data.founderName) founderName.textContent = data.founderName;
-
-                const founderBio1 = document.getElementById('dy-founder-bio1');
-                if(founderBio1 && data.founderBio1) founderBio1.textContent = data.founderBio1;
-
-                const founderBio2 = document.getElementById('dy-founder-bio2');
-                if(founderBio2 && data.founderBio2) founderBio2.textContent = data.founderBio2;
-            }
-        } catch(error) {
-            Logger.error('GlobalController', 'Error loading settings: ' + (error.message || error), error.stack || '');
+            this.initCounters();
+        } catch (error) {
+            Logger.error('GlobalController', 'Error loading live stats: ' + (error.message || error), error.stack || '');
+            if (statsSection) statsSection.style.display = 'none';
         }
     }
+
+    // NOTE: a `loadSettings()` reading `settings/global` used to live here,
+    // but firestore.rules has `match /settings/{docId} { allow write: if false; }`
+    // — no client can ever write that doc, so it was permanently dead code.
+    // These fields (hero text, vision/mission/values, founder bio) are now
+    // served through the same `pageContent` + `[data-dynamic]` pipeline as
+    // everything else in loadDynamicData(), which the admin panel can
+    // actually write to (`pageContent/{home,about,...}`, admin-gated by rules).
 
     initCounters() {
         const counterObserver = new IntersectionObserver((entries, observer) => {

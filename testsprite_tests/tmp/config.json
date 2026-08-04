@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173",
+  "loginUser": "admin@sudanfree.com",
+  "loginPassword": "Jamal@www20",
+  "executionArgs": {
+    "projectName": "HOME-WEB",
+    "projectPath": "/home/jamal/Projects/HOME-WEB",
+    "testIds": [
+      "TC002"
+    ],
+    "additionalInstruction": "Please focus on debugging why the user cannot enter the course room.",
+    "envs": {
+      "API_KEY": "sk-user-S7qPQ-sqSZtsap7KiYmpk3puutXSG0i7KDYftXH-RHNn8PcdmtVDTqFiH_gu4QkMtthjl2PEH-ajq0E5TtHyOm8g9iJtfq_RjwieKQ4t-rWZM04zpgtXuOHU3LDRN7zoQuA"
+    }
+  }
+}

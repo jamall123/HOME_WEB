@@ -4,6 +4,25 @@ import { Logger } from './Logger.js';
 import { eventBus } from '../core/EventBus.js';
 import { CMSManager } from './CMSManager.js';
 import { MediaManager } from './MediaManager.js';
+import { NotificationManager } from './NotificationManager.js';
+
+// Phonetic Arabic → Latin map used to derive Firebase-safe usernames from
+// Arabic full names (Firebase Auth email/doc IDs only accept ASCII).
+const ARABIC_TO_LATIN_MAP = {
+    'ا': 'a', 'أ': 'a', 'إ': 'a', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th',
+    'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'th', 'ر': 'r', 'ز': 'z',
+    'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a',
+    'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n',
+    'ه': 'h', 'و': 'w', 'ي': 'y', 'ى': 'a', 'ة': 'a', 'ئ': 'y', 'ؤ': 'w', 'ء': 'a'
+};
+
+function transliterateToUsername(rawName) {
+    const transliterated = String(rawName || '')
+        .split('')
+        .map(ch => ARABIC_TO_LATIN_MAP[ch] ?? ch)
+        .join('');
+    return transliterated.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+}
 
 class AdminControllerClass {
     constructor() {
@@ -405,12 +424,7 @@ class AdminControllerClass {
     handleError(e) {
         console.error('[AdminController]', e);
         const message = e.message || 'حدث خطأ غير متوقع';
-        // Check if there is a notificationManager, else fallback to alert
-        if (window.NotificationManager) {
-            window.NotificationManager.show({ title: 'خطأ', message, type: 'error' });
-        } else {
-            alert(message);
-        }
+        NotificationManager.show(message, 'error');
     }
 
     async approveRequest(id, fullName, courseId) {
@@ -533,7 +547,7 @@ class AdminControllerClass {
                 const roleInput = document.getElementById('new-user-role');
                 const courseInput = document.getElementById('new-user-course');
                 
-                const base = fullnameInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'user';
+                const base = transliterateToUsername(fullnameInput.value) || 'user';
                 const unique = Math.floor(Math.random() * 10000).toString();
                 const creds = { username: base + unique, password: base + unique };
                 

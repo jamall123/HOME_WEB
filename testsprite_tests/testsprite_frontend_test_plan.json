@@ -1,0 +1,708 @@
+[
+  {
+    "id": "TC001",
+    "title": "Admin logs in and reaches the dashboard",
+    "description": "Verifies that an administrator can sign in from the public page and access the protected admin dashboard.",
+    "category": "Administrator Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard content is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Student logs in and enters the course room",
+    "description": "Verifies that a student can sign in with a login code and room ID and reach the protected course room.",
+    "category": "Student Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login code field with a valid code"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with a valid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the course room is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify course room content is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Protected admin route is blocked without a session",
+    "description": "Verifies that opening the admin dashboard directly without being signed in does not allow access to protected admin content.",
+    "category": "Administrator Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /admin-panel.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin login screen or access block is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin dashboard is not displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Protected course room is blocked without a session",
+    "description": "Verifies that opening the course room directly without being signed in does not allow access to protected class content.",
+    "category": "Student Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /course-room.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the student login screen or access block is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the course room is not displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Admin creates a new student account",
+    "description": "Verifies that an administrator can create a new student account from the dashboard and see the generated account details.",
+    "category": "Admin Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the new student creation form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student details with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Submit the student creation form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new student account is created"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify generated account credentials are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Admin reviews dashboard content after signing in",
+    "description": "Verifies that an authenticated administrator can view the main dashboard stats, widgets, and quick actions after login.",
+    "category": "Admin Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard statistics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify quick actions are available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Create a new student account",
+    "description": "This verifies that an administrator can create a student account and see the generated credentials after submission.",
+    "category": "Academy User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the new student form with valid details"
+      },
+      {
+        "type": "action",
+        "description": "Submit the new student form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify generated student credentials are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new student account is shown in the user management view"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Admin opens each management section from the dashboard",
+    "description": "Verifies that an administrator can navigate through the available menu sections from the dashboard and open the related pages.",
+    "category": "Admin Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the academy users section"
+      },
+      {
+        "type": "action",
+        "description": "Open the courses section"
+      },
+      {
+        "type": "action",
+        "description": "Open the settings section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the management sections are accessible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the related page content is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Update a user's role",
+    "description": "This verifies that an administrator can change an existing user's role and see the updated user information.",
+    "category": "Academy User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the academy user management section"
+      },
+      {
+        "type": "action",
+        "description": "Select an existing user"
+      },
+      {
+        "type": "action",
+        "description": "Update the selected user's role"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated user information is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Admin updates a user's role",
+    "description": "Verifies that an administrator can change a user's role and see the updated role reflected in the interface.",
+    "category": "Admin Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the user management section"
+      },
+      {
+        "type": "action",
+        "description": "Select an existing user to edit"
+      },
+      {
+        "type": "action",
+        "description": "Change the user's role to a different valid role"
+      },
+      {
+        "type": "action",
+        "description": "Save the user changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user's role is updated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated role is visible in user management"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Review dashboard stats and quick actions",
+    "description": "This verifies that an administrator can sign in and view the dashboard overview with key stats and quick actions.",
+    "category": "Academy User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard stats are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify quick actions are available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Student joins the live course room",
+    "description": "This verifies that an authenticated student can enter the course room and see the live session.",
+    "category": "Course Video Room",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student email or code field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with a valid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Join the meeting"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the live video room is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user has entered the session"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC013",
+    "title": "Navigate admin menu sections",
+    "description": "This verifies that an administrator can move through the main admin sections from the dashboard.",
+    "category": "Academy User Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the administrator password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the admin navigation menu"
+      },
+      {
+        "type": "action",
+        "description": "Select the user management section"
+      },
+      {
+        "type": "action",
+        "description": "Select the courses section"
+      },
+      {
+        "type": "action",
+        "description": "Select the settings section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each selected admin section is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC014",
+    "title": "Send a chat message in the live room",
+    "description": "This verifies that a student can send a chat message during a live course session and see it appear in the conversation.",
+    "category": "Course Video Room",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student email or code field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with a valid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Join the meeting"
+      },
+      {
+        "type": "action",
+        "description": "Send a chat message"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sent message is displayed in the chat"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC015",
+    "title": "Mute and unmute the microphone in the live room",
+    "description": "This verifies that a student can mute and then unmute their microphone while in the live course room.",
+    "category": "Course Video Room",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student email or code field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with a valid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Join the meeting"
+      },
+      {
+        "type": "action",
+        "description": "Mute the microphone"
+      },
+      {
+        "type": "action",
+        "description": "Unmute the microphone"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the microphone returns to the unmuted state"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC016",
+    "title": "Share the screen in the live room",
+    "description": "This verifies that a student can start screen sharing from the live course room and see the sharing state.",
+    "category": "Course Video Room",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student email or code field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with a valid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the student password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Join the meeting"
+      },
+      {
+        "type": "action",
+        "description": "Start screen sharing"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify screen sharing is active"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Admin sees an error for invalid credentials",
+    "description": "Verifies that an administrator entering invalid credentials stays on the login screen and sees a sign-in error.",
+    "category": "Administrator Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the admin login mode"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with wrong-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an authentication error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the admin dashboard is not displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC018",
+    "title": "Student sees an error for invalid login details",
+    "description": "Verifies that an invalid student login attempt shows an error and does not enter the course room.",
+    "category": "Student Login",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login code field with an invalid code"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the room ID field with an invalid room ID"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a login error message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the course room is not displayed"
+      }
+    ],
+    "priority": "Low"
+  }
+]

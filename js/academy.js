@@ -108,10 +108,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rawCover = course.cover || course.coverImage || course.image || course.thumbnail || course.photo;
                 const cover = rawCover && rawCover.trim() !== '' ? rawCover : null;
                 const isLive = !!course.isLive;
+                const price = course.price && course.price > 0 ? course.price : 0;
                 const badge = course.isPaid ? 
                     `<span class="course-card__badge course-card__badge--paid"><i class="fas fa-crown"></i> دورة مدفوعة</span>` 
                     : `<span class="course-card__badge course-card__badge--free"><i class="fas fa-gift"></i> مجانية بالكامل</span>`;
                 const livePill = isLive ? `<span class="course-card__pill course-card__pill--live"><i class="fas fa-circle"></i> مباشر الآن</span>` : '';
+                const priceTag = price > 0
+                    ? `<span class="course-price-tag course-price-tag--paid"><i class="fas fa-tag"></i> ${price.toLocaleString('ar-EG')} SDG</span>`
+                    : `<span class="course-price-tag course-price-tag--free"><i class="fas fa-check-circle"></i> مجاني</span>`;
 
                 grid.innerHTML += `
                 <article class="course-card" data-category="${category}" style="display: flex; flex-direction: column; background: transparent; border: none; box-shadow: none; overflow: visible;">
@@ -127,6 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <h3 class="course-card__title">${title}</h3>
                         <p class="course-card__description">${description.substring(0, 95)}${description.length > 95 ? '...' : ''}</p>
+                        <div class="course-card__footer">
+                            ${priceTag}
+                        </div>
                         <div class="course-card__actions">
                             <button class="btn btn-secondary open-course-modal" onclick="openModal('${course.id}')">التفاصيل</button>
                             <a href="course-room.html?type=paid&id=${course.id}" class="btn btn-primary">الدخول إلى الغرفة</a>
@@ -172,7 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const levelStr = data.level || 'عام';
             const durationStr = data.duration ? `${data.duration} يوم` : 'غير محدد';
             const studentsStr = data.students || data.studentsCount || 0;
-            const instructorNameStr = data.instructorName || data.instructor || 'جمال احمد';
+            const instructorNameStr = data.instructorName || data.instructor || 'مقدم الدورة';
+            const price = data.price && data.price > 0 ? data.price : 0;
+            const priceStr = price > 0
+                ? `${price.toLocaleString('ar-EG')} SDG`
+                : 'مجاني';
+            const priceColor = price > 0 ? '#34d399' : '#60a5fa';
+            const priceIcon = price > 0 ? 'fa-tag' : 'fa-gift';
 
             modalBody.innerHTML = `
                 <div class="course-modal-shell">
@@ -205,6 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i class="fas fa-users"></i>
                                 <span>المشتركين</span>
                                 <strong>${studentsStr} طالب</strong>
+                            </div>
+                            <div class="meta-item" style="background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.2);">
+                                <i class="fas ${priceIcon}" style="color: ${priceColor};"></i>
+                                <span style="color: ${priceColor};">رسوم الدورة</span>
+                                <strong style="color: ${priceColor}; font-size: 1.1rem;">${priceStr}</strong>
                             </div>
                             <button class="meta-item" style="cursor: pointer; background: rgba(147, 51, 234, 0.1); border: 1px solid rgba(147, 51, 234, 0.3); transition: 0.3s; width: 100%; display: block; font-family: inherit; padding: 1rem; border-radius: var(--radius-md);" onmouseover="this.style.background='rgba(147, 51, 234, 0.2)'" onmouseout="this.style.background='rgba(147, 51, 234, 0.1)'" onclick="openInstructorModal('${data.id}')">
                                 <i class="fas fa-chalkboard-teacher" style="color: #D8B4FE;"></i>

@@ -1,0 +1,83 @@
+version: "2"
+type: frontend
+tech_stack:
+  - HTML
+  - Vanilla JS
+  - Firebase
+  - Agora
+routes:
+  - path: /
+    file: index.html
+    auth_required: false
+    description: User/Student login page
+  - path: /admin-panel.html
+    file: admin-panel.html
+    auth_required: true
+    description: Admin Dashboard
+  - path: /course-room.html
+    file: course-room.html
+    auth_required: true
+    description: Course Video Room
+features:
+  - name: Student Login
+    description: Student login using generic code/room ID which authenticates via Cloud Functions
+    files:
+      - index.html
+      - js/index.js
+      - js/core/BackendGateway.js
+    entry_route: /
+    user_interactions:
+      - Fill login code input field
+      - Fill room ID input field
+      - Click Login button to submit
+      - See error message on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: /api_v1_academy_login
+    auth_required: false
+  - name: Admin Login
+    description: Admin login with email and password using Firebase Auth
+    files:
+      - index.html
+      - js/index.js
+    entry_route: /
+    user_interactions:
+      - Switch to Admin Tab
+      - Fill email input field
+      - Fill password input field
+      - Click Login button to submit
+      - See error message on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: Firebase Auth API
+    auth_required: false
+  - name: Admin Dashboard
+    description: Admin interface to manage courses, students, and settings
+    files:
+      - admin-panel.html
+      - js/admin.js
+      - js/modules/AdminController.js
+    entry_route: /admin-panel.html
+    user_interactions:
+      - Fill form to create new student
+      - Submit to generate student username/password
+      - Manage courses and roles
+    api_calls:
+      - method: POST
+        endpoint: /api_v1_admin_users_create
+    auth_required: true
+  - name: Course Room
+    description: Student and Teacher interface for live video classes using Agora
+    files:
+      - course-room.html
+      - js/academy.js
+      - js/agora.js
+    entry_route: /course-room.html
+    user_interactions:
+      - Join meeting
+      - Send chat message
+      - Mute/Unmute microphone
+      - Share screen
+    api_calls: []
+    auth_required: true
+known_limitations: []

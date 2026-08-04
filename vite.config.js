@@ -17,7 +17,11 @@ export default defineConfig({
         courses: resolve(__dirname, 'courses.html'),
         post: resolve(__dirname, 'post.html'),
         projects: resolve(__dirname, 'projects.html'),
-        story: resolve(__dirname, 'story.html')
+        story: resolve(__dirname, 'story.html'),
+        services: resolve(__dirname, 'services.html'),
+        sudanFree: resolve(__dirname, 'sudan-free.html'),
+        privacyPolicy: resolve(__dirname, 'privacy-policy.html'),
+        verify: resolve(__dirname, 'verify.html')
       },
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
