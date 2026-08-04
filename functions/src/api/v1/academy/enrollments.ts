@@ -14,8 +14,7 @@ export const enrollments = functions.https.onCall(async (rawData, context) => {
 
   // 1. Security & Identity
   SecurityMiddleware.requireAppCheck(context);
-  const authContext = AuthMiddleware.requireAuth(context);
-
+  
   // 2. Parse unified request
   const req = parseRequest(rawData);
   const { action } = req;
@@ -23,11 +22,19 @@ export const enrollments = functions.https.onCall(async (rawData, context) => {
   const correlationId = req.metadata?.correlationId;
   const { id } = payload;
 
+  // For request action, auth is not required. For all others, it is.
+  let authContext: any = null;
+  let isAdmin = false;
+  let isAdminOrInstructor = false;
+
+  if (action !== 'request') {
+    authContext = AuthMiddleware.requireAuth(context);
+    isAdmin = authContext.role === Role.ADMIN || authContext.role === Role.SUPER_ADMIN;
+    isAdminOrInstructor = isAdmin || authContext.role === Role.INSTRUCTOR;
+  }
+
   // 3. Idempotency Check
   await SecurityMiddleware.enforceIdempotency(correlationId);
-
-  const isAdmin = authContext.role === Role.ADMIN || authContext.role === Role.SUPER_ADMIN;
-  const isAdminOrInstructor = isAdmin || authContext.role === Role.INSTRUCTOR;
 
   try {
     switch (action) {
@@ -35,23 +42,25 @@ export const enrollments = functions.https.onCall(async (rawData, context) => {
       case 'request': {
         await enrollRateLimiter(context);
         const { courseId, email, name, student } = payload;
-        if (!courseId || !email) {
-          throw new functions.https.HttpsError('invalid-argument', 'Missing required fields: courseId, email.');
+        if (!courseId) {
+          throw new functions.https.HttpsError('invalid-argument', 'Missing required fields: courseId.');
         }
 
         const docRef = DI.db.collection('enrollmentRequests').doc();
         const auditRef = DI.db.collection('auditLogs').doc();
         const batch = DI.db.batch();
 
+        const userId = context.auth ? context.auth.uid : 'anonymous';
+
         batch.set(docRef, {
-          courseId, email, name, student,
-          userId: authContext.auth.uid,
+          courseId, email: email || null, name, student,
+          userId,
           status: 'pending',
           createdAt: new Date().toISOString()
         });
         batch.set(auditRef, {
           action: 'CREATE', collection: 'enrollmentRequests',
-          targetId: docRef.id, performedBy: authContext.auth.uid,
+          targetId: docRef.id, performedBy: userId,
           description: `Enrollment requested for course: ${courseId}`,
           timestamp: new Date(), success: true, correlationId
         });

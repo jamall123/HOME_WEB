@@ -422,12 +422,20 @@ window.RegistrationEngine = {
     },
 
     async checkDuplicateRegistration(phone) {
-        const db = firebase.firestore();
-        const snapshot = await db.collection('enrollmentRequests')
-            .where('courseId', '==', this.currentCourseId)
-            .where('student.phone', '==', phone)
-            .get();
-        return !snapshot.empty;
+        try {
+            const db = firebase.firestore();
+            const snapshot = await db.collection('enrollmentRequests')
+                .where('courseId', '==', this.currentCourseId)
+                .where('student.phone', '==', phone)
+                .get();
+            return !snapshot.empty;
+        } catch (error) {
+            // Public users don't have read access to enrollmentRequests,
+            // so we gracefully fallback to allowing the submission and let
+            // the backend/admin handle deduplication.
+            console.warn("Could not check duplicate registration:", error);
+            return false;
+        }
     },
 
     async handleStep1Submit() {

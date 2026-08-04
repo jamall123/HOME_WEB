@@ -50,7 +50,7 @@ export const login = functions.https.onCall(async (rawData, context) => {
     let credDoc: FirebaseFirestore.DocumentSnapshot | null = null;
     for (const candidate of candidates) {
       const snap = await DI.db.collection('courses_credentials').doc(candidate).get();
-      if (snap.exists && typeof snap.data()?.password === 'string') {
+      if (snap.exists && snap.data()?.password !== undefined) {
         credDoc = snap;
         break;
       }
@@ -64,7 +64,8 @@ export const login = functions.https.onCall(async (rawData, context) => {
       return fail('invalid-credentials', 'اسم المستخدم أو كلمة المرور غير صحيحة.', false);
     }
     
-    const storedPassword = credDoc.data()?.password as string;
+    const storedPasswordRaw = credDoc.data()?.password;
+    const storedPassword = storedPasswordRaw != null ? String(storedPasswordRaw) : '';
 
     if (storedPassword && (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$') || storedPassword.startsWith('$2y$'))) {
       // It is already a bcrypt hash
