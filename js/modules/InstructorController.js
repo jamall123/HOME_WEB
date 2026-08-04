@@ -439,7 +439,8 @@ class InstructorControllerClass {
                         });
                     } catch (error) {
                         console.error("Failed to upload audio:", error);
-                        alert("فشل رفع المقطع الصوتي: " + error.message);
+                        const { NotificationManager } = await import('./NotificationManager.js');
+                        NotificationManager.show('فشل رفع المقطع الصوتي: ' + error.message, 'error');
                     }
                 };
 
@@ -449,7 +450,8 @@ class InstructorControllerClass {
                 btn.classList.replace('btn-dark', 'btn-danger');
             } catch (err) {
                 console.error("Error accessing microphone:", err);
-                alert("لم نتمكن من الوصول إلى الميكروفون. يرجى التأكد من منح الصلاحيات.");
+                const { NotificationManager } = await import('./NotificationManager.js');
+                NotificationManager.show('لم نتمكن من الوصول إلى الميكروفون. يرجى التأكد من منح الصلاحيات.', 'error');
             }
         } else {
             this.mediaRecorder.stop();
@@ -463,6 +465,93 @@ class InstructorControllerClass {
                 this.audioStream = null;
             }
         }
+    }
+
+    // =========================================================================
+    // STUDENT MIC / HAND RAISE SYSTEM
+    // =========================================================================
+
+    /**
+     * Called by RoomEngine when a student requests to speak.
+     * Displays a toast notification to the instructor.
+     */
+    showHandRaiseNotification(studentName, studentUid) {
+        const container = document.getElementById('hand-raise-toasts');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'hand-raise-toast';
+        toast.dataset.uid = studentUid;
+        toast.innerHTML = `
+            <div class="toast-icon">✋</div>
+            <div class="toast-info">
+                <div class="toast-name">${studentName}</div>
+                <div class="toast-desc">يطلب الكلام في الدرس</div>
+            </div>
+            <button class="toast-allow-btn" data-uid="${studentUid}">سماح</button>
+        `;
+
+        // Allow button
+        toast.querySelector('.toast-allow-btn').addEventListener('click', () => {
+            this.allowStudentMic(studentUid, studentName);
+            toast.remove();
+        });
+
+        // Auto-dismiss after 15 seconds
+        container.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 15000);
+    }
+
+    /**
+     * Grants a student permission to use their microphone in Agora.
+     */
+    async allowStudentMic(studentUid, studentName) {
+        try {
+            const db = window.firebase.firestore();
+            await db.collection('active_sessions').doc(this.engine.courseId).update({
+                [`micPermissions.${studentUid}`]: true
+            });
+            const { NotificationManager } = await import('./NotificationManager.js');
+            NotificationManager.show(`تم السماح لـ ${studentName} بالكلام`, 'success');
+        } catch (e) {
+            console.error('[InstructorController] allowStudentMic failed:', e);
+        }
+    }
+
+    /**
+     * Revokes a student's microphone permission.
+     */
+    async revokeStudentMic(studentUid) {
+        try {
+            const db = window.firebase.firestore();
+            await db.collection('active_sessions').doc(this.engine.courseId).update({
+                [`micPermissions.${studentUid}`]: window.firebase.firestore.FieldValue.delete()
+            });
+        } catch (e) {
+            console.error('[InstructorController] revokeStudentMic failed:', e);
+        }
+    }
+
+    /**
+     * Sets up a Firestore listener for hand-raise requests from students.
+     */
+    listenForHandRaises() {
+        const db = window.firebase.firestore();
+        this._handRaiseUnsubscribe = db
+            .collection('active_sessions').doc(this.engine.courseId)
+            .collection('handRaises')
+            .onSnapshot(snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const data = change.doc.data();
+                        this.showHandRaiseNotification(data.name || 'طالب', change.doc.id);
+                    }
+                });
+            }, err => {
+                console.warn('[InstructorController] handRaises listener error:', err);
+            });
     }
 }
 

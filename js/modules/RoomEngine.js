@@ -94,6 +94,8 @@ class RoomEngineClass {
             if (this.isInstructor) {
                 import('./InstructorController.js').then(({ InstructorController }) => {
                     InstructorController.init(this);
+                    // Start listening for student hand-raise requests
+                    InstructorController.listenForHandRaises();
                 });
             }
 
@@ -245,12 +247,33 @@ class RoomEngineClass {
             TeachingRenderer.renderMode(this.state.room.mode, this.state.network.lowBandwidth);
             TeachingRenderer.updateLiveBadge(this.state.room.isLive);
 
+            // Sync float bar online count
+            const floatCount = document.getElementById('float-online-count');
+            const chatCount  = document.getElementById('chat-online-count');
+            if (floatCount && chatCount) {
+                const num = chatCount.textContent.replace(/[^\d]/g, '');
+                floatCount.textContent = num || '0';
+            }
+
             if (this.renderQueue.has('network')) {
                 const btnLowBandwidth = document.getElementById('btn-low-bandwidth');
                 if (btnLowBandwidth) {
-                    btnLowBandwidth.style.background = this.state.network.lowBandwidth
-                        ? 'var(--primary-color)'
-                        : 'rgba(0,0,0,0.4)';
+                    if (this.state.network.lowBandwidth) {
+                        btnLowBandwidth.classList.add('active');
+                    } else {
+                        btnLowBandwidth.classList.remove('active');
+                    }
+                }
+            }
+
+            // Student mic button: show only when a voice stream is possible
+            if (!this.isInstructor) {
+                const studentMicBtn = document.getElementById('btn-student-mic');
+                if (studentMicBtn) {
+                    const voiceModes = ['live', 'audio', 'slides'];
+                    const hasAudio   = voiceModes.includes(this.state.room.mode) &&
+                        (this.state.room.mode !== 'slides' || this.state.presentation.audioStream);
+                    studentMicBtn.style.display = hasAudio ? 'inline-flex' : 'none';
                 }
             }
             
@@ -429,11 +452,68 @@ class RoomEngineClass {
                 });
                 
                 if (this.state.network.lowBandwidth) {
-                    btnLowBandwidth.style.background = 'var(--primary-color)';
+                    btnLowBandwidth.classList.add('active');
                     NotificationManager.show('تم تفعيل وضع توفير البيانات', 'success');
                 } else {
-                    btnLowBandwidth.style.background = 'rgba(0,0,0,0.4)';
+                    btnLowBandwidth.classList.remove('active');
                     NotificationManager.show('تم إيقاف وضع توفير البيانات', 'info');
+                }
+            });
+        }
+
+        // Student mic request button
+        const studentMicBtn = document.getElementById('btn-student-mic');
+        if (studentMicBtn && !this.isInstructor) {
+            studentMicBtn.addEventListener('click', async () => {
+                const isRequesting = studentMicBtn.classList.contains('requesting');
+
+                if (isRequesting) {
+                    // Cancel the request
+                    studentMicBtn.classList.remove('requesting');
+                    studentMicBtn.title = 'طلب الكلام';
+                    studentMicBtn.querySelector('i').className = 'fas fa-hand-paper';
+                    // Remove from Firestore
+                    try {
+                        const db = window.firebase.firestore();
+                        await db.collection('active_sessions').doc(this.courseId)
+                            .collection('handRaises').doc(this.currentUser.uid).delete();
+                    } catch(e) { console.warn('handRaise cancel error', e); }
+                } else {
+                    // Send request
+                    studentMicBtn.classList.add('requesting');
+                    studentMicBtn.title = 'إلغاء طلب الكلام';
+                    studentMicBtn.querySelector('i').className = 'fas fa-hand-paper';
+                    NotificationManager.show('تم إرسال طلب الكلام. انتظر موافقة المدرب.', 'info');
+                    try {
+                        const db = window.firebase.firestore();
+                        await db.collection('active_sessions').doc(this.courseId)
+                            .collection('handRaises').doc(this.currentUser.uid).set({
+                                name: this.currentUser.displayName || this.currentUser.email || 'طالب',
+                                uid: this.currentUser.uid,
+                                timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                    } catch(e) {
+                        console.warn('handRaise write error', e);
+                        studentMicBtn.classList.remove('requesting');
+                    }
+
+                    // Listen for instructor approval
+                    const db = window.firebase.firestore();
+                    const unsubPermission = db.collection('active_sessions').doc(this.courseId)
+                        .onSnapshot(doc => {
+                            if (!doc.exists) return;
+                            const perms = doc.data().micPermissions || {};
+                            if (perms[this.currentUser.uid]) {
+                                unsubPermission();
+                                studentMicBtn.classList.remove('requesting');
+                                studentMicBtn.style.display = 'none';
+                                NotificationManager.show('وافق المدرب! يمكنك الآن التحدث.', 'success', 6000);
+                                // Join Agora as publisher
+                                import('./MediaEngine.js').then(({ MediaEngine }) => {
+                                    MediaEngine.joinLiveWebRTC(this.courseId, true); // true = publish audio
+                                });
+                            }
+                        });
                 }
             });
         }

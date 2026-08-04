@@ -4,6 +4,75 @@
  * Strictly separates DOM manipulation from business logic.
  */
 
+/**
+ * RoomConfirmDialog
+ * Lightweight replacement for window.confirm() / window.alert().
+ * Usage: RoomConfirmDialog.show({ icon, title, body, okLabel, danger }) => Promise<boolean>
+ */
+const RoomConfirmDialog = {
+    show({ icon = '📢', title = 'تأكيد', body = '', okLabel = 'تأكيد', cancelLabel = 'إلغاء', danger = false } = {}) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('room-confirm-overlay');
+            const iconEl  = document.getElementById('confirm-icon');
+            const titleEl = document.getElementById('confirm-title');
+            const bodyEl  = document.getElementById('confirm-body');
+            const okBtn   = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+            if (!overlay) { resolve(true); return; } // fallback if DOM not ready
+
+            if (iconEl)  iconEl.textContent  = icon;
+            if (titleEl) titleEl.textContent = title;
+            if (bodyEl)  bodyEl.textContent  = body;
+            if (okBtn)   okBtn.textContent   = okLabel;
+            if (cancelBtn) cancelBtn.textContent = cancelLabel;
+
+            if (okBtn) {
+                okBtn.className = danger ? 'btn-confirm-ok danger-ok' : 'btn-confirm-ok';
+            }
+
+            const cleanup = (result) => {
+                overlay.classList.remove('active');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+                resolve(result);
+            };
+
+            okBtn.onclick = () => cleanup(true);
+            cancelBtn.onclick = () => cleanup(false);
+            overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+
+            overlay.classList.add('active');
+        });
+    },
+
+    alert({ icon = 'ℹ️', title = 'تنبيه', body = '', okLabel = 'حسناً' } = {}) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('room-confirm-overlay');
+            if (!overlay) { resolve(); return; }
+
+            document.getElementById('confirm-icon').textContent  = icon;
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-body').textContent  = body;
+            document.getElementById('confirm-ok-btn').textContent = okLabel;
+            document.getElementById('confirm-cancel-btn').style.display = 'none';
+
+            const okBtn = document.getElementById('confirm-ok-btn');
+            okBtn.className = 'btn-confirm-ok';
+
+            const cleanup = () => {
+                overlay.classList.remove('active');
+                okBtn.onclick = null;
+                document.getElementById('confirm-cancel-btn').style.display = '';
+                resolve();
+            };
+            okBtn.onclick = () => cleanup();
+            overlay.onclick = (e) => { if (e.target === overlay) cleanup(); };
+            overlay.classList.add('active');
+        });
+    }
+};
+
 export class InstructorUIClass {
     init(controller) {
         this.controller = controller;
@@ -146,7 +215,9 @@ export class InstructorUIClass {
                             <h4 style="color: #fbbf24; margin: 0 0 1rem 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;"><i class="fas fa-bullhorn"></i> نمط القناة</h4>
                             <div style="margin-bottom: 1rem;">
                                 <textarea id="inst-channel-text" class="form-input" style="width: 100%; height: 80px; padding: 0.5rem; resize: none; margin-bottom: 0.5rem;" placeholder="اكتب رسالة نصية..."></textarea>
-                                <button class="btn btn-sm btn-primary" onclick="window.InstructorAPI.sendChannelMessage()" style="width: 100%; border-radius: 8px; background: #fbbf24; color: black; font-weight: bold;"><i class="fas fa-paper-plane"></i> إرسال النص</button>
+                                <button class="btn btn-sm btn-primary" onclick="window.InstructorAPI.sendChannelMessage()" style="width: 100%; border-radius: 8px; background: #fbbf24; color: black; font-weight: bold;">
+                                    <i class="fas fa-paper-plane"></i> إرسال النص
+                                </button>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                                 <button class="btn btn-sm btn-dark" onclick="document.getElementById('inst-channel-image').click()" style="border-radius: 8px;"><i class="fas fa-image"></i> إرسال صورة</button>
@@ -294,9 +365,19 @@ export class InstructorUIClass {
                     activeBtn.style.background = 'rgba(99, 102, 241, 0.1)';
                     activeBtn.querySelector('i').style.transform = 'scale(1.2)';
                 }
+
+                // Update the floating bar
+                this._updateFloatBar(mode);
             },
-            endCurrentLesson: () => {
-                if (confirm('هل أنت متأكد من إنهاء الدرس الحالي وبدء دورة درس جديدة؟')) {
+            endCurrentLesson: async () => {
+                const ok = await RoomConfirmDialog.show({
+                    icon: '🏁',
+                    title: 'إنهاء الدرس الحالي',
+                    body: 'هل أنت متأكد من إنهاء الدرس الحالي وبدء دورة درس جديدة؟',
+                    okLabel: 'نعم، إنهاء',
+                    danger: true
+                });
+                if (ok) {
                     import('./CurriculumController.js').then(({CurriculumController}) => CurriculumController.endCurrentLesson());
                 }
             },
@@ -305,29 +386,55 @@ export class InstructorUIClass {
             promptVideoUpload: () => this.controller.promptVideoUpload(),
             playVideo: () => this.controller.playVideo(),
             pauseVideo: () => this.controller.pauseVideo(),
-            startAgoraLive: () => {
-                alert("Start button clicked. Attempting to start broadcast...");
-                this.controller.startAgoraLive().catch(err => {
-                    alert("Controller error: " + err);
+            startAgoraLive: async () => {
+                const ok = await RoomConfirmDialog.show({
+                    icon: '📡',
+                    title: 'بدء البث الحي',
+                    body: 'سيتم بدء البث الحي للطلاب. هل أنت جاهز؟',
+                    okLabel: 'بدء البث',
+                    danger: false
+                });
+                if (!ok) return;
+                this.controller.startAgoraLive().catch(async (err) => {
+                    await RoomConfirmDialog.alert({ icon: '❌', title: 'خطأ', body: 'تعذر بدء البث: ' + err.message });
                 });
                 document.getElementById('btn-start-agora').style.display = 'none';
                 document.getElementById('btn-stop-agora').style.display = 'block';
+                // Show float bar stop + mic + cam buttons
+                const fb = document.getElementById('instructor-float-bar');
+                if (fb) {
+                    document.getElementById('float-btn-mic').style.display = 'inline-flex';
+                    document.getElementById('float-btn-cam').style.display = 'inline-flex';
+                    document.getElementById('float-btn-stop').style.display = 'inline-flex';
+                }
             },
-            stopAgoraLive: () => {
+            stopAgoraLive: async () => {
+                const ok = await RoomConfirmDialog.show({
+                    icon: '⏹',
+                    title: 'إنهاء البث',
+                    body: 'هل تريد إنهاء البث الحي الآن؟',
+                    okLabel: 'إنهاء البث',
+                    danger: true
+                });
+                if (!ok) return;
                 this.controller.stopAgoraLive();
                 document.getElementById('btn-start-agora').style.display = 'block';
                 document.getElementById('btn-stop-agora').style.display = 'none';
+                document.getElementById('float-btn-mic').style.display = 'none';
+                document.getElementById('float-btn-cam').style.display = 'none';
+                document.getElementById('float-btn-stop').style.display = 'none';
             },
             toggleAgoraMic: async () => {
                 const { MediaEngine } = await import('./MediaEngine.js');
                 const isMuted = MediaEngine.toggleMic();
                 const btn = document.getElementById('btn-agora-mic');
+                const floatMicBtn = document.getElementById('float-btn-mic');
                 if (isMuted) {
-                    btn.innerHTML = '<i class="fas fa-microphone-slash"></i> تم الكتم';
-                    btn.classList.add('btn-danger');
+                    if (btn) { btn.innerHTML = '<i class="fas fa-microphone-slash"></i> تم الكتم'; btn.classList.add('btn-danger'); }
+                    if (floatMicBtn) { floatMicBtn.innerHTML = '<i class="fas fa-microphone-slash"></i><span class="fb-label"> مكتوم</span>'; floatMicBtn.classList.add('active'); }
                 } else {
-                    btn.innerHTML = '<i class="fas fa-microphone"></i> كتم المايك';
-                    btn.classList.remove('btn-danger');
+                    if (btn) { btn.innerHTML = '<i class="fas fa-microphone"></i> كتم المايك'; btn.classList.remove('btn-danger'); }
+                    if (floatMicBtn) { floatMicBtn.innerHTML = '<i class="fas fa-microphone"></i><span class="fb-label"> المايك</span>'; floatMicBtn.classList.remove('active'); }
                 }
             },
             switchAgoraCamera: async () => {
@@ -336,19 +443,85 @@ export class InstructorUIClass {
             },
             uploadSlides: (e) => this.controller.uploadSlides(e),
             presentSelectedSlides: () => this.controller.presentSelectedSlides(),
-            startSlidesAudio: () => this.controller.startSlidesAudio(),
-            stopSlidesAudio: () => this.controller.stopSlidesAudio(),
+            startSlidesAudio: () => {
+                this.controller.startSlidesAudio();
+                // Show mic stop in float bar
+                const floatMicBtn = document.getElementById('float-btn-mic');
+                if (floatMicBtn) floatMicBtn.style.display = 'inline-flex';
+                const floatStopBtn = document.getElementById('float-btn-stop');
+                if (floatStopBtn) floatStopBtn.style.display = 'inline-flex';
+            },
+            stopSlidesAudio: () => {
+                this.controller.stopSlidesAudio();
+                const floatMicBtn = document.getElementById('float-btn-mic');
+                if (floatMicBtn) floatMicBtn.style.display = 'none';
+                const floatStopBtn = document.getElementById('float-btn-stop');
+                if (floatStopBtn) floatStopBtn.style.display = 'none';
+            },
             
             // Audio mode
-            startAudioOnly: () => this.controller.startAudioOnly(),
-            stopAudioOnly: () => this.controller.stopAudioOnly(),
+            startAudioOnly: () => {
+                this.controller.startAudioOnly();
+                const floatMicBtn = document.getElementById('float-btn-mic');
+                if (floatMicBtn) floatMicBtn.style.display = 'inline-flex';
+                const floatStopBtn = document.getElementById('float-btn-stop');
+                if (floatStopBtn) floatStopBtn.style.display = 'inline-flex';
+            },
+            stopAudioOnly: () => {
+                this.controller.stopAudioOnly();
+                const floatMicBtn = document.getElementById('float-btn-mic');
+                if (floatMicBtn) floatMicBtn.style.display = 'none';
+                const floatStopBtn = document.getElementById('float-btn-stop');
+                if (floatStopBtn) floatStopBtn.style.display = 'none';
+            },
             
-            // Channel mode
-            sendChannelMessage: () => this.controller.sendChannelMessage(),
-            sendChannelImage: (e) => this.controller.sendChannelImage(e),
-            sendChannelVideo: (e) => this.controller.sendChannelVideo(e),
+            // Channel mode — with confirm dialog
+            sendChannelMessage: async () => {
+                const textInput = document.getElementById('inst-channel-text');
+                const msg = textInput ? textInput.value.trim() : '';
+                if (!msg) {
+                    await RoomConfirmDialog.alert({ icon: '✏️', title: 'الرسالة فارغة', body: 'يرجى كتابة رسالة قبل الإرسال.' });
+                    return;
+                }
+                const ok = await RoomConfirmDialog.show({
+                    icon: '📢',
+                    title: 'تأكيد إرسال الرسالة',
+                    body: msg.length > 120 ? msg.slice(0, 120) + '...' : msg,
+                    okLabel: 'إرسال'
+                });
+                if (ok) this.controller.sendChannelMessage();
+            },
+            sendChannelImage: async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const ok = await RoomConfirmDialog.show({
+                    icon: '🖼️',
+                    title: 'إرسال صورة',
+                    body: `هل تريد إرسال الصورة "${file.name}" للطلاب؟`,
+                    okLabel: 'إرسال الصورة'
+                });
+                if (ok) this.controller.sendChannelImage(e);
+                else e.target.value = '';
+            },
+            sendChannelVideo: async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const ok = await RoomConfirmDialog.show({
+                    icon: '🎬',
+                    title: 'إرسال فيديو',
+                    body: `هل تريد إرسال الفيديو "${file.name}" للطلاب؟`,
+                    okLabel: 'إرسال الفيديو'
+                });
+                if (ok) this.controller.sendChannelVideo(e);
+                else e.target.value = '';
+            },
             toggleChannelVoice: () => this.controller.toggleChannelVoice()
         };
+
+        // Float bar button wiring
+        this._wireFloatBar();
+        // Show the float bar for instructors by default
+        this._updateFloatBar('video');
 
         const navBtns = this.mountPoint.querySelectorAll('.inst-nav');
         navBtns.forEach(btn => {
@@ -410,9 +583,88 @@ export class InstructorUIClass {
                         btn.disabled = false;
                     }, 3000);
                 } catch (error) {
-                    alert('حدث خطأ أثناء حفظ البيانات');
+                    await RoomConfirmDialog.alert({ icon: '❌', title: 'خطأ', body: 'حدث خطأ أثناء حفظ البيانات: ' + (error.message || '') });
                     btn.innerHTML = originalText;
                     btn.disabled = false;
+                }
+            });
+        }
+    }
+
+    // ─── Floating Bar helpers ───────────────────────────────────────────────
+
+    /**
+     * Called whenever the teaching mode changes.
+     * Updates the mode label and shows/hides relevant float bar controls.
+     */
+    _updateFloatBar(mode) {
+        const bar    = document.getElementById('instructor-float-bar');
+        const label  = document.getElementById('float-mode-label');
+        const modeText = document.getElementById('float-mode-text');
+        if (!bar) return;
+
+        bar.classList.add('visible');
+
+        const modeConfig = {
+            video:   { cls: 'mode-video',   icon: 'fa-video',       text: 'فيديو' },
+            link:    { cls: 'mode-video',   icon: 'fa-link',        text: 'رابط' },
+            slides:  { cls: 'mode-slides',  icon: 'fa-images',      text: 'شرائح' },
+            audio:   { cls: 'mode-audio',   icon: 'fa-podcast',     text: 'صوت فقط' },
+            channel: { cls: 'mode-channel', icon: 'fa-bullhorn',    text: 'قناة' },
+            live:    { cls: 'mode-live',    icon: 'fa-satellite-dish', text: 'بث حي' },
+        };
+        const cfg = modeConfig[mode] || modeConfig.video;
+
+        // Update label
+        label.className = `float-bar-mode-label ${cfg.cls}`;
+        label.innerHTML = `<i class="fas ${cfg.icon}"></i>`;
+        if (modeText) modeText.textContent = cfg.text;
+
+        // Show/hide action buttons based on mode
+        const micBtn  = document.getElementById('float-btn-mic');
+        const camBtn  = document.getElementById('float-btn-cam');
+        const stopBtn = document.getElementById('float-btn-stop');
+
+        // Reset visibility
+        if (micBtn)  micBtn.style.display  = 'none';
+        if (camBtn)  camBtn.style.display  = 'none';
+        if (stopBtn) stopBtn.style.display = 'none';
+
+        // Mode-specific shows
+        if (mode === 'live') {
+            if (micBtn)  micBtn.style.display  = 'inline-flex';
+            if (camBtn)  camBtn.style.display  = 'inline-flex';
+            if (stopBtn) stopBtn.style.display = 'inline-flex';
+        } else if (mode === 'audio') {
+            if (micBtn)  micBtn.style.display  = 'inline-flex';
+            if (stopBtn) stopBtn.style.display = 'inline-flex';
+        }
+    }
+
+    /**
+     * Wires float-bar buttons to InstructorAPI.
+     */
+    _wireFloatBar() {
+        const floatMicBtn  = document.getElementById('float-btn-mic');
+        const floatCamBtn  = document.getElementById('float-btn-cam');
+        const floatStopBtn = document.getElementById('float-btn-stop');
+
+        if (floatMicBtn) {
+            floatMicBtn.addEventListener('click', () => window.InstructorAPI.toggleAgoraMic());
+        }
+        if (floatCamBtn) {
+            floatCamBtn.addEventListener('click', () => window.InstructorAPI.switchAgoraCamera());
+        }
+        if (floatStopBtn) {
+            // Context-aware stop — checks current mode
+            floatStopBtn.addEventListener('click', async () => {
+                const mode = document.getElementById('float-mode-text')?.textContent;
+                if (mode === 'بث حي') {
+                    window.InstructorAPI.stopAgoraLive();
+                } else if (mode === 'صوت فقط') {
+                    window.InstructorAPI.stopAudioOnly();
+                } else if (mode === 'شرائح') {
+                    window.InstructorAPI.stopSlidesAudio();
                 }
             });
         }

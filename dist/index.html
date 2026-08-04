@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jhome | نبني تقنية اليوم لتمكين الغد</title>
     <meta name="description" content="Jhome هي شركة تقنية رائدة تبني منتجات رقمية تعيد صياغة المستقبل الاقتصادي في السودان.">
+    <link rel="canonical" href="https://www.sudanfree.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Jhome">
+    <meta property="og:locale" content="ar_AR">
+    <meta property="og:title" content="Jhome | نبني تقنية اليوم لتمكين الغد">
+    <meta property="og:description" content="Jhome هي شركة تقنية رائدة تبني منتجات رقمية تعيد صياغة المستقبل الاقتصادي في السودان.">
+    <meta property="og:url" content="https://www.sudanfree.com/">
+    <meta property="og:image" content="https://www.sudanfree.com/assets/images/favicon.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Jhome | نبني تقنية اليوم لتمكين الغد">
+    <meta name="twitter:description" content="Jhome هي شركة تقنية رائدة تبني منتجات رقمية تعيد صياغة المستقبل الاقتصادي في السودان.">
+    <meta name="twitter:image" content="https://www.sudanfree.com/assets/images/favicon.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Jhome",
+        "url": "https://www.sudanfree.com/",
+        "logo": "https://www.sudanfree.com/assets/images/favicon.png",
+        "description": "Jhome هي شركة تقنية رائدة تبني منتجات رقمية تعيد صياغة المستقبل الاقتصادي في السودان.",
+        "email": "contact@jhome.sd"
+    }
+    </script>
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,10 +48,12 @@
         .roadmap-item::before { content: ''; position: absolute; right: -11px; top: 5px; width: 20px; height: 20px; border-radius: 50%; background: var(--bg-base); border: 4px solid var(--primary-color); }
         @media (max-width: 992px) { .narrative-grid { grid-template-columns: 1fr; text-align: center; gap: 2rem; } }
     </style>
-  <script type="module" crossorigin src="/assets/ThemeManager-Df5bj4E3.js"></script>
-  <script type="module" crossorigin src="/assets/GlobalController-Df_3lCaU.js"></script>
-  <script type="module" crossorigin src="/assets/academy-ByPLnmFJ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/ThemeManager-CgE2LGLP.css">
+  <script type="module" crossorigin src="/assets/ThemeManager-Dt8KBxWK.js"></script>
+  <script type="module" crossorigin src="/assets/firebase-config-CVzH6vXx.js"></script>
+  <script type="module" crossorigin src="/assets/animations-BlPka5LK.js"></script>
+  <script type="module" crossorigin src="/assets/GlobalController-VjAdDXd5.js"></script>
+  <script type="module" crossorigin src="/assets/academy-DkbmnA9Z.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/sudanFree-CgE2LGLP.css">
 </head>
 <body>
 
@@ -97,7 +122,6 @@
                 <li><a href="blog.html">المركز الإعلامي</a></li>
                 <li><a href="about.html">الشركة</a></li>
                 <li><a href="contact.html">تواصل معنا</a></li>
-                <li><a href="https://sudanfree-d04fc.web.app" target="_blank" class="btn" style="background:var(--primary-color); color:white; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold;">تطبيق الويب</a></li>
             </ul>
             <button class="hamburger-btn" aria-label="Toggle Navigation">
                 <span class="bar"></span>
@@ -117,7 +141,6 @@
             <li><a href="blog.html" class="nav-link">المركز الإعلامي</a></li>
             <li><a href="about.html" class="nav-link">الشركة</a></li>
             <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
-            <li><a href="https://sudanfree-d04fc.web.app" target="_blank" class="nav-link" style="color:var(--primary-color); font-weight: bold;">تطبيق الويب</a></li>
         </ul>
     </div>
 
@@ -133,7 +156,7 @@
                     نبني <span class="text-gradient">المنتجات</span><br>
                     لنمكّن <span class="text-gradient-accent">الأعمال</span>
                 </h1>
-                <p id="dy-hero-text" class="body-large animate-fade-up delay-200" style="margin: 2rem auto; max-width: 700px; line-height: 1.8;">
+                <p id="dy-hero-text" data-dynamic="heroSubtitle" class="body-large animate-fade-up delay-200" style="margin: 2rem auto; max-width: 700px; line-height: 1.8;">
                     Jhome هي وجهتك التقنية الشاملة. نحن لا نطور مجرد تطبيقات، بل نبني أنظمة مؤسسية متكاملة (Enterprise Systems)، ومنصات للعمل الحر (SudanFree)، وأكاديميات تعليمية حديثة لتمكين الجيل القادم.
                 </p>
                 <div class="animate-fade-up delay-300" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
@@ -171,20 +194,20 @@
                 </div>
                 <div class="impact-grid animate-fade-up delay-100" style="margin-bottom: 4rem;">
                     <div class="stat-item">
-                        <h3 class="counter-value" id="stat-loc" data-target="0">0</h3>
-                        <p>سطر برمجي (نظيف)</p>
+                        <h3 class="counter-value" id="stat-courses" data-target="0">0</h3>
+                        <p>دورة تدريبية في الأكاديمية</p>
                     </div>
                     <div class="stat-item">
-                        <h3 class="counter-value" id="stat-projects" data-target="0">0</h3>
-                        <p>منتجات تقنية</p>
+                        <h3 class="counter-value" id="stat-posts" data-target="0">0</h3>
+                        <p>مقال ومحتوى منشور</p>
                     </div>
                     <div class="stat-item">
-                        <h3>+<span class="counter-value" id="stat-users" data-target="0">0</span></h3>
-                        <p>مستخدم مستهدف</p>
+                        <h3 class="counter-value" id="stat-stories" data-target="0">0</h3>
+                        <p>قصة نجاح موثقة</p>
                     </div>
                     <div class="stat-item">
-                        <h3 class="counter-value" id="stat-uptime" data-target="0">0</h3>
-                        <p>% جهوزية النظام</p>
+                        <h3 class="counter-value" id="stat-products" data-target="2">2</h3>
+                        <p>منتج رقمي حي (SudanFree وAcademy)</p>
                     </div>
                 </div>
 
@@ -214,8 +237,8 @@
                 </div>
                 <div class="animate-fade-up delay-100">
                     <span class="caption-meta" style="color: var(--success); display: block; margin-bottom: 1rem;"><i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> منتجنا الرئيسي</span>
-                    <h2 class="display-2" style="margin-bottom: 1.5rem;">سودان فري</h2>
-                    <p class="body-large" style="margin-bottom: 2rem;">
+                    <h2 data-dynamic="sudanFreeTitle" class="display-2" style="margin-bottom: 1.5rem;">سودان فري</h2>
+                    <p data-dynamic="sudanFreeDesc" class="body-large" style="margin-bottom: 2rem;">
                         أول منصة رقمية متكاملة لربط المستقلين والحرفيين بالعملاء في السودان. تطبيق يعيد تعريف سوق العمل الحر ويوفر بيئة موثوقة للجميع.
                     </p>
                     <a href="projects.html" class="btn btn-secondary">تصفح كل المنتجات</a>

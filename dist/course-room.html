@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>غرفة الدورة | Jhome Academy</title>
+    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="/assets/favicon-DTXfpf_g.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,16 +39,17 @@
             border-radius: 8px;
         }
     </style>
-  <script type="module" crossorigin src="/assets/courseRoom-De_BQyJX.js"></script>
+  <script type="module" crossorigin src="/assets/courseRoom-DVpjiBZ_.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
-  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-Df5bj4E3.js">
-  <link rel="modulepreload" crossorigin href="/assets/academy-ByPLnmFJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/ThemeManager-Dt8KBxWK.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CVzH6vXx.js">
+  <link rel="modulepreload" crossorigin href="/assets/academy-DkbmnA9Z.js">
   <link rel="modulepreload" crossorigin href="/assets/EventBus-C86EHaQu.js">
   <link rel="modulepreload" crossorigin href="/assets/NotificationManager-BwYHblnf.js">
-  <link rel="modulepreload" crossorigin href="/assets/ChatService-Cvs-X7ES.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-DD-He9Xy.js">
-  <link rel="stylesheet" crossorigin href="/assets/ThemeManager-CgE2LGLP.css">
-  <link rel="stylesheet" crossorigin href="/assets/courseRoom-DzTiZKuT.css">
+  <link rel="modulepreload" crossorigin href="/assets/ChatService-CPBU4ZHr.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-BqhaMA_s.js">
+  <link rel="stylesheet" crossorigin href="/assets/courseRoom-BawdEAjX.css">
+  <link rel="stylesheet" crossorigin href="/assets/sudanFree-CgE2LGLP.css">
 </head>
 <body style="overflow: hidden;"> <!-- Prevent global scrolling in the room layout -->
 
@@ -78,24 +80,43 @@
 
     <div class="room-app" id="app-root">
         
-        <!-- Global Header -->
+        <!-- Global Header (Mobile-First Compact) -->
         <header class="room-header">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <button id="nav-toggle-curriculum" class="btn btn-icon d-lg-none" style="background: transparent; color: var(--text-primary); border: none;">
-                    <i class="fas fa-bars"></i>
+            <!-- Right side: Back + curriculum toggle -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <!-- Curriculum toggle (mobile) -->
+                <button id="nav-toggle-curriculum" class="room-header-btn d-lg-none" title="المنهج الدراسي">
+                    <i class="fas fa-book-open"></i>
+                    <span class="btn-label">المنهج</span>
                 </button>
-                <a href="courses.html" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-arrow-right"></i> <span class="d-none d-sm-inline">العودة للأكاديمية</span>
+                <!-- Back to Academy -->
+                <a href="courses.html" class="room-header-back" title="العودة للأكاديمية">
+                    <i class="fas fa-arrow-right"></i>
+                    <span class="back-label">الأكاديمية</span>
                 </a>
             </div>
-            
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <button id="btn-low-bandwidth" class="btn btn-secondary" style="background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="توفير البيانات">
-                    <i class="fas fa-wifi"></i> <span class="d-none d-sm-inline" style="margin-right: 0.5rem;">توفير البيانات</span>
+
+            <!-- Left side: Controls -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <!-- Data saver -->
+                <button id="btn-low-bandwidth" class="room-header-btn" title="توفير البيانات">
+                    <i class="fas fa-wifi"></i>
+                    <span class="btn-label">توفير البيانات</span>
                 </button>
-                <span id="role-badge" style="font-size: 0.8rem; background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font-weight: bold;">طالب</span>
-                <button id="nav-toggle-chat" class="btn btn-icon d-lg-none" style="background: transparent; color: var(--text-primary); border: none; position: relative;">
+
+                <!-- Student mic request (hidden by default, shown during live audio modes) -->
+                <button id="btn-student-mic" class="room-header-btn student-mic-btn" title="طلب الكلام" style="display:none;">
+                    <i class="fas fa-hand-paper"></i>
+                    <span class="btn-label">طلب الكلام</span>
+                </button>
+
+                <!-- Role badge -->
+                <span id="role-badge" style="font-size: 0.8rem; background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font-weight: bold; flex-shrink: 0;">طالب</span>
+
+                <!-- Chat toggle (mobile) -->
+                <button id="nav-toggle-chat" class="room-header-btn d-lg-none" title="الدردشة" style="position: relative;">
                     <i class="fas fa-comments"></i>
+                    <span class="btn-label">الدردشة</span>
                     <span id="chat-unread-badge" style="position: absolute; top: -5px; right: -5px; background: var(--error); color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; display: none;">0</span>
                 </button>
             </div>
@@ -143,7 +164,7 @@
                             <span style="font-size: 0.8rem; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: var(--radius-pill);" id="resources-count">0 ملفات</span>
                         </div>
                         <div id="resources-container" style="display: grid; gap: 1rem;">
-                            <!-- Rendered by ResourceViewer.js -->
+                            <!-- Rendered by ResourceManager.js -->
                         </div>
                     </div>
 
@@ -161,14 +182,50 @@
                 
                 <!-- Unified Teaching Renderer -->
                 <div class="teaching-renderer" id="teaching-renderer">
-                    
+
+                    <!-- ── Floating Instructor Control Bar ── -->
+                    <div class="instructor-float-bar" id="instructor-float-bar">
+                        <!-- Mode label (updated by JS) -->
+                        <span class="float-bar-mode-label mode-video" id="float-mode-label">
+                            <i class="fas fa-video"></i>
+                            <span id="float-mode-text">فيديو</span>
+                        </span>
+                        <div class="float-bar-divider"></div>
+
+                        <!-- Quick mic toggle (live / audio / slides+audio) -->
+                        <button class="float-bar-btn" id="float-btn-mic" title="كتم / تشغيل المايك" style="display:none;">
+                            <i class="fas fa-microphone"></i>
+                            <span class="fb-label">المايك</span>
+                        </button>
+
+                        <!-- Camera switch (live only) -->
+                        <button class="float-bar-btn" id="float-btn-cam" title="تدوير الكاميرا" style="display:none;">
+                            <i class="fas fa-sync-alt"></i>
+                            <span class="fb-label">الكاميرا</span>
+                        </button>
+
+                        <!-- End stream / stop -->
+                        <button class="float-bar-btn active" id="float-btn-stop" title="إنهاء البث" style="display:none;">
+                            <i class="fas fa-stop-circle"></i>
+                            <span class="fb-label">إنهاء</span>
+                        </button>
+
+                        <div class="float-bar-divider" id="float-div-stats"></div>
+
+                        <!-- Online count in bar -->
+                        <span style="font-size: 0.73rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;">
+                            <i class="fas fa-circle" style="font-size: 0.45rem; color: var(--success);"></i>
+                            <span id="float-online-count">0</span>
+                        </span>
+                    </div>
+
                     <!-- Live Badge Overlay -->
                     <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.6); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-en); font-size: 0.8rem; z-index: 10; display: flex; align-items: center; gap: 0.5rem; backdrop-filter: blur(5px);">
                         <span id="live-badge-dot" style="color: var(--error);"><i class="fas fa-circle" style="font-size: 0.6rem;"></i></span> 
                         <span id="live-badge-text" style="font-weight: bold; letter-spacing: 1px;">OFFLINE</span>
                     </div>
 
-                    <!-- Fullscreen Overlay -->
+                    <!-- Fullscreen button -->
                     <button id="btn-fullscreen" class="btn btn-icon" style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.6); border: none; color: white; z-index: 10; padding: 0.5rem 0.8rem; border-radius: var(--radius-sm); backdrop-filter: blur(5px);">
                         <i class="fas fa-expand"></i>
                     </button>
@@ -234,6 +291,24 @@
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════
+         Custom Confirm Dialog (replaces native alert/confirm)
+         ══════════════════════════════════════════════ -->
+    <div class="room-confirm-overlay" id="room-confirm-overlay" role="dialog" aria-modal="true">
+        <div class="room-confirm-box">
+            <div class="room-confirm-icon" id="confirm-icon">📢</div>
+            <div class="room-confirm-title" id="confirm-title">تأكيد الإرسال</div>
+            <div class="room-confirm-body" id="confirm-body"></div>
+            <div class="room-confirm-actions">
+                <button class="btn-confirm-cancel" id="confirm-cancel-btn">إلغاء</button>
+                <button class="btn-confirm-ok" id="confirm-ok-btn">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hand Raise Toasts Container -->
+    <div id="hand-raise-toasts" style="position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:0.75rem;"></div>
+
     <!-- Syllabus/Room Management Modal (Instructor Only) -->
 
     <!-- Firebase SDKs -->
@@ -248,33 +323,26 @@
 
     <!-- New ES Modules Architecture (Phase 3 Integration) -->
     <script>
+        // Log (don't alert) uncaught errors — an alert() here would block the
+        // entire page for any unrelated script error, making the login gate
+        // look broken even when the credentials themselves are fine.
         window.addEventListener('error', function(e) {
-            alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+            console.error('JS Error:', e.message, 'at', e.filename + ':' + e.lineno);
         });
         window.addEventListener('unhandledrejection', function(e) {
-            alert('Promise Error: ' + e.reason);
+            console.error('Promise Error:', e.reason);
         });
-        // Make the button say "Script loaded" if the module loads successfully
-        window.moduleLoaded = function() {
-            // document.getElementById('login-submit-btn').innerHTML += ' (Script Loaded)';
-        };
 
+        // Bridges the inline onclick (non-module scope) into the ES-module
+        // login flow below; validation/feedback happens there via NotificationManager.
         window.handleLoginClick = function(btn) {
-            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>'; 
+            btn.innerHTML = 'جاري تسجيل الدخول... <i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
 
             const email = document.getElementById('unified-email').value.trim();
             const pass = document.getElementById('unified-pass').value.trim();
-            
-            if(!email || !pass) {
-                alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
-                btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للغرفة';
-                btn.disabled = false;
-                return;
-            }
 
-            const ev = new CustomEvent('DO_LOGIN', { detail: { email, pass, btn } });
-            document.dispatchEvent(ev);
+            document.dispatchEvent(new CustomEvent('DO_LOGIN', { detail: { email, pass, btn } }));
         };
     </script>
     <script>
