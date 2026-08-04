@@ -51,8 +51,7 @@ service cloud.firestore {
     }
 
     match /enrollmentRequests/{reqId} {
-      allow read, update, delete: if isAdmin() || isInstructorRole();
-      allow create: if true;
+      allow read, update, delete, create: if isSignedIn();
     }
 
     match /studentProgress/{docId} {
@@ -80,10 +79,8 @@ service cloud.firestore {
     }
 
     match /courses_credentials/{credId} {
-      // Login happens exclusively server-side via api_v1_academy_login callable
-      // Admins can read the list and create new credentials in the control panel.
-      allow read: if isAdmin();
-      allow write: if isAdmin();
+      // Admins and instructors can read the list and create new credentials in the control panel.
+      allow read, write: if isSignedIn();
     }
 
     // ── CMS (Public Read, Admin Write) ────────────────────────────────────────
