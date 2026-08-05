@@ -146,12 +146,32 @@ class RoomEngineClass {
 
     async checkUserRole() {
         if (this.currentUser && this.currentUser.role) {
-            return this.currentUser.role === 'instructor' || this.currentUser.role === 'admin';
+            return ['instructor', 'admin', 'supervisor'].includes(this.currentUser.role);
         }
+        
         try {
+            // Check custom claims from token first (used for legacy course credentials)
+            if (this.currentUser.getIdTokenResult) {
+                const tokenResult = await this.currentUser.getIdTokenResult();
+                if (tokenResult && tokenResult.claims && tokenResult.claims.role) {
+                    if (['instructor', 'admin', 'supervisor'].includes(tokenResult.claims.role)) {
+                        return true;
+                    }
+                }
+            }
+
+            // Fallback to firestore 'users' collection
             const doc = await window.firebase.firestore().collection('users').doc(this.currentUser.uid).get();
             if (doc.exists) {
-                return doc.data().role === 'instructor' || doc.data().role === 'admin';
+                const userData = doc.data();
+                this.currentUser = { 
+                    uid: this.currentUser.uid, 
+                    email: this.currentUser.email, 
+                    displayName: this.currentUser.displayName,
+                    ...this.currentUser, 
+                    ...userData 
+                };
+                return ['instructor', 'admin', 'supervisor'].includes(userData.role);
             }
         } catch(e) {
             // console.warn("[RoomEngine] Failed to fetch role", e);
@@ -194,7 +214,7 @@ class RoomEngineClass {
 
     validateState(partialState) {
         if (partialState.room && partialState.room.mode) {
-            const validModes = ['video', 'link', 'slides', 'channel', 'audio', 'archive'];
+            const validModes = ['video', 'link', 'slides', 'channel', 'audio', 'archive', 'live'];
             if (!validModes.includes(partialState.room.mode)) return false;
         }
         return true;
@@ -414,11 +434,31 @@ class RoomEngineClass {
                     presentation: { videoUrl: lesson.contentUrl || lesson.url, activeLessonId: lesson.id }
                 });
 
+                // If instructor: broadcast lessonId to active_sessions so students auto-sync their curriculum
+                if (this.isInstructor && lesson.id) {
+                    window.firebase.firestore()
+                        .collection('active_sessions').doc(this.courseId)
+                        .set({ lessonId: lesson.id }, { merge: true })
+                        .catch(e => console.warn('[RoomEngine] Failed to sync lessonId', e));
+                }
+
                 const playerVideo = document.getElementById('player-video');
                 if (playerVideo && (lesson.contentUrl || lesson.url)) {
                     playerVideo.src = lesson.contentUrl || lesson.url;
                     playerVideo.load();
-                    playerVideo.play().catch(e => console.log('Autoplay prevented', e));
+
+                    // Bug 5 Fix: Restore saved timestamp on autoResume
+                    if (lesson.autoResume && lesson.id) {
+                        import('./CurriculumProgress.js').then(({ CurriculumProgress }) => {
+                            const savedTime = CurriculumProgress.getVideoTimestamp(lesson.id);
+                            if (savedTime > 0) {
+                                playerVideo.currentTime = savedTime;
+                            }
+                            playerVideo.play().catch(e => console.log('Autoplay prevented', e));
+                        });
+                    } else {
+                        playerVideo.play().catch(e => console.log('Autoplay prevented', e));
+                    }
                     
                     // Track video progress and completion
                     playerVideo.onended = () => {
@@ -548,10 +588,11 @@ class RoomEngineClass {
                     });
 
                     // Force student Curriculum to match instructor's active lesson
-                    if (!this.isInstructor && data.videoUrl) {
+                    if (!this.isInstructor && data.lessonId) {
                         import('./CurriculumController.js').then(({ CurriculumController }) => {
-                            // Find the lesson ID corresponding to the videoUrl or pass it directly if we start storing lessonId in active_sessions
-                            // Assuming we sync lessonId in future: CurriculumController.selectLesson(data.lessonId);
+                            if (data.lessonId !== CurriculumController.cache?.currentLessonId) {
+                                CurriculumController.selectLesson(data.lessonId);
+                            }
                         });
                     }
                 }

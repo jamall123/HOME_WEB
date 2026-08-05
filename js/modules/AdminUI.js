@@ -136,7 +136,7 @@ class AdminUIClass {
 
         const fragment = document.createDocumentFragment();
         users.forEach(user => {
-            const roleBadge = user.role === 'instructor' 
+            const roleBadge = ['instructor', 'admin', 'supervisor'].includes(user.role)
                 ? '<span style="background: var(--warning); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">مدرب / مشرف</span>'
                 : '<span style="background: var(--primary-color); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">طالب</span>';
             

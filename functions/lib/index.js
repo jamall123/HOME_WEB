@@ -12,9 +12,11 @@ export * from './shared/monitoring/analytics.js';
 import { courses } from './api/v1/academy/courses.js';
 import { enrollments } from './api/v1/academy/enrollments.js';
 import { login } from './api/v1/academy/login.js';
+import { createCourseChat } from './api/v1/academy/chat.js';
 export const api_v1_academy_courses = courses;
 export const api_v1_academy_enrollments = enrollments;
 export const api_v1_academy_login = login;
+export const api_v1_academy_createCourseChat = createCourseChat;
 // ── V1 API Gateway: CMS ───────────────────────────────────────────────────────
 import { content } from './api/v1/cms/content.js';
 import { settings } from './api/v1/cms/settings.js';

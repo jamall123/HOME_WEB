@@ -102,7 +102,7 @@ class ChatUIClass {
 
         messages.forEach(msg => {
             const isSelf = msg.userId === this.engine.currentUser?.uid;
-            const isInst = msg.role === 'instructor';
+            const isInst = ['instructor', 'admin', 'supervisor'].includes(msg.role);
             
             // Offline messages show a clock icon
             const timeStr = msg.isOffline 

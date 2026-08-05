@@ -6,7 +6,7 @@ export class PermissionManager {
         if (!user) return false;
         
         // Temporarily, if user has 'instructor', restrict access to some routes
-        if (user.role === 'instructor') {
+        if (['instructor', 'supervisor'].includes(user.role)) {
             const allowedForInstructor = ['dashboard', 'courses', 'requests', 'users'];
             if (!allowedForInstructor.includes(routeOrAction)) {
                 return false;

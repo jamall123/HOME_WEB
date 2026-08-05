@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
 import { DI } from '../../../shared/di.js';
 import { SecurityMiddleware } from '../../../shared/middleware/security.js';
 import { RateLimiter } from '../../../shared/middleware/rateLimit.js';
@@ -43,7 +42,7 @@ export const login = functions.https.onCall(async (rawData, context) => {
         let credDoc = null;
         for (const candidate of candidates) {
             const snap = await DI.db.collection('courses_credentials').doc(candidate).get();
-            if (snap.exists && typeof snap.data()?.password === 'string') {
+            if (snap.exists && snap.data()?.password !== undefined) {
                 credDoc = snap;
                 break;
             }
@@ -54,7 +53,8 @@ export const login = functions.https.onCall(async (rawData, context) => {
         if (!credDoc) {
             return fail('invalid-credentials', 'اسم المستخدم أو كلمة المرور غير صحيحة.', false);
         }
-        const storedPassword = credDoc.data()?.password;
+        const storedPasswordRaw = credDoc.data()?.password;
+        const storedPassword = storedPasswordRaw != null ? String(storedPasswordRaw) : '';
         if (storedPassword && (storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$') || storedPassword.startsWith('$2y$'))) {
             // It is already a bcrypt hash
             passwordMatches = await bcrypt.compare(password, storedPassword);
@@ -93,12 +93,12 @@ export const login = functions.https.onCall(async (rawData, context) => {
         const displayName = data.fullname || data.name || credDoc.id;
         // Lazily provision a real Firebase Auth account on first server-verified login.
         try {
-            await admin.auth().getUser(uid);
+            await DI.auth.getUser(uid);
         }
         catch (e) {
-            await admin.auth().createUser({ uid, displayName, disabled: false });
+            await DI.auth.createUser({ uid, displayName, disabled: false });
         }
-        await admin.auth().setCustomUserClaims(uid, { role, courseId: data.courseId || null });
+        await DI.auth.setCustomUserClaims(uid, { role, courseId: data.courseId || null });
         // Mirror a real profile doc so the account shows up like any other user.
         await DI.db.collection('users').doc(uid).set({
             uid, displayName, role,
@@ -119,13 +119,13 @@ export const login = functions.https.onCall(async (rawData, context) => {
             description: `Legacy credential login for ${credDoc.id}, migrated to real Auth uid ${uid}`,
             timestamp: new Date(), success: true, correlationId,
         });
-        const token = await admin.auth().createCustomToken(uid, { role, courseId: data.courseId || null });
+        const token = await DI.auth.createCustomToken(uid, { role, courseId: data.courseId || null });
         return ok({ token, role, courseId: data.courseId || null, displayName, username: credDoc.id }, 'Login verified.', startTime, correlationId);
     }
     catch (error) {
         if (error instanceof functions.https.HttpsError)
             throw error;
-        DI.logger.error('academy login failed', { error });
+        DI.logger.error('academy login failed', { message: error.message, stack: error.stack });
         throw new functions.https.HttpsError('internal', 'Login failed due to a server error.');
     }
 });

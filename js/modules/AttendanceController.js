@@ -20,6 +20,16 @@ class AttendanceControllerClass {
         window.addEventListener('beforeunload', () => {
             this.recordSessionExit();
         });
+
+        // Bug 4 Fix: Sync any previously queued attendance when connection is restored
+        window.addEventListener('online', () => {
+            this.syncOfflineQueue();
+        });
+
+        // Attempt an initial sync on load (handles sessions closed while offline)
+        if (navigator.onLine) {
+            this.syncOfflineQueue();
+        }
     }
 
     recordSessionExit() {

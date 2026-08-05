@@ -152,12 +152,31 @@ export class InstructorUIClass {
                             
                             <!-- Recorded Video Controls -->
                             <div id="v-panel-recorded" style="display: block;">
-                                <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.promptVideoUpload()" style="width: 100%; margin-bottom: 0.5rem; border-radius: 8px;"><i class="fas fa-upload"></i> رفع / اختيار فيديو</button>
-                                <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-dark" id="btn-video-upload" onclick="window.InstructorAPI.promptVideoUpload()" style="width: 100%; margin-bottom: 0.5rem; border-radius: 8px;"><i class="fas fa-upload"></i> رفع فيديو</button>
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                                     <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.playVideo()" style="flex: 1; color: #34d399; border-radius: 8px;"><i class="fas fa-play"></i> تشغيل</button>
                                     <button class="btn btn-sm btn-dark" onclick="window.InstructorAPI.pauseVideo()" style="flex: 1; color: #fbbf24; border-radius: 8px;"><i class="fas fa-pause"></i> إيقاف</button>
                                 </div>
+
+                                <!-- Video Management Panel (shown after upload) -->
+                                <div id="video-management-panel" style="display: none; margin-top: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(96,165,250,0.25); padding: 0.75rem; animation: fadeIn 0.3s ease;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem;">
+                                        <i class="fas fa-film" style="color: #60a5fa; font-size: 0.85rem;"></i>
+                                        <span id="current-video-name" style="font-size: 0.82rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">فيديو محمّل</span>
+                                        <span style="font-size: 0.7rem; background: rgba(52,211,153,0.15); color: #34d399; padding: 0.15rem 0.5rem; border-radius: 99px; border: 1px solid rgba(52,211,153,0.3);">✔ مرفوع</span>
+                                    </div>
+                                    <video id="current-video-preview" controls style="width: 100%; border-radius: 8px; max-height: 110px; background: #000; margin-bottom: 0.6rem;" preload="metadata"></video>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <button class="btn btn-sm" onclick="window.InstructorAPI.replaceVideo()" style="flex: 1; border-radius: 7px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; font-size: 0.8rem;">
+                                            <i class="fas fa-exchange-alt"></i> تغيير
+                                        </button>
+                                        <button class="btn btn-sm" onclick="window.InstructorAPI.deleteVideo()" style="flex: 1; border-radius: 7px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; font-size: 0.8rem;">
+                                            <i class="fas fa-trash"></i> حذف
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
                             
                             <!-- Live Stream Controls -->
                             <div id="v-panel-live" style="display: none;">
@@ -384,6 +403,26 @@ export class InstructorUIClass {
             toggleVideoTab: (tab) => this.toggleVideoTabUI(tab),
             handleSlideLayoutChange: (e) => this.controller.handleSlideLayoutChange(e),
             promptVideoUpload: () => this.controller.promptVideoUpload(),
+            deleteVideo: async () => {
+                const ok = await RoomConfirmDialog.show({
+                    icon: '🗑️',
+                    title: 'حذف الفيديو',
+                    body: 'هل أنت متأكد من حذف الفيديو الحالي؟ لا يمكن التراجع عن هذا الإجراء.',
+                    okLabel: 'نعم، احذف',
+                    danger: true
+                });
+                if (ok) await this.controller.deleteVideo();
+            },
+            replaceVideo: async () => {
+                const ok = await RoomConfirmDialog.show({
+                    icon: '🔄',
+                    title: 'تغيير الفيديو',
+                    body: 'سيتم حذف الفيديو الحالي واستبداله بفيديو جديد. هل تريد المتابعة؟',
+                    okLabel: 'نعم، تغيير',
+                    danger: false
+                });
+                if (ok) await this.controller.replaceVideo();
+            },
             playVideo: () => this.controller.playVideo(),
             pauseVideo: () => this.controller.pauseVideo(),
             startAgoraLive: async () => {

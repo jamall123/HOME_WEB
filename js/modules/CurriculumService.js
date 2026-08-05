@@ -6,7 +6,14 @@
 
 class CurriculumServiceClass {
     constructor() {
-        this.db = firebase.firestore();
+        this._db = null;
+    }
+
+    get db() {
+        if (!this._db) {
+            this._db = firebase.firestore();
+        }
+        return this._db;
     }
 
     /**

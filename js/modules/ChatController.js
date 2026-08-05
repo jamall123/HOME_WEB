@@ -141,7 +141,7 @@ class ChatControllerClass {
             await ChatService.sendMessage(
                 lessonId,
                 this.engine.currentUser.uid,
-                this.engine.currentUser.name,
+                this.engine.currentUser.displayName || this.engine.currentUser.name || 'مستخدم',
                 this.engine.currentUser.role || 'student',
                 text,
                 channel,

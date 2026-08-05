@@ -7,7 +7,8 @@ export const createCourseChat = functions.https.onCall(async (data, context) => 
   SecurityMiddleware.requireAppCheck(context);
   const authContext = AuthMiddleware.requireAuth(context);
   
-  const { lessonId, text, channel } = data;
+  const payload = data.payload || data;
+  const { lessonId, text, channel } = payload;
   if (!lessonId || !text) throw new functions.https.HttpsError('invalid-argument', 'Missing fields.');
 
   try {

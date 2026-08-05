@@ -107,11 +107,11 @@ export const login = functions.https.onCall(async (rawData, context) => {
 
     // Lazily provision a real Firebase Auth account on first server-verified login.
     try {
-      await admin.auth().getUser(uid);
+      await DI.auth.getUser(uid);
     } catch (e) {
-      await admin.auth().createUser({ uid, displayName, disabled: false });
+      await DI.auth.createUser({ uid, displayName, disabled: false });
     }
-    await admin.auth().setCustomUserClaims(uid, { role, courseId: data.courseId || null });
+    await DI.auth.setCustomUserClaims(uid, { role, courseId: data.courseId || null });
 
     // Mirror a real profile doc so the account shows up like any other user.
     await DI.db.collection('users').doc(uid).set({
@@ -136,12 +136,12 @@ export const login = functions.https.onCall(async (rawData, context) => {
       timestamp: new Date(), success: true, correlationId,
     });
 
-    const token = await admin.auth().createCustomToken(uid, { role, courseId: data.courseId || null });
+    const token = await DI.auth.createCustomToken(uid, { role, courseId: data.courseId || null });
 
     return ok({ token, role, courseId: data.courseId || null, displayName, username: credDoc.id }, 'Login verified.', startTime, correlationId);
   } catch (error: any) {
     if (error instanceof functions.https.HttpsError) throw error;
-    DI.logger.error('academy login failed', { error });
+    DI.logger.error('academy login failed', { message: error.message, stack: error.stack });
     throw new functions.https.HttpsError('internal', 'Login failed due to a server error.');
   }
 });

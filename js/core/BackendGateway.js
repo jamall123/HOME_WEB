@@ -5,11 +5,18 @@ const CLIENT_VERSION = '1.0.0';
 
 export class BackendGateway {
   constructor() {
-    this.functions = window.firebase ? window.firebase.app().functions('us-central1') : null;
+    this._functions = null;
     this.offlineQueue = [];
     this.version = API_VERSION;
 
     window.addEventListener('online', this.processOfflineQueue.bind(this));
+  }
+
+  get functions() {
+    if (!this._functions && window.firebase) {
+      this._functions = window.firebase.app().functions('us-central1');
+    }
+    return this._functions;
   }
 
   /**

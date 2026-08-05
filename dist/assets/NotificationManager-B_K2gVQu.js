@@ -2,7 +2,7 @@ import{t as r}from"./rolldown-runtime-BQ-_32WO.js";var l=r({NotificationManager:
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                z-index: 9999;
+                z-index: 999999;
                 display: flex;
                 flex-direction: column;
                 gap: 10px;

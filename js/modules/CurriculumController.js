@@ -167,7 +167,7 @@ class CurriculumControllerClass {
         this.notifyUIRender();
     }
 
-    selectLesson(lessonId) {
+    selectLesson(lessonId, autoResume = false) {
         this.cache.currentLessonId = lessonId;
         this.notifyUIRender();
         
@@ -180,7 +180,7 @@ class CurriculumControllerClass {
 
         if (lesson) {
             import('./EventBus.js').then(({ EventBus, Events }) => {
-                EventBus.emit(Events.PLAY_LECTURE, lesson);
+                EventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
             });
         }
         
@@ -201,24 +201,25 @@ class CurriculumControllerClass {
     async addSection(title) {
         try {
             // Memory Optimistic Update
+            const tempId = 'temp_' + Date.now();
             const newSection = {
-                id: 'temp_' + Date.now(),
+                id: tempId,
                 title: title,
                 courseId: this.courseId,
                 order: this.cache.sections.length,
                 status: 'Draft'
             };
             this.cache.sections.push(newSection);
-            this.cache.lessons[newSection.id] = [];
+            this.cache.lessons[tempId] = [];
             this.notifyUIRender();
 
             // Background Sync
             const docRef = await CurriculumService.addSection(this.courseId, title, newSection.order);
             
-            // Reconcile ID
+            // Reconcile ID: replace temp ID with real ID
             newSection.id = docRef.id;
-            this.cache.lessons[newSection.id] = [];
-            delete this.cache.lessons['temp_' + Date.now()];
+            this.cache.lessons[docRef.id] = this.cache.lessons[tempId] || [];
+            delete this.cache.lessons[tempId];
 
             import('./CurriculumAudit.js').then(async ({ CurriculumAudit }) => {
                 const { AuthService } = await import('./AuthService.js');

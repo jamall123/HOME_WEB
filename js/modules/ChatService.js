@@ -5,8 +5,15 @@
 
 class ChatServiceClass {
     constructor() {
-        this.db = window.firebase.firestore();
+        this._db = null;
         this.unsubscribeFunctions = {};
+    }
+
+    get db() {
+        if (!this._db) {
+            this._db = window.firebase.firestore();
+        }
+        return this._db;
     }
 
     /**
@@ -44,8 +51,8 @@ class ChatServiceClass {
         try {
             const { commandBus } = await import('../core/CommandBus.js');
             await commandBus.dispatch({
-                domain: 'academy',
-                action: 'createCourseChat',
+                domain: 'academy_createCourseChat',
+                action: 'create',
                 payload: {
                     lessonId,
                     userId,

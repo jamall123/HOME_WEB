@@ -45,6 +45,9 @@ class InstructorControllerClass {
         InstructorAnalytics.init(this);
 
         this.isInitialized = true;
+
+        // Restore video management panel if a video was previously uploaded
+        this.restoreVideoManagementPanel();
     }
 
     // --- DELEGATED METHODS (UI -> Controller -> SubManager/Service) ---
@@ -70,10 +73,15 @@ class InstructorControllerClass {
             const file = e.target.files[0];
             if (!file) return;
             
-            // Upload to Firebase Storage
+            // Show loading state
+            const uploadBtn = document.getElementById('btn-video-upload');
+            if (uploadBtn) { uploadBtn.disabled = true; uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...'; }
+            
             try {
-                // We should show a loader in UI ideally
                 const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/videos`);
+                
+                // Store current video URL in Firestore for management
+                await window.firebase.firestore().collection('courses').doc(this.engine.courseId).update({ activeVideoUrl: url });
                 
                 // Once uploaded, set mode and broadcast the video URL
                 await TeachingModes.setMode('video', { 
@@ -83,13 +91,103 @@ class InstructorControllerClass {
                     timestamp: 0
                 });
                 
-                alert('تم رفع الفيديو وتعيينه للعرض بنجاح.');
+                this._showVideoManagementPanel(url, file.name);
+                
             } catch (error) {
                 alert('فشل رفع الفيديو: ' + error.message);
+            } finally {
+                if (uploadBtn) { uploadBtn.disabled = false; uploadBtn.innerHTML = '<i class="fas fa-upload"></i> رفع فيديو'; }
             }
         };
         input.click();
     }
+
+    async deleteVideo() {
+        const courseRef = window.firebase.firestore().collection('courses').doc(this.engine.courseId);
+        try {
+            // Get current video URL from Firestore to delete from Storage
+            const courseDoc = await courseRef.get();
+            const activeVideoUrl = courseDoc.data()?.activeVideoUrl;
+            
+            if (activeVideoUrl) {
+                try {
+                    // Delete file from Firebase Storage
+                    const storageRef = window.firebase.storage().refFromURL(activeVideoUrl);
+                    await storageRef.delete();
+                } catch(e) {
+                    console.warn('[InstructorController] Storage delete failed (may have already been removed):', e.message);
+                }
+            }
+            
+            // Clear from Firestore
+            await courseRef.update({ activeVideoUrl: window.firebase.firestore.FieldValue.delete() });
+            
+            // Reset teaching mode - clear the video
+            await TeachingModes.setMode('video', { isLive: false, videoUrl: null, status: 'paused' });
+            
+            this._hideVideoManagementPanel();
+            
+        } catch (error) {
+            alert('فشل حذف الفيديو: ' + error.message);
+        }
+    }
+
+    async replaceVideo() {
+        // First delete the old one silently, then prompt a new upload
+        const courseRef = window.firebase.firestore().collection('courses').doc(this.engine.courseId);
+        try {
+            const courseDoc = await courseRef.get();
+            const activeVideoUrl = courseDoc.data()?.activeVideoUrl;
+            if (activeVideoUrl) {
+                try {
+                    const storageRef = window.firebase.storage().refFromURL(activeVideoUrl);
+                    await storageRef.delete();
+                } catch(e) {
+                    console.warn('[InstructorController] Old video delete on replace failed:', e.message);
+                }
+            }
+        } catch(e) {
+            // Non-fatal
+        }
+        this.promptVideoUpload();
+    }
+
+    /** Update the UI when a video has been uploaded successfully */
+    _showVideoManagementPanel(url, name) {
+        const panel = document.getElementById('video-management-panel');
+        if (!panel) return;
+        
+        const nameEl = document.getElementById('current-video-name');
+        const previewEl = document.getElementById('current-video-preview');
+        
+        if (nameEl) nameEl.textContent = name || 'فيديو محمّل';
+        if (previewEl) previewEl.src = url;
+        
+        panel.style.display = 'block';
+        panel.style.animation = 'fadeIn 0.3s ease';
+    }
+
+    /** Hide the video management panel (e.g. after deletion) */
+    _hideVideoManagementPanel() {
+        const panel = document.getElementById('video-management-panel');
+        if (panel) panel.style.display = 'none';
+        const previewEl = document.getElementById('current-video-preview');
+        if (previewEl) previewEl.src = '';
+    }
+
+    /** Called on room init to restore the management panel if a video is already set */
+    async restoreVideoManagementPanel() {
+        try {
+            const courseDoc = await window.firebase.firestore().collection('courses').doc(this.engine.courseId).get();
+            const url = courseDoc.data()?.activeVideoUrl;
+            if (url) {
+                this._showVideoManagementPanel(url, 'فيديو محمّل مسبقاً');
+            }
+        } catch(e) {
+            // Non-fatal
+        }
+    }
+
 
     async playVideo() {
         await TeachingModes.setMode('video', { status: 'playing' });

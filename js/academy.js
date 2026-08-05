@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Show instructor tools tab if instructor
-            if (window.currentUser.role === 'instructor') {
+            if (['instructor', 'admin', 'supervisor'].includes(window.currentUser.role)) {
                 const instBtn = document.getElementById('instructor-tab-btn');
                 if (instBtn) instBtn.style.display = 'block';
                 if (typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const userData = userDoc.data();
                     window.currentUser = { name: userData.fullname, role: userData.role };
                     
-                    if (userData.role === 'instructor') {
+                    if (['instructor', 'admin', 'supervisor'].includes(userData.role)) {
                         const instructorTabBtn = document.getElementById('instructor-tab-btn');
                         if (instructorTabBtn) instructorTabBtn.style.display = 'block';
                         if (typeof window.renderSyllabusUI === 'function') window.renderSyllabusUI();
@@ -1279,7 +1279,7 @@ async function loadCourseRoomData() {
         const rooms = window.currentCourseRooms || [];
         const courseId = window.currentCourseId;
         const roomId = window.currentRoomId;
-        const isInstructor = window.currentUser && window.currentUser.role === 'instructor';
+        const isInstructor = window.currentUser && ['instructor', 'admin', 'supervisor'].includes(window.currentUser.role);
 
         let html = '<h3 style="padding:1rem; border-bottom:1px solid rgba(255,255,255,0.05); margin:0;">المنهج والدروس</h3><div style="padding:1rem; display: flex; flex-direction: column; gap: 1rem; position: relative;">';
         
