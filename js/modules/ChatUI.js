@@ -16,7 +16,7 @@ class ChatUIClass {
         this.elements = {
             container: document.getElementById('chat-messages'),
             form: document.getElementById('chat-input-form'),
-            input: document.getElementById('chat-input-field'),
+            input: document.getElementById('chat-input-msg'),
             channelsMenu: document.getElementById('chat-channels-menu'), // hypothetical element
             typingIndicator: document.getElementById('chat-typing-indicator')
         };
@@ -35,6 +35,7 @@ class ChatUIClass {
         
         this.elements.form.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!this.elements.input) return;
             const text = this.elements.input.value.trim();
             if (!text) return;
             
@@ -42,9 +43,17 @@ class ChatUIClass {
             ChatController.sendMessage(text);
         });
 
-        this.elements.input.addEventListener('input', () => {
-            ChatController.handleTyping();
-        });
+        if (this.elements.input) {
+            this.elements.input.addEventListener('input', () => {
+                ChatController.handleTyping();
+            });
+            this.elements.input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.elements.form.dispatchEvent(new Event('submit'));
+                }
+            });
+        }
 
         // Event delegation for channel switching
         document.body.addEventListener('click', (e) => {
