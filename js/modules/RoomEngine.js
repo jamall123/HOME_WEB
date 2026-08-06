@@ -680,7 +680,7 @@ class RoomEngineClass {
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.lastSeen) {
-                        const lastSeenMs = data.lastSeen.toMillis ? data.lastSeen.toMillis() : now;
+                        const lastSeenMs = data.lastSeen.toMillis ? data.lastSeen.toMillis() : (typeof data.lastSeen === 'number' ? data.lastSeen : now);
                         if ((now - lastSeenMs) < 90000) activeCount++;
                     } else {
                         activeCount++; // count if no timestamp yet

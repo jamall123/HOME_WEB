@@ -125,7 +125,7 @@
         /* ── Instructor Mode Workspace Animation ── */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     </style>
-  <script type="module" crossorigin src="/assets/courseRoom-Cj0v1-lP.js"></script>
+  <script type="module" crossorigin src="/assets/courseRoom-CSx45lk7.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
   <link rel="modulepreload" crossorigin href="/assets/ThemeManager-Dt8KBxWK.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-CVzH6vXx.js">
@@ -133,8 +133,8 @@
   <link rel="modulepreload" crossorigin href="/assets/EventBus-C86EHaQu.js">
   <link rel="modulepreload" crossorigin href="/assets/NotificationManager-yG1gWUIM.js">
   <link rel="modulepreload" crossorigin href="/assets/ChatService-B9sSZW3y.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-CfN2hRV3.js">
-  <link rel="stylesheet" crossorigin href="/assets/courseRoom-BawdEAjX.css">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumController-D7rU3xMn.js">
+  <link rel="stylesheet" crossorigin href="/assets/courseRoom-BlpEFrmq.css">
   <link rel="stylesheet" crossorigin href="/assets/sudanFree-CgE2LGLP.css">
 </head>
 <body style="overflow: hidden;"> <!-- Prevent global scrolling in the room layout -->
@@ -310,7 +310,7 @@
                     </div>
 
                     <!-- Live Badge Overlay -->
-                    <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.6); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-en); font-size: 0.8rem; z-index: 10; display: flex; align-items: center; gap: 0.5rem; backdrop-filter: blur(5px);">
+                    <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.6); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); font-family: var(--font-en); font-size: 0.8rem; z-index: 10; display: flex; align-items: center; gap: 0.5rem; backdrop-filter: blur(5px);">
                         <span id="live-badge-dot" style="color: var(--error);"><i class="fas fa-circle" style="font-size: 0.6rem;"></i></span> 
                         <span id="live-badge-text" style="font-weight: bold; letter-spacing: 1px;">OFFLINE</span>
                     </div>
@@ -349,10 +349,10 @@
                     <!-- ── CHANNEL LAYER ── -->
                     <div id="layer-channel" class="renderer-layer">
                         <!-- Header -->
-                        <div class="channel-header">
-                            <i class="fas fa-bullhorn" style="color:#fbbf24;font-size:1.1rem;"></i>
+                        <div class="channel-header" style="justify-content: center; position: relative;">
+                            <i class="fas fa-bullhorn" style="position: absolute; right: 1.2rem; color:#fbbf24;font-size:1.1rem;"></i>
                             <h3 style="margin:0;color:#fbbf24;font-size:1rem;font-weight:bold;">قناة المحاضرة</h3>
-                            <span id="channel-msg-count" style="margin-right:auto;background:rgba(251,191,36,0.15);color:#fbbf24;font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:99px;border:1px solid rgba(251,191,36,0.3);">0 رسالة</span>
+                            <span id="channel-msg-count" style="position: absolute; left: 1.2rem; background:rgba(251,191,36,0.15);color:#fbbf24;font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:99px;border:1px solid rgba(251,191,36,0.3);">0 رسالة</span>
                         </div>
                         <!-- Scrollable feed -->
                         <div id="channel-feed">

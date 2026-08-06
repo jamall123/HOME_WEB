@@ -117,7 +117,7 @@ class PresenceManagerClass {
                 userId: this.engine.currentUser.uid,
                 userName: this.engine.currentUser.displayName || 'طالب',
                 role: this.engine.isInstructor ? 'instructor' : 'student',
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                lastSeen: Date.now(),
                 currentLesson: this.engine.state?.presentation?.videoUrl || null,
                 teachingMode: this.engine.state?.room?.mode || 'video',
                 bandwidthMode: this.engine.state?.network?.lowBandwidth ? 'reduced' : 'normal',
