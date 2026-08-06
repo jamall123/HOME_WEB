@@ -121,6 +121,13 @@ service firebase.storage {
       allow write: if isAdmin() && isAllowedType() && isValidSize();
     }
     
+    // Recordings
+    match /recordings/{courseId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      // Allow any signed in user to upload a recording for now (will be refined later)
+      allow write: if isSignedIn();
+    }
+    
     // Default Block
     match /{allPaths=**} {
       allow read, write: if false;

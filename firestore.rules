@@ -43,6 +43,9 @@ service cloud.firestore {
       match /typing_status/{typingId} {
         allow read, write: if true;
       }
+      match /channelMessages/{msgId} {
+        allow read, write: if true;
+      }
     }
 
     match /enrollments/{enrollmentId} {

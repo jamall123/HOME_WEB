@@ -90,7 +90,7 @@ export const login = functions.https.onCall(async (rawData, context) => {
         // Preserve the legacy lowercase role values ('student'/'instructor') the
         // frontend already checks against, rather than the RBAC enum casing.
         const role = data.role || 'student';
-        const displayName = data.fullname || data.name || credDoc.id;
+        const displayName = data.fullName || data.studentName || (data.student && (data.student.fullName || data.student.name)) || data.fullname || data.name || credDoc.id;
         // Lazily provision a real Firebase Auth account on first server-verified login.
         try {
             await DI.auth.getUser(uid);

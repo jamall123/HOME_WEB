@@ -104,11 +104,23 @@ class ChatUIClass {
             const isSelf = msg.userId === this.engine.currentUser?.uid;
             const isInst = ['instructor', 'admin', 'supervisor'].includes(msg.role);
             
-            // Offline messages show a clock icon
-            const timeStr = msg.isOffline 
-                ? '<i class="fas fa-clock"></i> جار الإرسال...' 
-                : (msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '');
+            let timeStr = '';
+            if (msg.isOffline) {
+                timeStr = '<i class="fas fa-clock"></i> جار الإرسال...';
+            } else if (msg.timestamp) {
+                try {
+                    const dateObj = (typeof msg.timestamp.toDate === 'function') 
+                        ? msg.timestamp.toDate() 
+                        : new Date(msg.timestamp);
+                    timeStr = dateObj.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+                } catch(e) {
+                    timeStr = '';
+                }
+            }
             
+            const reactions = msg.reactions || { like: 0, heart: 0 };
+            const msgId = msg.id || 'unknown';
+
             html += `
                 <div class="chat-message ${msg.isOffline ? 'offline' : ''}" style="align-self: ${isSelf ? 'flex-end' : 'flex-start'}; max-width: 85%;">
                     <div style="font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: center; gap: 0.5rem; justify-content: ${isSelf ? 'flex-end' : 'flex-start'};">
@@ -124,6 +136,16 @@ class ChatUIClass {
                                 border-${isSelf ? 'bottom-left' : 'bottom-right'}-radius: 0;
                                 opacity: ${msg.isOffline ? '0.7' : '1'};">
                         ${msg.text}
+                        ${!msg.isOffline ? `
+                        <div style="display:flex;gap:0.3rem;margin-top:0.4rem;justify-content:${isSelf ? 'flex-end' : 'flex-start'};">
+                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'like')" style="background:rgba(0,0,0,0.15);border:none;color:${isSelf ? '#fff' : '#cbd5e1'};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
+                                👍 <span>${reactions.like > 0 ? reactions.like : ''}</span>
+                            </button>
+                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'heart')" style="background:rgba(0,0,0,0.15);border:none;color:${isSelf ? '#fff' : '#cbd5e1'};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
+                                ❤️ <span>${reactions.heart > 0 ? reactions.heart : ''}</span>
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;

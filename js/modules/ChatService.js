@@ -56,13 +56,27 @@ class ChatServiceClass {
                 payload: {
                     lessonId,
                     userId,
+                    userName,
                     text,
                     channel
                 }
             });
         } catch (error) {
-            console.error("[ChatService] Failed to send message", error);
-            throw new Error('SyncError');
+            console.warn("[ChatService] API failed, falling back to direct Firestore write", error);
+            try {
+                await this.db.collection('course_chats').add({
+                    lessonId,
+                    userId,
+                    userName,
+                    role,
+                    text,
+                    channel: channel || 'general',
+                    timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (fallbackError) {
+                console.error("[ChatService] Fallback also failed", fallbackError);
+                throw new Error('SyncError');
+            }
         }
     }
 

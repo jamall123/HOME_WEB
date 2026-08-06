@@ -23,6 +23,40 @@ export const NotificationManager = {
         this.container = document.getElementById('notification-container');
     },
 
+    async requestBrowserPermission() {
+        if (!("Notification" in window)) {
+            console.warn("This browser does not support desktop notification");
+            return false;
+        }
+        
+        if (Notification.permission === "granted") {
+            return true;
+        }
+        
+        if (Notification.permission !== "denied") {
+            const permission = await Notification.requestPermission();
+            return permission === "granted";
+        }
+        
+        return false;
+    },
+
+    showBrowserNotification(title, options = {}) {
+        if (!("Notification" in window)) return;
+        
+        if (Notification.permission === "granted") {
+            const notification = new Notification(title, {
+                icon: '/images/logo.png', // Assuming a logo exists, or it will fallback
+                ...options
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                this.close();
+            };
+        }
+    },
+
     show(message, type = 'info', duration = 3000) {
         if (!this.container) this.init();
 

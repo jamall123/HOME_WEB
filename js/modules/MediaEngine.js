@@ -234,6 +234,30 @@ export const MediaEngine = {
             document.getElementById('btn-start-agora').style.display = 'none';
             document.getElementById('btn-stop-agora').style.display = 'block';
             
+            // Setup Local Recording
+            try {
+                const audioTrack = this.localTracks.audio.getMediaStreamTrack();
+                const videoTrack = this.localTracks.video.getMediaStreamTrack();
+                const stream = new MediaStream([audioTrack, videoTrack]);
+                
+                this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' });
+                this.recordedChunks = [];
+                
+                this.mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        this.recordedChunks.push(event.data);
+                    }
+                };
+                
+                this.mediaRecorder.start(1000); // chunk every second
+                console.log("[MediaEngine] Local recording started");
+                import('./NotificationManager.js').then(({ NotificationManager }) => {
+                    NotificationManager.show('بدأ تسجيل المحاضرة تلقائياً', 'info');
+                });
+            } catch (recErr) {
+                console.warn("[MediaEngine] Failed to start local recording:", recErr);
+            }
+            
             this.hideLoader();
             alert('تم بدء البث المباشر بنجاح!');
         } catch (error) {
@@ -355,6 +379,29 @@ export const MediaEngine = {
     },
 
     async stopLiveWebRTC(courseId) {
+        // ── 1. Stop the local recording ──────────────────────────────────────────
+        const saveRecording = () => new Promise(resolve => {
+            if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
+                resolve(null);
+                return;
+            }
+            this.mediaRecorder.onstop = async () => {
+                try {
+                    const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+                    this.recordedChunks = [];
+                    resolve(blob);
+                } catch (e) {
+                    console.error('[MediaEngine] Failed to build recording blob:', e);
+                    resolve(null);
+                }
+            };
+            this.mediaRecorder.stop();
+        });
+
+        const recordingBlob = await saveRecording();
+        this.mediaRecorder = null;
+
+        // ── 2. Stop Agora tracks ─────────────────────────────────────────────────
         if (this.localTracks.audio) {
             this.localTracks.audio.close();
             this.localTracks.audio = null;
@@ -367,16 +414,58 @@ export const MediaEngine = {
             await this.agoraClient.leave();
             this.agoraClient = null;
         }
-        
-        const liveDiv = document.getElementById('agora-local-live');
-        if (liveDiv) {
-            liveDiv.style.display = 'none';
-        }
 
-        
+        const liveDiv = document.getElementById('agora-local-live');
+        if (liveDiv) liveDiv.style.display = 'none';
+
         document.getElementById('btn-start-agora').style.display = 'block';
         document.getElementById('btn-stop-agora').style.display = 'none';
-        alert('تم إنهاء البث المباشر.');
+
+        // ── 3. Upload recording and link to current lesson ────────────────────────
+        if (recordingBlob) {
+            import('./NotificationManager.js').then(({ NotificationManager }) => {
+                NotificationManager.show('جاري رفع تسجيل المحاضرة... انتظر لحظة', 'info', 8000);
+            });
+
+            try {
+                const { CurriculumController } = await import('./CurriculumController.js');
+                const lessonId = CurriculumController.cache?.currentLessonId;
+
+                const timestamp = Date.now();
+                const fileName = `recordings/${courseId}/${lessonId || 'unlisted'}/recording_${timestamp}.webm`;
+                const storageRef = window.firebase.storage().ref(fileName);
+
+                await storageRef.put(recordingBlob, { contentType: 'video/webm' });
+                const downloadUrl = await storageRef.getDownloadURL();
+
+                // Attach recording to the lesson document as a resource
+                if (lessonId) {
+                    const db = window.firebase.firestore();
+                    await db.collection('curriculumLessons').doc(lessonId).update({
+                        recordings: window.firebase.firestore.FieldValue.arrayUnion({
+                            url: downloadUrl,
+                            timestamp: timestamp,
+                            label: `تسجيل ${new Date(timestamp).toLocaleDateString('ar-SA')}`
+                        }),
+                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    console.log('[MediaEngine] Recording saved to lesson:', lessonId, downloadUrl);
+                }
+
+                import('./NotificationManager.js').then(({ NotificationManager }) => {
+                    NotificationManager.show('✅ تم حفظ تسجيل المحاضرة ورفعه للطلاب!', 'success', 6000);
+                });
+            } catch (uploadErr) {
+                console.error('[MediaEngine] Failed to upload recording:', uploadErr);
+                import('./NotificationManager.js').then(({ NotificationManager }) => {
+                    NotificationManager.show('⚠️ فشل رفع التسجيل. تحقق من الاتصال.', 'warning', 6000);
+                });
+            }
+        }
+
+        import('./NotificationManager.js').then(({ NotificationManager }) => {
+            NotificationManager.show('تم إنهاء البث المباشر', 'info');
+        });
     },
     
     toggleMic() {

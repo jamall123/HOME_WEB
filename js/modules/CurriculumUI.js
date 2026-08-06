@@ -47,6 +47,14 @@ class CurriculumUIClass {
                 return;
             }
 
+            const viewRecBtn = e.target.closest('.btn-view-recordings');
+            if (viewRecBtn) {
+                e.stopPropagation();
+                const recordings = JSON.parse(viewRecBtn.dataset.recordings || '[]');
+                this.showRecordingsModal(recordings);
+                return;
+            }
+
             const lessonItem = e.target.closest('.curriculum-item');
             if (lessonItem) {
                 const lessonId = lessonItem.dataset.id;
@@ -63,7 +71,40 @@ class CurriculumUIClass {
                 }, 300);
             }
         });
+    }
 
+    showRecordingsModal(recordings) {
+        // Remove existing
+        const existing = document.getElementById('recordings-modal');
+        if (existing) existing.remove();
+
+        const listHtml = recordings.map(rec => `
+            <div style="background:#1e293b;border-radius:10px;overflow:hidden;margin-bottom:0.8rem;">
+                <div style="padding:0.6rem 0.8rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <span style="color:#f1f5f9;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;"><i class="fas fa-video" style="color:#ef4444;"></i> ${rec.label || 'تسجيل'}</span>
+                    <a href="${rec.url}" target="_blank" download style="color:#94a3b8;font-size:0.78rem;text-decoration:none;"><i class="fas fa-download"></i> تحميل</a>
+                </div>
+                <video src="${rec.url}" controls style="width:100%;max-height:240px;display:block;outline:none;background:#000;"></video>
+            </div>
+        `).join('');
+
+        const modal = document.createElement('div');
+        modal.id = 'recordings-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);padding:1rem;';
+        modal.innerHTML = `
+            <div style="background:linear-gradient(145deg,#0f172a,#1e293b);border:1px solid rgba(255,255,255,0.08);border-radius:18px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+                    <h3 style="margin:0;color:#f1f5f9;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-circle" style="color:#ef4444;font-size:0.7rem;"></i> تسجيلات المحاضرة</h3>
+                    <button onclick="document.getElementById('recordings-modal').remove()" style="background:rgba(255,255,255,0.06);border:none;color:#94a3b8;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button>
+                </div>
+                ${listHtml || '<p style="color:#94a3b8;text-align:center;">لا توجد تسجيلات متاحة</p>'}
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }
+
+    attachSearchListener() {
         // Search Listener (Debounced)
         if (this.elements.searchInput) {
             let timeout = null;
@@ -79,6 +120,7 @@ class CurriculumUIClass {
         if (this.isInstructor) {
             this.setupDragAndDrop();
         }
+        this.attachSearchListener();
     }
 
     setupDragAndDrop() {
@@ -182,15 +224,19 @@ class CurriculumUIClass {
             sectionLessons.forEach(lesson => {
                 const handler = LessonRegistry.getHandler(lesson.type);
                 const isActive = state.currentLessonId === lesson.id;
-                
+                const hasRecordings = lesson.recordings && lesson.recordings.length > 0;
                 const isInstructor = this.isInstructor;
+
                 html += `
-                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
+                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;">
+                        <div style="display:flex;align-items:center;flex:1;min-width:0;">
                             <i class="fas ${handler.icon}"></i>
-                            <span style="margin-right: 8px;">${lesson.title}</span>
+                            <span style="margin-right: 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lesson.title}</span>
                         </div>
-                        ${isInstructor ? `<button class="btn btn-icon btn-edit-lesson" data-id="${lesson.id}" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fas fa-edit"></i></button>` : ''}
+                        <div style="display:flex;align-items:center;gap:0.3rem;flex-shrink:0;">
+                            ${hasRecordings ? `<button class="btn-view-recordings" data-id="${lesson.id}" data-recordings='${JSON.stringify(lesson.recordings)}' title="مشاهدة التسجيلات" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:0.15rem 0.5rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-circle" style="color:#ef4444;font-size:0.5rem;"></i>تسجيل</button>` : ''}
+                            ${isInstructor ? `<button class="btn btn-icon btn-edit-lesson" data-id="${lesson.id}" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fas fa-edit"></i></button>` : ''}
+                        </div>
                     </div>
                 `;
             });

@@ -240,3 +240,26 @@ class ChatControllerClass {
 }
 
 export const ChatController = new ChatControllerClass();
+
+window.ChatAPI = {
+    toggleReaction: async (msgId, reactionType) => {
+        try {
+            const db = window.firebase.firestore();
+            const msgRef = db.collection('course_chats').doc(msgId);
+            
+            await db.runTransaction(async (transaction) => {
+                const doc = await transaction.get(msgRef);
+                if (!doc.exists) return;
+                
+                const data = doc.data();
+                const reactions = data.reactions || { like: 0, heart: 0 };
+                
+                reactions[reactionType] = (reactions[reactionType] || 0) + 1;
+                
+                transaction.update(msgRef, { reactions: reactions });
+            });
+        } catch (error) {
+            console.error("Error toggling chat reaction:", error);
+        }
+    }
+};

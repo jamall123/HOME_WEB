@@ -66,8 +66,22 @@ class RoomEngineClass {
         }
 
         this.courseId = courseId;
+        
+        // Request browser notifications permissions silently
+        NotificationManager.requestBrowserPermission().catch(() => {});
+
         this.currentUser = AuthService.getCurrentUser();
         
+        // If academy.js populated window.currentUser during unified login, use it to ensure we get the real name
+        if (window.currentUser) {
+            this.currentUser = {
+                ...this.currentUser,
+                displayName: window.currentUser.name,
+                name: window.currentUser.name,
+                username: window.currentUser.username
+            };
+        }
+
         if (!this.currentUser) {
             console.error("[RoomEngine] Fatal: Unauthenticated user.");
             return;
@@ -167,10 +181,28 @@ class RoomEngineClass {
                 this.currentUser = { 
                     uid: this.currentUser.uid, 
                     email: this.currentUser.email, 
-                    displayName: this.currentUser.displayName,
                     ...this.currentUser, 
-                    ...userData 
+                    ...userData,
+                    // Preserve the displayName if we already fetched the real name from window.currentUser
+                    displayName: this.currentUser.displayName || userData.displayName
                 };
+
+                // Fetch real name from courses_credentials if available
+                if (userData.legacyCredentialId) {
+                    try {
+                        const credDoc = await window.firebase.firestore().collection('courses_credentials').doc(userData.legacyCredentialId).get();
+                        if (credDoc.exists) {
+                            const credData = credDoc.data();
+                            const realName = credData.fullName || credData.studentName || credData.fullname || (credData.student && (credData.student.fullName || credData.student.name)) || credData.name;
+                            if (realName) {
+                                this.currentUser.displayName = realName;
+                                this.currentUser.name = realName;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn("[RoomEngine] Could not fetch real name from credentials", err);
+                    }
+                }
                 return ['instructor', 'admin', 'supervisor'].includes(userData.role);
             }
         } catch(e) {
@@ -587,6 +619,12 @@ class RoomEngineClass {
                         }
                     });
 
+                    // Trigger notification if live stream just started
+                    if (this.state.room.isLive && !this._wasLive && !this.isInstructor) {
+                        NotificationManager.showBrowserNotification('بدأ البث المباشر', { body: 'المدرب متصل الآن، انضم للمشاهدة!' });
+                    }
+                    this._wasLive = this.state.room.isLive;
+
                     // Force student Curriculum to match instructor's active lesson
                     if (!this.isInstructor && data.lessonId) {
                         import('./CurriculumController.js').then(({ CurriculumController }) => {
@@ -608,10 +646,17 @@ class RoomEngineClass {
             .orderBy('timestamp', 'asc')
             .onSnapshot(snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
+                    if (change.type === 'added' || change.type === 'modified') {
                         const data = change.doc.data();
-                        TeachingRenderer.renderChannelMessage(data);
+                        TeachingRenderer.renderChannelMessage(data, change.doc.id);
                         
+                        // Send notification for new messages if the tab is not in focus
+                        if (change.type === 'added' && Date.now() - data.timestamp < 10000 && !document.hasFocus() && !this.isInstructor) {
+                            let notifBody = 'مرفق جديد';
+                            if (data.type === 'text') notifBody = data.content;
+                            NotificationManager.showBrowserNotification('رسالة جديدة في القناة', { body: notifBody });
+                        }
+
                         this.updateState({
                             presentation: {
                                 lastChannelMessage: data
@@ -688,5 +733,29 @@ class RoomEngineClass {
 // Export singleton instance
 export const RoomEngine = new RoomEngineClass();
 
-// Bind to window for global inline handlers if strictly necessary (legacy support)
+// Bind to window for global inline handlers
 window.RoomEngine = RoomEngine;
+window.RoomAPI = {
+    toggleReaction: async (msgId, reactionType) => {
+        try {
+            if (!RoomEngine.courseId) return;
+            const db = window.firebase.firestore();
+            const msgRef = db.collection('courses').doc(RoomEngine.courseId).collection('channelMessages').doc(msgId);
+            
+            await db.runTransaction(async (transaction) => {
+                const doc = await transaction.get(msgRef);
+                if (!doc.exists) return;
+                
+                const data = doc.data();
+                const reactions = data.reactions || { like: 0, heart: 0 };
+                
+                // For simplicity, just increment (or we could store user IDs to toggle properly)
+                reactions[reactionType] = (reactions[reactionType] || 0) + 1;
+                
+                transaction.update(msgRef, { reactions: reactions });
+            });
+        } catch (error) {
+            console.error("Error toggling reaction:", error);
+        }
+    }
+};
