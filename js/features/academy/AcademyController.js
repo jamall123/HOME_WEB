@@ -282,3 +282,4 @@ export class AcademyController {
 
 export const academyController = new AcademyController();
 window.academyController = academyController; // Expose globally for inline onclick handlers temporarily
+window.openModal = academyController.openModal.bind(academyController); // Required for inline onclick="openModal('...')" in course cards

@@ -501,7 +501,7 @@
                 try {
                     const { claims } = await user.getIdTokenResult();
                     if (claims.courseId && claims.courseId !== courseId) {
-                        await AuthService.logout();
+                        await AuthController.logout();
                         NotificationManager.show('عذراً، هذا الحساب غير مصرح له بدخول هذه الدورة.', 'error');
                         return;
                     }
@@ -526,7 +526,7 @@
             }
 
             try {
-                await AuthService.login(email, pass, courseId);
+                await AuthController.login(email, pass, courseId);
             } catch (err) {
                 console.error('Login failed:', err);
                 NotificationManager.show(err.message || 'بيانات الدخول غير صحيحة.', 'error');
