@@ -10,6 +10,59 @@ export class AcademyController {
     async init() {
         await this.renderCourses();
         this.setupFiltering();
+        this._setupModalCloseHandlers();
+    }
+
+    _setupModalCloseHandlers() {
+        // Course modal — X button
+        const courseModal = document.getElementById('course-modal');
+        if (courseModal) {
+            const closeBtn = courseModal.querySelector('.close-modal');
+            if (closeBtn) closeBtn.addEventListener('click', () => this.closeModal());
+            // Click outside modal content to close
+            courseModal.addEventListener('click', (e) => {
+                if (e.target === courseModal) this.closeModal();
+            });
+        }
+
+        // Instructor modal — X button
+        const instructorModal = document.getElementById('instructor-modal');
+        if (instructorModal) {
+            const closeBtn = instructorModal.querySelector('.close-instructor-modal');
+            if (closeBtn) closeBtn.addEventListener('click', () => this.closeInstructorModal());
+            instructorModal.addEventListener('click', (e) => {
+                if (e.target === instructorModal) this.closeInstructorModal();
+            });
+        }
+
+        // Enrollment modal — X button + close-enrollment-modal buttons
+        const enrollmentModal = document.getElementById('enrollment-modal');
+        if (enrollmentModal) {
+            const closeEnrollmentBtn = enrollmentModal.querySelector('.close-enrollment-modal');
+            if (closeEnrollmentBtn) {
+                closeEnrollmentBtn.addEventListener('click', () => {
+                    enrollmentModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            }
+            // All .close-enrollment-modal buttons (success/error states)
+            enrollmentModal.querySelectorAll('.close-enrollment-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    enrollmentModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            });
+        }
+
+        // ESC key closes any open modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeModal();
+                this.closeInstructorModal();
+                const em = document.getElementById('enrollment-modal');
+                if (em) { em.classList.remove('active'); document.body.style.overflow = 'auto'; }
+            }
+        });
     }
 
     async renderCourses() {
