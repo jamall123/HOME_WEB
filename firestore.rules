@@ -118,7 +118,7 @@ service cloud.firestore {
     // ── Users ────────────────────────────────────────────────────────────────
     match /users/{userId} {
       allow read: if request.auth.uid == userId || isAdmin();
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // ── Contact / Messages ───────────────────────────────────────────────────

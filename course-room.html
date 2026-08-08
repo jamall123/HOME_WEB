@@ -430,7 +430,13 @@
     
     <!-- Phase 5 WebRTC integration: Agora SDK loaded as global (stream-core.js = renamed AgoraRTC SDK) -->
     <script src="/js/stream-core.js"></script>
-    <script type="module" src="js/academy.js"></script>
+    <script type="module">
+        import { courseRoomController } from './js/features/academy/CourseRoomController.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            courseRoomController.init();
+        });
+    </script>
 
     <!-- New ES Modules Architecture (Phase 3 Integration) -->
     <script>
@@ -457,10 +463,24 @@
         };
     </script>
     <script type="module">
-        import { AuthService } from './js/modules/AuthService.js';
-        import { RoomEngine } from './js/modules/RoomEngine.js';
-        import { NotificationManager } from './js/modules/NotificationManager.js';
-        import { EventBus, Events } from './js/modules/EventBus.js';
+        import { AuthController } from './js/features/auth/AuthController.js';
+        import { AuthUI } from './js/features/auth/AuthUI.js';
+        import { UserUI } from './js/features/user/UserUI.js';
+        import { PresenceUI } from './js/features/presence/PresenceUI.js';
+        import { PresenceController } from './js/features/presence/PresenceController.js';
+        import { RoomEngine } from './js/features/room/RoomController.js';
+        import { NotificationManager } from './js/features/global/NotificationManager.js';
+        import { eventBus as EventBus, Events } from './js/core/EventBus.js';
+        import { stateStore as StateStore } from './js/core/StateStore.js';
+
+        window.StateStore = StateStore;
+        window.EventBus = EventBus;
+        window.Events = Events;
+        window.PresenceUI = PresenceUI;
+        window.PresenceController = PresenceController;
+        
+        AuthUI.init();
+        UserUI.init();
 
         function resetLoginButton(btn) {
             if (!btn) return;

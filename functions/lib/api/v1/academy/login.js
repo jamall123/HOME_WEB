@@ -113,13 +113,19 @@ export const login = functions.https.onCall(async (rawData, context) => {
             lastLogin: new Date().toISOString(),
             loginCount: (data.loginCount || 0) + 1,
         });
-        await DI.db.collection('auditLogs').add({
+        const auditData = {
             action: 'LOGIN', collection: 'courses_credentials',
             targetId: credDoc.id, performedBy: uid,
             description: `Legacy credential login for ${credDoc.id}, migrated to real Auth uid ${uid}`,
-            timestamp: new Date(), success: true, correlationId,
-        });
-        const token = await DI.auth.createCustomToken(uid, { role, courseId: data.courseId || null });
+            timestamp: new Date(), success: true,
+        };
+        if (correlationId)
+            auditData.correlationId = correlationId;
+        await DI.db.collection('auditLogs').add(auditData);
+        const claims = { role };
+        if (data.courseId)
+            claims.courseId = data.courseId;
+        const token = await DI.auth.createCustomToken(uid, claims);
         return ok({ token, role, courseId: data.courseId || null, displayName, username: credDoc.id }, 'Login verified.', startTime, correlationId);
     }
     catch (error) {

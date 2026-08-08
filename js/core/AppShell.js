@@ -13,9 +13,9 @@ import { EnterpriseHeader } from '../components/EnterpriseHeader.js';
 import { Workspace } from '../components/Workspace.js';
 
 // Subsystems
-import { CMSManager } from '../modules/CMSManager.js';
-import { MediaManager } from '../modules/MediaManager.js';
-import { AdminController } from '../modules/AdminController.js';
+import { CMSManager } from '../features/admin/index.js';
+import { MediaManager } from '../features/media/MediaManager.js';
+import { AdminController } from '../features/admin/index.js';
 
 export class AppShell {
     constructor() {

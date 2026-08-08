@@ -1,1 +1,0 @@
-var a={logEvent(e,r){try{firebase.firestore().collection("curriculumAnalytics").add({event:e,data:r,timestamp:firebase.firestore.FieldValue.serverTimestamp()})}catch{}}};export{a as CurriculumAnalytics};

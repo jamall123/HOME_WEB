@@ -56,8 +56,8 @@ export class EnterpriseSidebar {
         const toggleBtn = this.container.querySelector('#btn-toggle-sidebar');
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
-                const collapsed = !stateStore.get('sidebarCollapsed');
-                stateStore.set('sidebarCollapsed', collapsed);
+                const collapsed = !stateStore.getState('sidebarCollapsed');
+                stateStore.setState({ sidebarCollapsed: collapsed });
                 this.container.querySelector('.enterprise-sidebar').classList.toggle('collapsed', collapsed);
             });
         }
@@ -97,7 +97,7 @@ export class EnterpriseSidebar {
             this.navContainer.appendChild(groupEl);
         });
 
-        this.updateActiveState(stateStore.get('currentRoute'));
+        this.updateActiveState(stateStore.getState('currentRoute'));
     }
 
     updateActiveState(route) {

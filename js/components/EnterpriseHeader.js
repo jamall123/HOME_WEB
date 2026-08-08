@@ -42,9 +42,9 @@ export class EnterpriseHeader {
         const themeBtn = this.container.querySelector('#btn-theme-toggle');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => {
-                const isDark = stateStore.get('theme') === 'dark';
+                const isDark = stateStore.getState('theme') === 'dark';
                 const newTheme = isDark ? 'light' : 'dark';
-                stateStore.set('theme', newTheme);
+                stateStore.setState({ theme: newTheme });
                 themeBtn.innerHTML = newTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
                 document.body.setAttribute('data-theme', newTheme);
             });

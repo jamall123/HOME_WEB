@@ -386,8 +386,13 @@
     <script type="module" src="js/firebase-config.js"></script>
     
     <script type="module" src="js/animations.js"></script>
-    <script type="module" src="js/modules/GlobalController.js"></script>
-    <script type="module" src="js/modules/RegistrationEngine.js"></script>
-    <script type="module" src="js/academy.js"></script>
+    <script type="module" src="js/features/global/GlobalController.js"></script>
+    <script type="module">
+        import { academyController } from './js/features/academy/AcademyController.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            academyController.init();
+        });
+    </script>
 </body>
 </html>

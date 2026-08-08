@@ -1,4 +1,5 @@
 import { AppError, ErrorCategory } from './AppError.js';
+import { FirebaseManager } from './FirebaseManager.js';
 
 const API_VERSION = 'v1';
 const CLIENT_VERSION = '1.0.0';
@@ -13,8 +14,8 @@ export class BackendGateway {
   }
 
   get functions() {
-    if (!this._functions && window.firebase) {
-      this._functions = window.firebase.app().functions('us-central1');
+    if (!this._functions) {
+      this._functions = FirebaseManager.getFunctions();
     }
     return this._functions;
   }

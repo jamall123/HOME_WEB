@@ -32,7 +32,7 @@ export class Router {
         if (this.currentRoute === route) return;
         
         this.currentRoute = route;
-        stateStore.set('currentRoute', route);
+        stateStore.setState({ currentRoute: route });
         
         // Update URL hash without triggering hashchange again
         if (window.location.hash !== `#${route}`) {

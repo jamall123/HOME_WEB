@@ -4,8 +4,8 @@
  * Used for Final QA Certification.
  */
 
-import { Logger } from '../modules/Logger.js';
-import { OfflineSyncEngine } from '../modules/OfflineSyncEngine.js';
+import { Logger } from '../core/Logger.js';
+import { OfflineSyncEngine } from '../features/offline/OfflineSyncEngine.js';
 
 export class LoadTesterClass {
     async runStressTest() {

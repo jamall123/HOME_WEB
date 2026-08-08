@@ -1,0 +1,45 @@
+/**
+ * ProgressManager.js
+ * Master entry point for Phase 9 Enterprise Analytics and Progress Tracking.
+ */
+
+import { ProgressController } from './ProgressController.js';
+
+export class ProgressManagerClass {
+    constructor() {
+        this.engine = null;
+        this.activityTimer = null;
+    }
+
+    init(engine) {
+        this.engine = engine;
+        ProgressController.init(engine);
+
+        // Track live activity dynamically
+        this.startActivityTracking();
+
+        // Boot specific UI based on role
+        if (this.engine.isInstructor) {
+            import('../instructor/InstructorAnalyticsUI.js').then(({ InstructorAnalyticsUI }) => {
+                InstructorAnalyticsUI.init(this.engine);
+            });
+        } else {
+            import('./StudentProgressUI.js').then(({ StudentProgressUI }) => {
+                StudentProgressUI.init(this.engine);
+            });
+        }
+    }
+
+    startActivityTracking() {
+        if (this.activityTimer) clearInterval(this.activityTimer);
+        // Ping every minute to track session attendance internally
+        this.activityTimer = setInterval(() => {
+            ProgressController.logUserActivity();
+        }, 60000);
+    }
+
+    destroy() {
+        if (this.activityTimer) clearInterval(this.activityTimer);
+    }
+}
+export const ProgressManager = new ProgressManagerClass();
