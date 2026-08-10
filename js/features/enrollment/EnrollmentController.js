@@ -544,7 +544,7 @@ export const EnrollmentController = {
 
         } catch (error) {
             console.error('Final submission failed:', error);
-            this.showError('فشل التسجيل', 'لم نتمكن من حفظ بياناتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مجدداً.');
+            this.showError('فشل التسجيل', `لم نتمكن من حفظ بياناتك. (${error.message || error.code || 'خطأ غير معروف'})`);
         }
     },
 

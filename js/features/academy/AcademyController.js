@@ -8,6 +8,7 @@ export class AcademyController {
     }
 
     async init() {
+        EnrollmentController.init(); // Must be called before openEnrollment() can work
         await this.renderCourses();
         this.setupFiltering();
         this._setupModalCloseHandlers();
