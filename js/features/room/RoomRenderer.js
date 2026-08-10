@@ -72,43 +72,35 @@ export class RoomRenderer {
             if (state.room.mode === 'video' && state.presentation.videoUrl) {
                 const playerVideo = document.getElementById('player-video');
                 if (playerVideo) {
-                    playerVideo.controls = this.isInstructor; // Instructor has controls, student does not
+                    playerVideo.controls = false; // Instructor must use the synced side-panel controls
                     if (playerVideo.getAttribute('src') !== state.presentation.videoUrl) {
                         playerVideo.src = state.presentation.videoUrl;
                         playerVideo.setAttribute('src', state.presentation.videoUrl);
                         playerVideo.load();
                     }
                     
-                    if (!this.isInstructor) {
-                        const timestamp = state.presentation.timestamp || 0;
-                        const updatedAtObj = state.presentation.updatedAt;
-                        const updatedAt = updatedAtObj && typeof updatedAtObj.toMillis === 'function' ? updatedAtObj.toMillis() : Date.now();
-                        
-                        let effectiveTimestamp = timestamp;
-                        if (state.presentation.status === 'playing') {
-                            const elapsed = (Date.now() - updatedAt) / 1000;
-                            effectiveTimestamp = timestamp + Math.max(0, elapsed);
-                        }
-                        
-                        const drift = Math.abs(playerVideo.currentTime - effectiveTimestamp);
-                        
-                        // Force jump if drift is larger than 1.5s
-                        if (drift > 1.5) {
-                            playerVideo.currentTime = effectiveTimestamp;
-                        }
-                        
-                        if (state.presentation.status === 'playing' && playerVideo.paused) {
-                            playerVideo.play().catch(e => console.warn('Student video playback prevented by browser', e));
-                        } else if (state.presentation.status === 'paused' && !playerVideo.paused) {
-                            playerVideo.pause();
-                        }
-                    } else {
-                        // Instructor video syncing handled in InstructorController
-                        if (state.presentation.status === 'playing' && playerVideo.paused) {
-                            playerVideo.play().catch(e => console.warn('Instructor video playback prevented', e));
-                        } else if (state.presentation.status === 'paused' && !playerVideo.paused) {
-                            playerVideo.pause();
-                        }
+                    // Apply synchronization logic for EVERYONE (including the instructor's main video)
+                    const timestamp = state.presentation.timestamp || 0;
+                    const updatedAtObj = state.presentation.updatedAt;
+                    const updatedAt = updatedAtObj && typeof updatedAtObj.toMillis === 'function' ? updatedAtObj.toMillis() : Date.now();
+                    
+                    let effectiveTimestamp = timestamp;
+                    if (state.presentation.status === 'playing') {
+                        const elapsed = (Date.now() - updatedAt) / 1000;
+                        effectiveTimestamp = timestamp + Math.max(0, elapsed);
+                    }
+                    
+                    const drift = Math.abs(playerVideo.currentTime - effectiveTimestamp);
+                    
+                    // Force jump if drift is larger than 1.5s
+                    if (drift > 1.5) {
+                        playerVideo.currentTime = effectiveTimestamp;
+                    }
+                    
+                    if (state.presentation.status === 'playing' && playerVideo.paused) {
+                        playerVideo.play().catch(e => console.warn('Video playback prevented', e));
+                    } else if (state.presentation.status === 'paused' && !playerVideo.paused) {
+                        playerVideo.pause();
                     }
                 }
             }
