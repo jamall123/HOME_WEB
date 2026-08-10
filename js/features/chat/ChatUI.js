@@ -17,8 +17,8 @@ class ChatUIClass {
         this.elements = {
             container: document.getElementById('chat-messages'),
             form: document.getElementById('chat-input-form'),
-            input: document.getElementById('chat-input-msg'),
-            channelsMenu: document.getElementById('chat-channels-menu'), // hypothetical element
+            input: document.getElementById('chat-input-field'),
+            channelsMenu: document.getElementById('chat-channels-menu'),
             typingIndicator: document.getElementById('chat-typing-indicator')
         };
         
