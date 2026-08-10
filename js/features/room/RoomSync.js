@@ -35,6 +35,8 @@ export class RoomSync {
                     presentation: {
                         videoUrl: (data.metadata && data.metadata.videoUrl) || data.videoUrl,
                         status: (data.metadata && data.metadata.status) || 'playing',
+                        timestamp: (data.metadata && data.metadata.timestamp) || 0,
+                        updatedAt: data.updatedAt || null,
                         currentSlideUrl: (data.metadata && data.metadata.currentSlideUrl) || data.currentSlideUrl,
                         slides: (data.metadata && data.metadata.slides) || [],
                         layout: (data.metadata && data.metadata.layout) || 'slides-layout-1',

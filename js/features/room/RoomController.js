@@ -134,11 +134,8 @@ class RoomControllerClass {
 
     async loadInstructorInfo() {
         try {
-            const { FirebaseManager } = await import('../../core/FirebaseManager.js');
-            const db = FirebaseManager.getFirestore();
-            const courseDoc = await db.collection('courses').doc(this.courseId).get();
-            if (!courseDoc.exists) return;
-            const courseData = courseDoc.data();
+            const courseData = await CourseRepository.getCourse(this.courseId);
+            if (!courseData) return;
             const instructorId = courseData.instructorId || courseData.createdBy || courseData.uid;
             if (!instructorId) return;
 

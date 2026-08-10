@@ -168,10 +168,49 @@ class InstructorControllerClass {
         const previewEl = document.getElementById('current-video-preview');
         
         if (nameEl) nameEl.textContent = name || 'فيديو محمّل';
-        if (previewEl) previewEl.src = url;
+        if (previewEl) {
+            previewEl.src = url;
+            this._attachVideoSyncListeners(previewEl);
+        }
         
         panel.style.display = 'block';
         panel.style.animation = 'fadeIn 0.3s ease';
+    }
+
+    _attachVideoSyncListeners(videoEl) {
+        this._removeVideoSyncListeners(videoEl); // Clean up if existing
+        
+        // Cache bound handlers so we can remove them later
+        this._videoHandlers = {
+            play: () => TeachingModes.setMode('video', { status: 'playing', timestamp: videoEl.currentTime }),
+            pause: () => TeachingModes.setMode('video', { status: 'paused', timestamp: videoEl.currentTime }),
+            seeked: () => TeachingModes.setMode('video', { timestamp: videoEl.currentTime }), // Preserve status, just update time
+            timeupdate: (() => {
+                let lastTime = 0;
+                return () => {
+                    const now = Date.now();
+                    // Throttle updates to every 2 seconds during playback
+                    if (now - lastTime > 2000 && !videoEl.paused) {
+                        TeachingModes.setMode('video', { status: 'playing', timestamp: videoEl.currentTime });
+                        lastTime = now;
+                    }
+                };
+            })()
+        };
+
+        videoEl.addEventListener('play', this._videoHandlers.play);
+        videoEl.addEventListener('pause', this._videoHandlers.pause);
+        videoEl.addEventListener('seeked', this._videoHandlers.seeked);
+        videoEl.addEventListener('timeupdate', this._videoHandlers.timeupdate);
+    }
+
+    _removeVideoSyncListeners(videoEl) {
+        if (!videoEl || !this._videoHandlers) return;
+        videoEl.removeEventListener('play', this._videoHandlers.play);
+        videoEl.removeEventListener('pause', this._videoHandlers.pause);
+        videoEl.removeEventListener('seeked', this._videoHandlers.seeked);
+        videoEl.removeEventListener('timeupdate', this._videoHandlers.timeupdate);
+        this._videoHandlers = null;
     }
 
     /** Hide the video management panel (e.g. after deletion) */
@@ -179,7 +218,7 @@ class InstructorControllerClass {
         const panel = document.getElementById('video-management-panel');
         if (panel) panel.style.display = 'none';
         const previewEl = document.getElementById('current-video-preview');
-        if (previewEl) previewEl.src = '';
+        this._removeVideoSyncListeners(previewEl);
     }
 
     /** Called on room init to restore the management panel if a video is already set */
@@ -197,11 +236,13 @@ class InstructorControllerClass {
 
 
     async playVideo() {
-        await TeachingModes.setMode('video', { status: 'playing' });
+        const previewEl = document.getElementById('current-video-preview');
+        if (previewEl) previewEl.play().catch(e => console.warn('Play prevented', e));
     }
 
     async pauseVideo() {
-        await TeachingModes.setMode('video', { status: 'paused' });
+        const previewEl = document.getElementById('current-video-preview');
+        if (previewEl) previewEl.pause();
     }
 
     async startAgoraLive() {
@@ -704,6 +745,8 @@ class InstructorControllerClass {
             this.activeSessionsUnsubscribe();
             this.activeSessionsUnsubscribe = null;
         }
+        const previewEl = document.getElementById('current-video-preview');
+        this._removeVideoSyncListeners(previewEl);
         this.isInitialized = false;
         this.engine = null;
     }
