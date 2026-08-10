@@ -519,7 +519,40 @@ class InstructorControllerClass {
                         sampleRate: 44100
                     }
                 });
-                this.mediaRecorder = new MediaRecorder(this.audioStream);
+                
+                // --- Audio Processing Engine ---
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.audioCtx = new AudioContext();
+                const source = this.audioCtx.createMediaStreamSource(this.audioStream);
+
+                // 1. Highpass Filter: Remove low-frequency hum/rumble (air conditioner, wind)
+                const highpass = this.audioCtx.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.value = 85; 
+
+                // 2. Lowpass Filter: Remove high-frequency hiss
+                const lowpass = this.audioCtx.createBiquadFilter();
+                lowpass.type = 'lowpass';
+                lowpass.frequency.value = 9000;
+
+                // 3. Compressor: Level out voice volume (make quiet parts louder, prevent loud distortion)
+                const compressor = this.audioCtx.createDynamicsCompressor();
+                compressor.threshold.value = -40; // DB threshold
+                compressor.knee.value = 30;
+                compressor.ratio.value = 10;
+                compressor.attack.value = 0.005;
+                compressor.release.value = 0.1;
+
+                // Connect the chain: Source -> Highpass -> Lowpass -> Compressor -> Destination
+                source.connect(highpass);
+                highpass.connect(lowpass);
+                lowpass.connect(compressor);
+
+                const destination = this.audioCtx.createMediaStreamDestination();
+                compressor.connect(destination);
+
+                // Use the processed stream for recording
+                this.mediaRecorder = new MediaRecorder(destination.stream);
                 this.audioChunks = [];
 
                 this.mediaRecorder.ondataavailable = (event) => {
@@ -564,6 +597,11 @@ class InstructorControllerClass {
             }
         } else {
             this.mediaRecorder.stop();
+            this.audioStream.getTracks().forEach(track => track.stop());
+            if (this.audioCtx) {
+                this.audioCtx.close().catch(e => console.warn(e));
+                this.audioCtx = null;
+            }
             this.isRecordingVoice = false;
             btn.innerHTML = '<i class="fas fa-microphone"></i> تسجيل صوتي';
             btn.classList.replace('btn-danger', 'btn-dark');
