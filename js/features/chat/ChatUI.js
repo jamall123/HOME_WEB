@@ -155,12 +155,12 @@ class ChatUIClass {
                         ${!msg.isOptimistic ? `
                         <div style="display:flex;gap:0.3rem;margin-top:0.4rem;justify-content:${isSelf ? 'flex-end' : 'flex-start'};">
                             <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'like')"
-                                style="background:${userLiked ? 'rgba(99,102,241,0.35)' : 'rgba(0,0,0,0.15)'};border:${userLiked ? '1px solid rgba(99,102,241,0.6)' : 'none'};color:${userLiked ? '#a5b4fc' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
-                                👍 <span>${likeCount > 0 ? likeCount : ''}</span>
+                                style="background:${userLiked ? 'rgba(34,197,94,0.25)' : 'rgba(0,0,0,0.15)'};border:${userLiked ? '1px solid rgba(34,197,94,0.5)' : 'none'};color:${userLiked ? '#86efac' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.2rem 0.6rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;">
+                                👍 <span>فهمت ${likeCount > 0 ? '('+likeCount+')' : ''}</span>
                             </button>
                             <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'heart')"
-                                style="background:${userHearted ? 'rgba(239,68,68,0.25)' : 'rgba(0,0,0,0.15)'};border:${userHearted ? '1px solid rgba(239,68,68,0.5)' : 'none'};color:${userHearted ? '#fca5a5' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
-                                ❤️ <span>${heartCount > 0 ? heartCount : ''}</span>
+                                style="background:${userHearted ? 'rgba(239,68,68,0.25)' : 'rgba(0,0,0,0.15)'};border:${userHearted ? '1px solid rgba(239,68,68,0.5)' : 'none'};color:${userHearted ? '#fca5a5' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.2rem 0.6rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;">
+                                👎 <span>لم أفهم ${heartCount > 0 ? '('+heartCount+')' : ''}</span>
                             </button>
                         </div>
                         ` : ''}
