@@ -1,5 +1,5 @@
 import { EnrollmentRepository } from '../../repositories/EnrollmentRepository.js';
-import { BackendGateway } from '../../core/BackendGateway.js';
+import { backendGateway } from '../../core/BackendGateway.js';
 
 export const EnrollmentController = {
     // State
@@ -533,7 +533,7 @@ export const EnrollmentController = {
                 }
             };
 
-            await BackendGateway.execute({
+            await backendGateway.execute({
                 domain: 'academy_enrollments',
                 action: 'request',
                 entity: undefined,

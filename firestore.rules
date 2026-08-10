@@ -148,6 +148,9 @@ service cloud.firestore {
     // ── System ───────────────────────────────────────────────────────────────
     match /system_config/{docId} { allow read: if true; allow write: if false; }
     match /subscriptions/{subId} { allow read, write: if false; }
+    // Idempotency & Rate Limiting: only Cloud Functions (admin SDK) write to these
+    match /system_idempotency/{docId} { allow read, write: if false; }
+    match /system_rate_limits/{docId} { allow read, write: if false; }
 
     // (pageContent admin write handled above under CMS section)
 
