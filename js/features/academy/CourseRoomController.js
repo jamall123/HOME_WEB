@@ -113,6 +113,35 @@ export class CourseRoomController {
                 }
             });
         }
+        
+        // Image Viewer (Lightbox) Logic
+        const imageViewerOverlay = document.getElementById('image-viewer-overlay');
+        const imageViewerImg = document.getElementById('image-viewer-img');
+        const closeImageViewerBtn = document.getElementById('close-image-viewer');
+        const slidesContainer = document.getElementById('slides-container');
+
+        if (imageViewerOverlay && imageViewerImg) {
+            const closeViewer = () => {
+                imageViewerOverlay.style.display = 'none';
+                imageViewerImg.src = '';
+            };
+
+            if (closeImageViewerBtn) {
+                closeImageViewerBtn.addEventListener('click', closeViewer);
+            }
+            imageViewerOverlay.addEventListener('click', (e) => {
+                if (e.target === imageViewerOverlay) closeViewer();
+            });
+
+            if (slidesContainer) {
+                slidesContainer.addEventListener('click', (e) => {
+                    if (e.target.tagName.toLowerCase() === 'img') {
+                        imageViewerImg.src = e.target.src;
+                        imageViewerOverlay.style.display = 'flex';
+                    }
+                });
+            }
+        }
     }
 
     closeBottomSheet() {
