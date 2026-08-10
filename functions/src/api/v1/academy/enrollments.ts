@@ -9,7 +9,10 @@ import { parseRequest, ok } from '../../../shared/api/contract.js';
 
 const enrollRateLimiter = RateLimiter.apply('academy_enroll', 5, 60000);
 
-export const enrollments = functions.https.onCall(async (rawData, context) => {
+// Increase timeout to 60 seconds for this function
+const runtimeOpts: functions.RuntimeOptions = { timeoutSeconds: 60 };
+
+export const enrollments = functions.runWith(runtimeOpts).https.onCall(async (rawData, context) => {
   const startTime = performance.now();
 
   // 1. Security & Identity
@@ -33,8 +36,10 @@ export const enrollments = functions.https.onCall(async (rawData, context) => {
     isAdminOrInstructor = isAdmin || authContext.role === Role.INSTRUCTOR;
   }
 
-  // 3. Idempotency Check
-  await SecurityMiddleware.enforceIdempotency(correlationId);
+  // 3. Idempotency Check — only for authenticated admin actions to avoid cold-start latency for public requests
+  if (action !== 'request') {
+    await SecurityMiddleware.enforceIdempotency(correlationId);
+  }
 
   try {
     switch (action) {

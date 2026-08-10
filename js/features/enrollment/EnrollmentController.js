@@ -538,7 +538,7 @@ export const EnrollmentController = {
                 action: 'request',
                 entity: undefined,
                 payload: payload.payload
-            });
+            }, { retries: 1, timeout: 60000 });
             
             this.showStep(this.elements.successStep);
 
