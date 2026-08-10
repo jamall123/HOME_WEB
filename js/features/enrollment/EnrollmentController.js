@@ -318,7 +318,7 @@ export const EnrollmentController = {
         const genderVal = this.elements.gender.value;
         const reasonVal = this.elements.reason.value.trim();
 
-        if (!nameVal || /\\d/.test(nameVal) || nameVal.length < 3) {
+        if (!nameVal || /\d/.test(nameVal) || nameVal.length < 3) {
             this.markInvalid(this.elements.name, this.elements.errName);
             isValid = false;
         } else {
@@ -326,7 +326,7 @@ export const EnrollmentController = {
         }
 
         if (emailVal) {
-            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if(!emailRegex.test(emailVal)) {
                 this.markInvalid(this.elements.email, this.elements.errEmail);
                 isValid = false;
@@ -344,7 +344,7 @@ export const EnrollmentController = {
             this.markValid(this.elements.age);
         }
 
-        const phoneDigits = phoneVal.replace(/\\D/g, '');
+        const phoneDigits = phoneVal.replace(/\D/g, '');
         if (phoneDigits.length < 9) {
             this.markInvalid(this.elements.phone, this.elements.errPhone);
             isValid = false;
