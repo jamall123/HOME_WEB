@@ -216,7 +216,7 @@ export class InstructorUIClass {
                                             <span id="current-video-name" style="font-size:0.8rem;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">فيديو محمّل</span>
                                             <span style="font-size:0.7rem;background:rgba(52,211,153,0.15);color:#34d399;padding:0.15rem 0.5rem;border-radius:99px;border:1px solid rgba(52,211,153,0.3);">✔ مرفوع</span>
                                         </div>
-                                        <video id="current-video-preview" controls style="width:100%;border-radius:8px;max-height:110px;background:#000;margin-bottom:0.5rem;" preload="metadata"></video>
+                                        <video id="current-video-preview" controls muted style="width:100%;border-radius:8px;max-height:110px;background:#000;margin-bottom:0.5rem;" preload="metadata"></video>
                                         <div style="display:flex;gap:0.4rem;">
                                             <button class="btn btn-sm" onclick="window.InstructorAPI.replaceVideo()" style="flex:1;border-radius:7px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:0.78rem;">
                                                 <i class="fas fa-exchange-alt"></i> تغيير
