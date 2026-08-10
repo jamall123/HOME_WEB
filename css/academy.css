@@ -485,7 +485,8 @@
     width: 100%;
     max-width: 800px;
     max-height: 90vh;
-    overflow-y: auto;
+    max-height: 90dvh;
+    overflow-y: auto !important; /* Force override over glass-panel overflow:hidden */
     position: relative;
     transform: scale(0.95) translateY(20px);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
