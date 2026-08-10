@@ -144,7 +144,8 @@ export class ChatRepositoryClass {
         }
     }
 
-    async toggleReaction(msgId, reactionType) {
+    async toggleReaction(msgId, reactionType, userId) {
+        if (!userId) return;
         try {
             const db = FirebaseManager.getFirestore();
             const msgRef = db.collection(Constants.COLLECTIONS.COURSE_CHATS).doc(msgId);
@@ -154,11 +155,36 @@ export class ChatRepositoryClass {
                 if (!doc.exists) return;
                 
                 const data = doc.data();
-                const reactions = data.reactions || { like: 0, heart: 0 };
-                
-                reactions[reactionType] = (reactions[reactionType] || 0) + 1;
-                
-                transaction.update(msgRef, { reactions: reactions });
+                const oppositeType = reactionType === 'like' ? 'heart' : 'like';
+                const byKey    = reactionType + 'dBy';   // 'likedBy' or 'heartedBy'
+                const oppByKey = oppositeType + 'dBy';   // opposite key
+
+                let byArr    = Array.isArray(data[byKey])    ? [...data[byKey]]    : [];
+                let oppByArr = Array.isArray(data[oppByKey]) ? [...data[oppByKey]] : [];
+
+                const alreadyReacted = byArr.includes(userId);
+
+                if (alreadyReacted) {
+                    // Toggle OFF: remove own reaction
+                    byArr = byArr.filter(id => id !== userId);
+                } else {
+                    // Toggle ON: add this, remove opposite
+                    byArr.push(userId);
+                    oppByArr = oppByArr.filter(id => id !== userId);
+                }
+
+                transaction.update(msgRef, {
+                    [byKey]:    byArr,
+                    [oppByKey]: oppByArr,
+                    [`reactions.like`]:  null,  // deprecated counter
+                    [`reactions.heart`]: null,
+                    reactions: {
+                        like:  (byKey === 'likedBy'   ? byArr : oppByArr).length,
+                        heart: (byKey === 'heartedBy' ? byArr : oppByArr).length,
+                        likedBy:   byKey === 'likedBy'   ? byArr : oppByArr,
+                        heartedBy: byKey === 'heartedBy' ? byArr : oppByArr
+                    }
+                });
             });
         } catch (error) {
             this._handleError(error, 'toggleReaction');

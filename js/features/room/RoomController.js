@@ -13,6 +13,7 @@ import { CurriculumUI } from '../curriculum/index.js';
 import { PermissionManager } from '../../core/PermissionManager.js';
 import { UserRepository } from '../../repositories/UserRepository.js';
 import { ChatRepository } from '../../repositories/ChatRepository.js';
+import { PresenceController } from '../presence/PresenceController.js';
 
 import { RoomState } from './RoomState.js';
 import { RoomRenderer } from './RoomRenderer.js';
@@ -82,7 +83,7 @@ class RoomControllerClass {
         
         try {
             await Promise.all([
-                window.PresenceController ? window.PresenceController.startPresenceSession(this.courseId, this.currentUser, this.state) : Promise.resolve(),
+                PresenceController.startPresenceSession(this.courseId, this.currentUser, this.state),
                 import('../chat/ChatController.js').then(({ ChatController }) => ChatController.init(this)),
                 import('../../features/media/MediaManager.js').then(({ MediaManager }) => MediaManager.init(this))
             ]);
@@ -126,6 +127,36 @@ class RoomControllerClass {
                 badge.textContent = 'طالب';
                 badge.style.background = 'var(--primary-color)';
             }
+        }
+        // Load instructor info for the course details panel
+        this.loadInstructorInfo();
+    }
+
+    async loadInstructorInfo() {
+        try {
+            const { FirebaseManager } = await import('../../core/FirebaseManager.js');
+            const db = FirebaseManager.getFirestore();
+            const courseDoc = await db.collection('courses').doc(this.courseId).get();
+            if (!courseDoc.exists) return;
+            const courseData = courseDoc.data();
+            const instructorId = courseData.instructorId || courseData.createdBy || courseData.uid;
+            if (!instructorId) return;
+
+            const instructor = await UserRepository.getUser(instructorId);
+            if (!instructor) return;
+
+            const nameEl = document.getElementById('info-instructor-name');
+            const photoEl = document.getElementById('info-instructor-photo');
+            const specialtyEl = document.getElementById('info-instructor-specialty');
+
+            if (nameEl) nameEl.textContent = instructor.displayName || instructor.name || instructor.fullName || 'المدرب';
+            if (photoEl && (instructor.photoURL || instructor.avatar)) {
+                photoEl.src = instructor.photoURL || instructor.avatar;
+                photoEl.onerror = () => { photoEl.src = 'assets/images/avatar.png'; };
+            }
+            if (specialtyEl) specialtyEl.textContent = instructor.specialty || instructor.title || instructor.bio?.slice(0, 60) || '';
+        } catch (e) {
+            console.warn('[RoomController] Could not load instructor info:', e);
         }
     }
 

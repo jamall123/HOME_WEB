@@ -129,30 +129,38 @@ class ChatUIClass {
             }
             
             const reactions = msg.reactions || { like: 0, heart: 0 };
+            const likedBy   = reactions.likedBy   || [];
+            const heartedBy = reactions.heartedBy || [];
+            const currentUid = this.engine?.currentUser?.uid || '';
+            const userLiked  = likedBy.includes(currentUid);
+            const userHearted = heartedBy.includes(currentUid);
+            const likeCount  = reactions.like  || likedBy.length  || 0;
+            const heartCount = reactions.heart || heartedBy.length || 0;
             const msgId = msg.id || 'unknown';
 
             html += `
-                <div class="chat-message ${msg.isOffline ? 'offline' : ''}" style="align-self: ${isSelf ? 'flex-end' : 'flex-start'}; max-width: 85%;">
+                <div class="chat-message ${msg.isOptimistic ? 'optimistic' : ''}" style="align-self: ${isSelf ? 'flex-end' : 'flex-start'}; max-width: 85%; opacity: ${msg.isOptimistic ? '0.75' : '1'}; transition: opacity 0.3s;">
                     <div style="font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: center; gap: 0.5rem; justify-content: ${isSelf ? 'flex-end' : 'flex-start'};">
                         <span style="font-weight: bold; color: ${isInst ? 'var(--primary-color)' : 'var(--text-secondary)'};">
                             ${msg.userName} ${isInst ? '<i class="fas fa-check-circle"></i>' : ''}
                         </span>
-                        <span style="font-size: 0.7rem; color: #666;">${timeStr}</span>
+                        <span style="font-size: 0.7rem; color: #666;">${timeStr}${msg.isOptimistic ? ' <i class="fas fa-clock" style="font-size:0.65rem;opacity:0.6;"></i>' : ''}</span>
                     </div>
                     <div style="background: ${isSelf ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)'}; 
                                 color: ${isSelf ? 'white' : 'var(--text-primary)'};
                                 padding: 0.8rem 1rem; 
                                 border-radius: 12px;
-                                border-${isSelf ? 'bottom-left' : 'bottom-right'}-radius: 0;
-                                opacity: ${msg.isOffline ? '0.7' : '1'};">
+                                border-${isSelf ? 'bottom-left' : 'bottom-right'}-radius: 0;">
                         ${msg.text}
-                        ${!msg.isOffline ? `
+                        ${!msg.isOptimistic ? `
                         <div style="display:flex;gap:0.3rem;margin-top:0.4rem;justify-content:${isSelf ? 'flex-end' : 'flex-start'};">
-                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'like')" style="background:rgba(0,0,0,0.15);border:none;color:${isSelf ? '#fff' : '#cbd5e1'};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
-                                👍 <span>${reactions.like > 0 ? reactions.like : ''}</span>
+                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'like')"
+                                style="background:${userLiked ? 'rgba(99,102,241,0.35)' : 'rgba(0,0,0,0.15)'};border:${userLiked ? '1px solid rgba(99,102,241,0.6)' : 'none'};color:${userLiked ? '#a5b4fc' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
+                                👍 <span>${likeCount > 0 ? likeCount : ''}</span>
                             </button>
-                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'heart')" style="background:rgba(0,0,0,0.15);border:none;color:${isSelf ? '#fff' : '#cbd5e1'};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
-                                ❤️ <span>${reactions.heart > 0 ? reactions.heart : ''}</span>
+                            <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'heart')"
+                                style="background:${userHearted ? 'rgba(239,68,68,0.25)' : 'rgba(0,0,0,0.15)'};border:${userHearted ? '1px solid rgba(239,68,68,0.5)' : 'none'};color:${userHearted ? '#fca5a5' : (isSelf ? '#fff' : '#cbd5e1')};border-radius:12px;padding:0.15rem 0.4rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.2rem;transition:all 0.2s;">
+                                ❤️ <span>${heartCount > 0 ? heartCount : ''}</span>
                             </button>
                         </div>
                         ` : ''}

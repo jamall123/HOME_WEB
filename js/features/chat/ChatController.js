@@ -95,6 +95,7 @@ class ChatControllerClass {
 
     handleNewMessages(channel, messages) {
         const prevLength = this.cache.messages[channel].length;
+        // Merge: keep optimistic messages if server hasn't confirmed yet, then replace
         this.cache.messages[channel] = messages;
 
         // Increment unread count if channel isn't active or chat is closed
@@ -114,7 +115,6 @@ class ChatControllerClass {
         const channel = this.cache.activeChannel;
         // Instructor only validation for announcements
         if (channel === 'announcements' && !this.engine.isInstructor) {
-            // console.warn("Students cannot post announcements.");
             this.isSending = false;
             return;
         }
@@ -127,7 +127,6 @@ class ChatControllerClass {
         }
 
         if (!navigator.onLine) {
-            // Queue offline
             this.queueOfflineMessage(text, channel, replyToId);
             setTimeout(() => { this.isSending = false; }, 500);
             return;
@@ -136,6 +135,21 @@ class ChatControllerClass {
         // Use courseId as fallback for LIVE mode
         const lessonId = this.activeLessonId || this.engine?.courseId;
         if (!lessonId) return;
+
+        // ── Optimistic insert: show message immediately ──
+        const tempId = 'opt_' + Date.now();
+        const optimisticMsg = {
+            id: tempId,
+            text,
+            channel,
+            userId: this.engine.currentUser.uid,
+            userName: this.engine.currentUser.displayName || this.engine.currentUser.name || 'مستخدم',
+            role: this.engine.currentUser.role || 'student',
+            timestamp: new Date(),
+            isOptimistic: true
+        };
+        this.cache.messages[channel] = [...(this.cache.messages[channel] || []), optimisticMsg];
+        this.notifyUI();
 
         try {
             await ChatService.sendMessage(
@@ -149,9 +163,11 @@ class ChatControllerClass {
                 replyToId
             );
         } catch (error) {
+            // Revert optimistic message on failure
+            this.cache.messages[channel] = this.cache.messages[channel].filter(m => m.id !== tempId);
+            this.notifyUI();
             console.error("SendMessage failed", error);
         } finally {
-            // Strict 500ms throttle
             setTimeout(() => { this.isSending = false; }, 500);
         }
     }
@@ -245,7 +261,9 @@ export const ChatController = new ChatControllerClass();
 window.ChatAPI = {
     toggleReaction: async (msgId, reactionType) => {
         try {
-            await ChatService.toggleReaction(msgId, reactionType);
+            const { ChatController } = await import('./ChatController.js');
+            const userId = ChatController.engine?.currentUser?.uid;
+            await ChatService.toggleReaction(msgId, reactionType, userId);
         } catch (error) {
             console.error("Error toggling chat reaction:", error);
         }

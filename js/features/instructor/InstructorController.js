@@ -510,7 +510,15 @@ class InstructorControllerClass {
         const btn = document.getElementById('btn-channel-voice');
         if (!this.isRecordingVoice) {
             try {
-                this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.audioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        noiseSuppression: true,
+                        echoCancellation: true,
+                        autoGainControl: true,
+                        channelCount: 1,
+                        sampleRate: 44100
+                    }
+                });
                 this.mediaRecorder = new MediaRecorder(this.audioStream);
                 this.audioChunks = [];
 

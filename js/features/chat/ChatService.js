@@ -71,8 +71,8 @@ class ChatServiceClass {
         return ChatRepository.subscribeToTyping(courseId, channel, onSnapshotCallback);
     }
 
-    async toggleReaction(msgId, reactionType) {
-        return ChatRepository.toggleReaction(msgId, reactionType);
+    async toggleReaction(msgId, reactionType, userId) {
+        return ChatRepository.toggleReaction(msgId, reactionType, userId);
     }
 }
 
