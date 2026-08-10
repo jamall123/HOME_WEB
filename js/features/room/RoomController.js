@@ -12,6 +12,7 @@ import { ChatUI } from '../chat/ChatUI.js';
 import { CurriculumUI } from '../curriculum/index.js';
 import { PermissionManager } from '../../core/PermissionManager.js';
 import { UserRepository } from '../../repositories/UserRepository.js';
+import { CourseRepository } from '../../repositories/CourseRepository.js';
 import { ChatRepository } from '../../repositories/ChatRepository.js';
 import { PresenceController } from '../presence/PresenceController.js';
 
