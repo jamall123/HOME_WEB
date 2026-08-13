@@ -131,6 +131,40 @@ export class RoomRepositoryClass {
             this._handleError(error, 'revokeMicPermission');
         }
     }
+
+    /**
+     * Revokes a student's microphone permission by removing their key from micPermissions.
+     * @param {string} courseId 
+     * @param {string} studentUid 
+     */
+    static async revokeMicRequest(courseId, studentUid) {
+        if (!courseId || !studentUid) return;
+        const ref = FirebaseManager.getDb().collection('active_sessions').doc(courseId);
+        try {
+            await ref.update({
+                [`micPermissions.${studentUid}`]: FirebaseManager.getFirestoreFieldValue().delete()
+            });
+        } catch (e) {
+            console.error('[RoomRepository] Revoke mic error:', e);
+            throw e;
+        }
+    }
+
+    /**
+     * Kicks a student by adding them to the kickedUsers array in the session.
+     */
+    static async kickStudent(courseId, studentUid) {
+        if (!courseId || !studentUid) return;
+        const ref = FirebaseManager.getDb().collection('active_sessions').doc(courseId);
+        try {
+            await ref.update({
+                kickedUsers: FirebaseManager.getFirestoreFieldValue().arrayUnion(studentUid)
+            });
+        } catch (e) {
+            console.error('[RoomRepository] Kick student error:', e);
+            throw e;
+        }
+    }
 }
 
 export const RoomRepository = new RoomRepositoryClass();

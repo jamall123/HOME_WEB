@@ -158,11 +158,8 @@ export class PresenceControllerClass {
      * Listen to active users in a course
      */
     listenToActiveUsers(courseId, callback) {
-        if (this.unsubscribe) {
-            this.unsubscribe();
-        }
-        this.unsubscribe = PresenceService.onPresenceSnapshot(courseId, callback);
-        return this.unsubscribe;
+        // Return a new snapshot listener for each caller. Callers should manage their own unsubscribe functions.
+        return PresenceService.onPresenceSnapshot(courseId, callback);
     }
 }
 

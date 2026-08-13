@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "agora-rtc-sdk-ng": "^4.24.6",
-    "firebase": "^8.10.1"
+    "firebase": "^8.10.1",
+    "firebase-admin": "^14.2.0"
   },
   "name": "home-web",
   "version": "1.0.0",

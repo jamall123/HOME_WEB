@@ -22,11 +22,12 @@ export class CurriculumRepositoryClass {
             const db = FirebaseManager.getFirestore();
             const snapshot = await db.collection(Constants.COLLECTIONS.CURRICULUM)
                 .where('courseId', '==', courseId)
-                .where('status', '!=', 'Deleted')
-                .orderBy('status') 
-                .orderBy('order')
                 .get();
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            docs = docs.filter(doc => doc.status !== 'Deleted');
+            docs.sort((a, b) => (a.order || 0) - (b.order || 0));
+            return docs;
         } catch (error) {
             this._handleError(error, 'getSections');
         }
@@ -37,11 +38,12 @@ export class CurriculumRepositoryClass {
             const db = FirebaseManager.getFirestore();
             const snapshot = await db.collection(Constants.COLLECTIONS.CURRICULUM_LESSONS)
                 .where('sectionId', '==', sectionId)
-                .where('status', '!=', 'Deleted')
-                .orderBy('status')
-                .orderBy('order')
                 .get();
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            docs = docs.filter(doc => doc.status !== 'Deleted');
+            docs.sort((a, b) => (a.order || 0) - (b.order || 0));
+            return docs;
         } catch (error) {
             this._handleError(error, 'getLessons');
         }

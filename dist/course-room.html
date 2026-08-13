@@ -129,17 +129,17 @@
         /* ── Instructor Mode Workspace Animation ── */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     </style>
-  <script type="module" crossorigin src="/assets/courseRoom-DVGupd_E.js"></script>
+  <script type="module" crossorigin src="/assets/courseRoom-9XAruR8r.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
-  <link rel="modulepreload" crossorigin href="/assets/CourseRepository-CIYmBoLj.js">
-  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CVzH6vXx.js">
-  <link rel="modulepreload" crossorigin href="/assets/UserRepository-B2rR5pqP.js">
-  <link rel="modulepreload" crossorigin href="/assets/EventBus-DfwAvCQ6.js">
-  <link rel="modulepreload" crossorigin href="/assets/NotificationManager-yG1gWUIM.js">
+  <link rel="modulepreload" crossorigin href="/assets/CourseRepository-BkU7rJA0.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-DkUYsNQt.js">
+  <link rel="modulepreload" crossorigin href="/assets/UserRepository-Qg-1MUAM.js">
+  <link rel="modulepreload" crossorigin href="/assets/EventBus-CDVHeIyw.js">
+  <link rel="modulepreload" crossorigin href="/assets/NotificationManager-DMg0JkUo.js">
   <link rel="modulepreload" crossorigin href="/assets/preload-helper-BATLnrmA.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumRepository-4eqn14s-.js">
-  <link rel="modulepreload" crossorigin href="/assets/StudentProgressRepository-De4oQjql.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumProgress-HkEGDNFS.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumRepository-BAvZwOTt.js">
+  <link rel="modulepreload" crossorigin href="/assets/StudentProgressRepository-kYhNGkTs.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumProgress-BAAnDeGs.js">
   <link rel="stylesheet" crossorigin href="/assets/courseRoom-BrFk4XgN.css">
   <link rel="stylesheet" crossorigin href="/assets/sudanFree-CgE2LGLP.css">
 </head>
@@ -229,11 +229,11 @@
             
             <!-- 1. Curriculum & Instructor Panel -->
             <aside class="room-panel panel-curriculum scrollable" id="panel-curriculum" style="display: flex; flex-direction: column; overflow: hidden;">
-                <div class="side-tabs" style="display: flex; border-bottom: 1px solid var(--room-border); flex-wrap: wrap; background: rgba(0,0,0,0.2);">
-                    <div class="side-tab active" data-target="curriculum" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid var(--primary-color); font-size: 0.9rem;"><i class="fas fa-book-open"></i> المنهج</div>
-                    <div class="side-tab" data-target="overview" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> تفاصيل</div>
-                    <div class="side-tab" data-target="resources" style="flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-paperclip"></i> الملحقات</div>
-                    <div class="side-tab" data-target="instructor-side" id="tab-btn-instructor-side" style="display: none; color: var(--warning); flex: 1 1 50%; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem;"><i class="fas fa-tools"></i> الإدارة</div>
+                <div class="side-tabs" style="display: flex; border-bottom: 1px solid var(--room-border); flex-wrap: nowrap; overflow-x: auto; background: rgba(0,0,0,0.2); scrollbar-width: none; -ms-overflow-style: none;">
+                    <div class="side-tab active" data-target="curriculum" style="flex: 1 0 auto; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid var(--primary-color); font-size: 0.9rem; min-width: max-content;"><i class="fas fa-book-open"></i> المنهج</div>
+                    <div class="side-tab" data-target="overview" style="flex: 1 0 auto; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; min-width: max-content;"><i class="fas fa-info-circle"></i> تفاصيل</div>
+                    <div class="side-tab" data-target="resources" style="flex: 1 0 auto; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; min-width: max-content;"><i class="fas fa-paperclip"></i> الملحقات</div>
+                    <div class="side-tab" data-target="instructor-side" id="tab-btn-instructor-side" style="display: none; color: var(--warning); flex: 1 0 auto; text-align: center; padding: 0.8rem 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; min-width: max-content;"><i class="fas fa-tools"></i> الإدارة</div>
                 </div>
                 
                 <div class="side-workspace-content" style="flex: 1; overflow-y: auto; position: relative;">
@@ -252,7 +252,7 @@
                         </div>
                         <p id="info-desc" class="text-muted" style="line-height: 1.6; margin-bottom: 1.5rem;"></p>
                         <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid var(--room-border);">
-                            <img id="info-instructor-photo" src="assets/images/avatar.png" alt="Instructor" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                            <img id="info-instructor-photo" src="data:image/png;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgODAwIDUwMCI+CiAgPHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI1MDAiIGZpbGw9IiMxYTFhMmUiLz4KICA8cmVjdCB4PSIzMDAiIHk9IjE4MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxNDAiIHJ4PSI4IiBmaWxsPSIjMTYyMTNlIi8+CiAgPGNpcmNsZSBjeD0iMzYwIiBjeT0iMjMwIiByPSIyNSIgZmlsbD0iIzBmMzQ2MCIvPgogIDxwb2x5Z29uIHBvaW50cz0iMzQ1LDI3MCAzNzUsMjcwIDQwMCwyNTAgNDAwLDMxMCAzNDUsMzEwIiBmaWxsPSIjMGYzNDYwIi8+CiAgPHRleHQgeD0iNDAwIiB5PSIzNzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZTk0NTYwIj7YtdmI2LHYqSDYutmK2LEg2YXYqtmI2YHYsdipPC90ZXh0Pgo8L3N2Zz4K" alt="Instructor" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background-color: var(--surface-light);">
                             <div>
                                 <div id="info-instructor-name" style="font-weight: bold; font-size: 1.1rem;">المدرب</div>
                                 <div id="info-instructor-specialty" style="font-size: 0.85rem; color: var(--primary-light);"></div>
@@ -426,6 +426,24 @@
             <div class="room-confirm-actions">
                 <button class="btn-confirm-cancel" id="confirm-cancel-btn">إلغاء</button>
                 <button class="btn-confirm-ok" id="confirm-ok-btn">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         Custom Prompt Dialog for Lesson Details
+         ══════════════════════════════════════════════ -->
+    <div class="room-confirm-overlay" id="room-prompt-overlay" role="dialog" aria-modal="true">
+        <div class="room-confirm-box" style="width: 400px; max-width: 90vw;">
+            <div class="room-confirm-title" id="prompt-title">عنوان النافذة</div>
+            <div class="room-confirm-body" id="prompt-body" style="text-align: right; margin-bottom: 1rem;">وصف النافذة</div>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; text-align: right;">
+                <input type="text" id="prompt-input-title" placeholder="عنوان الدرس..." style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--room-border); background: var(--surface); color: white; outline: none; font-family: var(--font-ar);">
+                <textarea id="prompt-input-desc" placeholder="تفاصيل الدرس (اختياري)..." rows="3" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--room-border); background: var(--surface); color: white; outline: none; font-family: var(--font-ar); resize: vertical;"></textarea>
+            </div>
+            <div class="room-confirm-actions" style="margin-top: 1.5rem;">
+                <button class="btn-confirm-cancel" id="prompt-cancel-btn">إلغاء</button>
+                <button class="btn-confirm-ok" id="prompt-ok-btn">حفظ ومتابعة</button>
             </div>
         </div>
     </div>

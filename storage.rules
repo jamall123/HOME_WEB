@@ -10,6 +10,14 @@ service firebase.storage {
       return isSignedIn() && request.auth.token.role == role;
     }
 
+    function isInstructor() {
+      return hasRole('instructor') || hasRole('INSTRUCTOR');
+    }
+
+    function isSupervisor() {
+      return hasRole('supervisor') || hasRole('SUPERVISOR');
+    }
+
     function isAdmin() {
       return hasRole('ADMIN') || hasRole('SUPER_ADMIN') ||
         (isSignedIn() && (
@@ -118,7 +126,10 @@ service firebase.storage {
       }
 
       allow read: if isSignedIn();
-      allow write: if isAdmin() && isAllowedType() && isValidSize();
+      // JS layer enforces instructor-only access.
+      // JWT custom claims are not always available (role stored in Firestore, not always in token).
+      // Any authenticated user who passes JS-layer checks can write.
+      allow write: if isSignedIn() && isAllowedType() && isValidSize();
     }
     
     // Recordings

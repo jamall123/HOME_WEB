@@ -56,11 +56,33 @@ class RoomControllerClass {
         const stateUser = stateStore.getState('userData');
         if (stateUser) {
             this.currentUser = {
+                uid: this.currentUser.uid,
+                email: this.currentUser.email,
+                role: this.currentUser.role,
+                getIdTokenResult: this.currentUser.getIdTokenResult ? this.currentUser.getIdTokenResult.bind(this.currentUser) : undefined,
                 ...this.currentUser,
-                displayName: stateUser.name,
-                name: stateUser.name,
-                username: stateUser.username
+                displayName: stateUser.fullName || stateUser.fullname || stateUser.name || this.currentUser.displayName,
+                name: stateUser.fullName || stateUser.fullname || stateUser.name || this.currentUser.displayName,
+                username: stateUser.username || this.currentUser.displayName
             };
+        } else if (this.currentUser) {
+            try {
+                const userDoc = await UserRepository.getUser(this.currentUser.uid);
+                if (userDoc && userDoc.name) {
+                    this.currentUser = {
+                        uid: this.currentUser.uid,
+                        email: this.currentUser.email,
+                        role: this.currentUser.role || userDoc.role,
+                        getIdTokenResult: this.currentUser.getIdTokenResult ? this.currentUser.getIdTokenResult.bind(this.currentUser) : undefined,
+                        ...this.currentUser,
+                        displayName: userDoc.fullName || userDoc.fullname || userDoc.name,
+                        name: userDoc.fullName || userDoc.fullname || userDoc.name,
+                        username: userDoc.username || userDoc.name
+                    };
+                }
+            } catch (e) {
+                console.warn('[RoomController] Could not fetch user doc for name override', e);
+            }
         }
 
         if (!this.currentUser) {
@@ -72,9 +94,9 @@ class RoomControllerClass {
         
         this.roomState.restoreLocalState(this.courseId);
         
-        this.roomRenderer.init(this.courseId, this.isInstructor);
+        this.roomRenderer.init(this.courseId, this.isInstructor, this.currentUser);
         this.roomEvents.init(this.courseId, this.currentUser, this.isInstructor);
-        this.roomSync.init(this.courseId, this.isInstructor);
+        this.roomSync.init(this.courseId, this.isInstructor, this.currentUser);
 
         ThemeManager.init();
         NotificationManager.init();
@@ -137,22 +159,36 @@ class RoomControllerClass {
         try {
             const courseData = await CourseRepository.getCourse(this.courseId);
             if (!courseData) return;
-            const instructorId = courseData.instructorId || courseData.createdBy || courseData.uid;
-            if (!instructorId) return;
-
-            const instructor = await UserRepository.getUser(instructorId);
-            if (!instructor) return;
 
             const nameEl = document.getElementById('info-instructor-name');
-            const photoEl = document.getElementById('info-instructor-photo');
+            const imgEl = document.getElementById('info-instructor-photo');
             const specialtyEl = document.getElementById('info-instructor-specialty');
 
-            if (nameEl) nameEl.textContent = instructor.displayName || instructor.name || instructor.fullName || 'المدرب';
-            if (photoEl && (instructor.photoURL || instructor.avatar)) {
-                photoEl.src = instructor.photoURL || instructor.avatar;
-                photoEl.onerror = () => { photoEl.src = 'assets/images/avatar.png'; };
+            let instructor = null;
+            // 1. Check if course has instructor embedded object or string
+            let instObj = courseData.instructor;
+            let name = (typeof instObj === 'object' && instObj !== null) ? (instObj.name || 'مقدم الدورة') : (instObj || courseData.instructorName || 'المدرب');
+            let photo = (typeof instObj === 'object' && instObj !== null && instObj.photo) ? instObj.photo : courseData.instructorPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            if (photo && typeof photo === 'string' && photo.includes('instructor.png')) photo = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E293B&color=A5B4FC`;
+            let specialty = (typeof instObj === 'object' && instObj !== null && instObj.specialty) ? instObj.specialty : courseData.instructorSpecialty || 'غير محدد';
+            
+            // 2. If it has instructorId, fetch from users collection to override
+            const instructorId = courseData.instructorId || courseData.createdBy || courseData.uid;
+            if (instructorId) {
+                instructor = await UserRepository.getUser(instructorId).catch(e => null);
+                if (instructor) {
+                    if (instructor.name) name = instructor.name;
+                    if (instructor.photo || instructor.photoURL || instructor.avatar) photo = instructor.photo || instructor.photoURL || instructor.avatar;
+                    if (instructor.specialty || instructor.title) specialty = instructor.specialty || instructor.title;
+                }
             }
-            if (specialtyEl) specialtyEl.textContent = instructor.specialty || instructor.title || instructor.bio?.slice(0, 60) || '';
+
+            if (nameEl) nameEl.textContent = name;
+            if (imgEl) {
+                imgEl.src = photo;
+                imgEl.onerror = () => { imgEl.src = 'assets/images/default-avatar.png'; };
+            }
+            if (specialtyEl) specialtyEl.textContent = specialty;
         } catch (e) {
             console.warn('[RoomController] Could not load instructor info:', e);
         }
@@ -175,12 +211,14 @@ class RoomControllerClass {
 
             const userData = await UserRepository.getUser(this.currentUser.uid);
             if (userData) {
+                const realName = userData.fullName || userData.fullname || userData.name || userData.studentName || userData.displayName || this.currentUser.displayName;
                 this.currentUser = { 
                     uid: this.currentUser.uid, 
                     email: this.currentUser.email, 
                     ...this.currentUser, 
                     ...userData,
-                    displayName: this.currentUser.displayName || userData.displayName
+                    displayName: realName,
+                    name: realName
                 };
 
                 if (userData.legacyCredentialId) {

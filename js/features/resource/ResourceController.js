@@ -35,13 +35,29 @@ export class ResourceControllerClass {
             return;
         }
 
+        let currentLessonTitle = '';
+        const activeId = this.activeLessonId || lessonId || 'global';
+        if (activeId !== 'global') {
+            const { CurriculumController } = await import('../curriculum/index.js');
+            const sections = CurriculumController.getSections();
+            for (const section of sections) {
+                const lessons = CurriculumController.getLessons(section.id);
+                const lesson = lessons.find(l => l.id === activeId);
+                if (lesson) {
+                    currentLessonTitle = lesson.title;
+                    break;
+                }
+            }
+        }
+
         for (const file of files) {
             try {
                 const preview = await PreviewEngine.generatePreview(file);
                 
                 await ResourceService.uploadFile(
                     this.engine.courseId, 
-                    this.activeLessonId || lessonId || 'global', 
+                    activeId,
+                    currentLessonTitle,
                     file, 
                     (id, state, progress) => {
                         if (this.onProgressUpdate) this.onProgressUpdate(id, state, progress, preview);
@@ -64,8 +80,17 @@ export class ResourceControllerClass {
     }
 
     async getResources() {
-        if (!this.activeLessonId) return [];
-        return await ResourceService.getResources(this.engine.courseId, this.activeLessonId);
+        const targetLesson = this.activeLessonId || 'global';
+        // Fetch all resources for the course to avoid requiring new Firestore indexes
+        const allResources = await ResourceService.getResources(this.engine.courseId, null);
+        
+        // Client-side filtering
+        return allResources.filter(res => {
+            // Backward compatibility: If no lessonId exists on the resource, show it everywhere 
+            // or show it only on the first lesson/global.
+            if (!res.lessonId || res.lessonId === 'global') return true;
+            return res.lessonId === targetLesson;
+        });
     }
 }
 export const ResourceController = new ResourceControllerClass();

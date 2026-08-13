@@ -1,9 +1,9 @@
 import * as functions from 'firebase-functions';
-import agoraPkg from 'agora-access-token';
-const { RtcTokenBuilder, RtcRole } = agoraPkg;
+import agoraToken from 'agora-token';
+const { RtcTokenBuilder, RtcRole } = agoraToken;
 import { DI } from '../../../shared/di.js';
 // The App ID and Certificate from the Agora Console
-const APP_ID = '4400dcdb72bf4dc1bcdcb2fe37fac0ef';
+const APP_ID = 'fb0027bb7df140ed9981a640622f0e74';
 const APP_CERTIFICATE = 'a888daacd5494b53b94b0a0cc0e7172d';
 export const generateAgoraToken = functions.https.onCall((data, context) => {
     // Make sure the user is authenticated (Optional but recommended for security)
@@ -28,7 +28,8 @@ export const generateAgoraToken = functions.https.onCall((data, context) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
     try {
-        const token = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpiredTs);
+        // Build Token V2
+        const token = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName, uid, role, expirationTimeInSeconds, expirationTimeInSeconds);
         DI.logger.info(`Agora token generated successfully for channel: ${channelName}`);
         return {
             token: token,

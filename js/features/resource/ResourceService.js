@@ -12,7 +12,7 @@ export class ResourceServiceClass {
         this.activeUploadTasks = new Map();
     }
 
-    async uploadFile(courseId, lessonId, file, onStateChange) {
+    async uploadFile(courseId, lessonId, lessonTitle, file, onStateChange) {
         // 1. Validation
         const validation = StorageValidator.validate(file);
         if (!validation.valid) {
@@ -79,6 +79,7 @@ export class ResourceServiceClass {
                 resourceId: resourceId,
                 courseId: courseId,
                 lessonId: lessonId || 'global',
+                lessonTitle: lessonTitle || '',
                 fileName: finalFile.name,
                 originalFileName: file.name,
                 mimeType: finalFile.type,

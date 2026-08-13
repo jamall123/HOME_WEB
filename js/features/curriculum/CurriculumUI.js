@@ -47,6 +47,15 @@ class CurriculumUIClass {
                 return;
             }
 
+            const detailsBtn = e.target.closest('.btn-details-lesson');
+            if (detailsBtn) {
+                e.stopPropagation();
+                const lessonDataStr = decodeURIComponent(detailsBtn.dataset.lesson || '%7B%7D');
+                const lessonData = JSON.parse(lessonDataStr);
+                this.showLessonDetailsModal(lessonData);
+                return;
+            }
+
             const viewRecBtn = e.target.closest('.btn-view-recordings');
             if (viewRecBtn) {
                 e.stopPropagation();
@@ -102,6 +111,35 @@ class CurriculumUIClass {
         `;
         document.body.appendChild(modal);
         modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }
+
+    showLessonDetailsModal(lesson) {
+        let modal = document.getElementById('inst-curr-details-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'inst-curr-details-modal';
+            modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:99999; display:flex; align-items:center; justify-content:center;';
+            modal.innerHTML = `
+                <div class="glass-panel" style="width: 400px; padding: 2rem; border-radius: 12px; position: relative;">
+                    <button id="inst-curr-close-btn" style="position:absolute; top:1rem; left:1rem; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    <h3 style="margin-top:0; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem; margin-bottom:1rem;">تفاصيل الدرس</h3>
+                    <div id="inst-curr-details-content"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('inst-curr-close-btn').addEventListener('click', () => { modal.style.display = 'none'; });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+        }
+        
+        const content = document.getElementById('inst-curr-details-content');
+        content.innerHTML = `
+            <div style="margin-bottom: 0.8rem;"><strong>الاسم:</strong> ${lesson.title || 'بدون عنوان'}</div>
+            <div style="margin-bottom: 0.8rem;"><strong>الوصف:</strong> ${lesson.description || 'لا يوجد وصف'}</div>
+            <div style="margin-bottom: 0.8rem;"><strong>النوع:</strong> ${lesson.type || 'غير محدد'}</div>
+            <div style="margin-bottom: 0.8rem;"><strong>الحالة:</strong> ${lesson.status || 'مسودة'}</div>
+            <div style="margin-bottom: 0.8rem;"><strong>الترتيب:</strong> ${lesson.order || 0}</div>
+        `;
+        modal.style.display = 'flex';
     }
 
     attachSearchListener() {
@@ -228,13 +266,14 @@ class CurriculumUIClass {
                 const isInstructor = this.isInstructor;
 
                 html += `
-                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;">
-                        <div style="display:flex;align-items:center;flex:1;min-width:0;">
+                    <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.4rem;">
+                        <div style="display:flex;align-items:center;flex: 1 1 150px;min-width:0;">
                             <i class="fas ${handler.icon}"></i>
-                            <span style="margin-right: 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lesson.title}</span>
+                            <span style="margin-right: 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${lesson.title}">${lesson.title}</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:0.3rem;flex-shrink:0;">
                             ${hasRecordings ? `<button class="btn-view-recordings" data-id="${lesson.id}" data-recordings='${JSON.stringify(lesson.recordings)}' title="مشاهدة التسجيلات" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:0.15rem 0.5rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-circle" style="color:#ef4444;font-size:0.5rem;"></i>تسجيل</button>` : ''}
+                            ${isInstructor ? `<button class="btn btn-icon btn-details-lesson" data-lesson="${encodeURIComponent(JSON.stringify(lesson))}" style="background: none; border: none; color: var(--info); cursor: pointer;"><i class="fas fa-info-circle"></i></button>` : ''}
                             ${isInstructor ? `<button class="btn btn-icon btn-edit-lesson" data-id="${lesson.id}" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fas fa-edit"></i></button>` : ''}
                         </div>
                     </div>

@@ -169,11 +169,11 @@ export const TeachingRenderer = {
             </div>
             <!-- Reaction buttons -->
             <div style="display:flex;gap:0.4rem;margin-top:0.5rem;" class="msg-reactions">
-                <button onclick="if(window.RoomAPI) window.RoomAPI.toggleReaction('${msgId}', 'like')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#cbd5e1;border-radius:20px;padding:0.3rem 0.6rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;">
-                    👍 <span class="rxn-count-like">${reactions.like > 0 ? reactions.like : ''}</span>
+                <button onclick="if(window.RoomAPI) window.RoomAPI.toggleReaction('${msgId}', 'like')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#cbd5e1;border-radius:20px;padding:0.3rem 0.6rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;" title="فهمت الفكرة">
+                    🧠 فهمت <span class="rxn-count-like">${reactions.like > 0 ? reactions.like : ''}</span>
                 </button>
-                <button onclick="if(window.RoomAPI) window.RoomAPI.toggleReaction('${msgId}', 'heart')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#cbd5e1;border-radius:20px;padding:0.3rem 0.6rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;">
-                    ❤️ <span class="rxn-count-heart">${reactions.heart > 0 ? reactions.heart : ''}</span>
+                <button onclick="if(window.RoomAPI) window.RoomAPI.toggleReaction('${msgId}', 'heart')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#cbd5e1;border-radius:20px;padding:0.3rem 0.6rem;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:all 0.2s;" title="لم أفهم / لدي سؤال">
+                    ❓ لم أفهم <span class="rxn-count-heart">${reactions.heart > 0 ? reactions.heart : ''}</span>
                 </button>
             </div>
         `;

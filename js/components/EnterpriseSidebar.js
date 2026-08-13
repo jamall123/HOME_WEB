@@ -47,7 +47,7 @@ export class EnterpriseSidebar {
             if (user) {
                 const nameEl = this.container.querySelector('#sidebar-user-name');
                 const roleEl = this.container.querySelector('#sidebar-user-role');
-                if (nameEl) nameEl.textContent = user.displayName || 'مدير النظام';
+                if (nameEl) nameEl.textContent = user.fullName || user.fullname || user.name || user.displayName || 'مدير النظام';
                 if (roleEl) roleEl.textContent = user.role || 'Admin';
             }
             this.render(); // Re-render to apply permissions

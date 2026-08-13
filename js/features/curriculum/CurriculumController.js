@@ -58,7 +58,23 @@ class CurriculumControllerClass {
 
             // 3. Session-Based Logic: Auto-create an active lesson if none exists
             if (this.isInstructor && !activeLesson) {
-                activeLesson = await this.createAutomaticLesson(totalLessonsCount + 1);
+                let defaultTitle = `الدرس ${totalLessonsCount + 1}`;
+                let title = defaultTitle;
+                let desc = '';
+                
+                if (window.RoomPromptDialog) {
+                    const res = await window.RoomPromptDialog.show({
+                        title: 'بيانات الدرس الأول',
+                        body: 'الرجاء إدخال عنوان ووصف للدرس للبدء',
+                        okLabel: 'بدء الدرس'
+                    });
+                    if (res && res.title) {
+                        title = res.title;
+                        desc = res.description || '';
+                    }
+                }
+                
+                activeLesson = await this.createAutomaticLesson(title, desc, totalLessonsCount + 1);
             }
 
             if (activeLesson) {
@@ -237,7 +253,7 @@ class CurriculumControllerClass {
         }
     }
 
-    async createAutomaticLesson(lessonNumber) {
+    async createAutomaticLesson(title, description, lessonNumber) {
         let section = this.cache.sections[0];
         if (!section) {
             const docRef = await CurriculumService.addSection(this.courseId, "بث مباشر", 0);
@@ -246,9 +262,10 @@ class CurriculumControllerClass {
             this.cache.lessons[section.id] = [];
         }
 
-        const title = `الدرس ${lessonNumber}`;
+        const finalTitle = title || `الدرس ${lessonNumber}`;
         const newLesson = {
-            title: title,
+            title: finalTitle,
+            description: description || '',
             type: 'video',
             duration: '0',
             locked: false,
@@ -291,10 +308,35 @@ class CurriculumControllerClass {
         if (!this.cache.currentLessonId) return;
         
         try {
-            // Mark current as completed
+            // Calculate total lessons for default name
+            let totalLessonsCount = 0;
+            for (const sectionId in this.cache.lessons) {
+                totalLessonsCount += this.cache.lessons[sectionId].length;
+            }
+
+            let defaultTitle = `الدرس ${totalLessonsCount + 1}`;
+            let title = defaultTitle;
+            let desc = '';
+            
+            if (window.RoomPromptDialog) {
+                const res = await window.RoomPromptDialog.show({
+                    title: 'إنهاء وبدء درس جديد',
+                    body: 'أدخل بيانات الدرس الجديد الذي سيتم إنشاؤه الآن',
+                    okLabel: 'إنهاء وبدء الجديد'
+                });
+                
+                if (!res || !res.title) {
+                    // Abort if instructor cancels
+                    return;
+                }
+                title = res.title;
+                desc = res.description || '';
+            }
+
+            // 1. Mark current as completed
             await CurriculumService.updateLesson(this.cache.currentLessonId, { status: 'Completed', locked: true });
             
-            // Optimistic update
+            // Optimistic update for old lesson
             for (const sectionId in this.cache.lessons) {
                 const targetLesson = this.cache.lessons[sectionId].find(l => l.id === this.cache.currentLessonId);
                 if (targetLesson) {
@@ -303,8 +345,11 @@ class CurriculumControllerClass {
                     break;
                 }
             }
-            
-            // Reload curriculum to auto-create the next active lesson
+
+            // 2. Create New Lesson
+            const newLesson = await this.createAutomaticLesson(title, desc, totalLessonsCount + 1);
+
+            // 3. Set Active Lesson & Broadcast (handled by loadCurriculum which will select the new active lesson)
             await this.loadCurriculum();
             NotificationManager.show("تم إنهاء الدرس بنجاح وبدء دورة جديدة", "success");
             

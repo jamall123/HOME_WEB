@@ -72,6 +72,56 @@ const RoomConfirmDialog = {
     }
 };
 
+const RoomPromptDialog = {
+    show({ title = 'بيانات الدرس', body = 'يرجى إدخال عنوان وتفاصيل الدرس الجديد', okLabel = 'حفظ', cancelLabel = 'إلغاء' } = {}) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('room-prompt-overlay');
+            const titleEl = document.getElementById('prompt-title');
+            const bodyEl  = document.getElementById('prompt-body');
+            const inputTitle = document.getElementById('prompt-input-title');
+            const inputDesc = document.getElementById('prompt-input-desc');
+            const okBtn   = document.getElementById('prompt-ok-btn');
+            const cancelBtn = document.getElementById('prompt-cancel-btn');
+
+            if (!overlay) { resolve({ title: null, description: null }); return; }
+
+            if (titleEl) titleEl.textContent = title;
+            if (bodyEl)  bodyEl.textContent  = body;
+            if (okBtn)   okBtn.textContent   = okLabel;
+            if (cancelBtn) cancelBtn.textContent = cancelLabel;
+
+            inputTitle.value = '';
+            inputDesc.value = '';
+
+            const cleanup = (isOk) => {
+                overlay.classList.remove('active');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+                
+                if (isOk) {
+                    resolve({
+                        title: inputTitle.value.trim() || null,
+                        description: inputDesc.value.trim() || ''
+                    });
+                } else {
+                    resolve({ title: null, description: null });
+                }
+            };
+
+            okBtn.onclick = () => cleanup(true);
+            cancelBtn.onclick = () => cleanup(false);
+            // overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); }; // Prevent closing by clicking outside to enforce input
+
+            overlay.classList.add('active');
+            inputTitle.focus();
+        });
+    }
+};
+
+// Expose globally so ResourceManager.js can use it for delete confirmations
+window.RoomConfirmDialog = RoomConfirmDialog;
+window.RoomPromptDialog = RoomPromptDialog;
+
 export class InstructorUIClass {
     init(controller) {
         this.controller = controller;
@@ -185,15 +235,7 @@ export class InstructorUIClass {
                                 <span style="font-weight: bold; font-size: 0.9rem; color: #60a5fa;">إدارة الفيديو</span>
                             </div>
                             <div style="padding: 0.9rem;">
-                                <!-- Sub Tabs: Recorded / Live -->
-                                <div style="display: flex; gap: 0.3rem; margin-bottom: 0.9rem; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 0.2rem;">
-                                    <button class="btn btn-sm btn-primary" id="v-tab-recorded" onclick="window.InstructorAPI.toggleVideoTab('recorded')" style="flex: 1; border-radius: 6px; font-size: 0.8rem;">
-                                        <i class="fas fa-film"></i> مسجّل
-                                    </button>
-                                    <button class="btn btn-sm btn-dark" id="v-tab-live" onclick="window.InstructorAPI.toggleVideoTab('live')" style="flex: 1; border-radius: 6px; font-size: 0.8rem;">
-                                        <i class="fas fa-satellite-dish"></i> بث حي
-                                    </button>
-                                </div>
+
 
                                 <!-- Recorded Panel -->
                                 <div id="v-panel-recorded">
@@ -228,23 +270,6 @@ export class InstructorUIClass {
                                     </div>
                                 </div>
 
-                                <!-- Live Panel (inside video tab) -->
-                                <div id="v-panel-live" style="display:none;">
-                                    <button class="btn btn-sm btn-primary" id="btn-start-agora" onclick="window.InstructorAPI.startAgoraLive()" style="width:100%;margin-bottom:0.5rem;border-radius:8px;background:linear-gradient(135deg,#f87171,#ef4444);border:none;">
-                                        <i class="fas fa-satellite-dish"></i> بدء البث الحي
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" id="btn-stop-agora" onclick="window.InstructorAPI.stopAgoraLive()" style="display:none;width:100%;margin-bottom:0.5rem;border-radius:8px;">
-                                        <i class="fas fa-stop-circle"></i> إنهاء البث
-                                    </button>
-                                    <div style="display:flex;gap:0.4rem;">
-                                        <button class="btn btn-sm btn-dark" id="btn-agora-mic" onclick="window.InstructorAPI.toggleAgoraMic()" style="flex:1;border-radius:8px;">
-                                            <i class="fas fa-microphone"></i> المايك
-                                        </button>
-                                        <button class="btn btn-sm btn-dark" id="btn-agora-cam" onclick="window.InstructorAPI.switchAgoraCamera()" style="flex:1;border-radius:8px;">
-                                            <i class="fas fa-sync-alt"></i> الكاميرا
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -443,19 +468,8 @@ export class InstructorUIClass {
                         <h3 style="font-size:1rem;margin-bottom:1rem;">
                             <i class="fas fa-users" style="color:var(--primary-color);"></i> إدارة الطلاب
                         </h3>
-                        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;">
-                            <table style="width:100%;text-align:right;border-collapse:collapse;font-size:0.88rem;">
-                                <thead style="background:rgba(255,255,255,0.05);">
-                                    <tr>
-                                        <th style="padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);">الاسم</th>
-                                        <th style="padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);">الحالة</th>
-                                        <th style="padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);">إجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="instructor-student-list">
-                                    <tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text-secondary);">جاري التحميل...</td></tr>
-                                </tbody>
-                            </table>
+                        <div id="instructor-student-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                            <div style="text-align:center;padding:2rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">جاري التحميل...</div>
                         </div>
                     </div>
 
@@ -463,20 +477,64 @@ export class InstructorUIClass {
                     <!-- ═══════════════════════════════════════
                          VIEW 3: RESOURCES MANAGEMENT
                          ═══════════════════════════════════════ -->
-                    <div id="inst-view-resources" class="inst-view" style="display:none;padding:0.9rem;">
-                        <h3 style="font-size:1rem;margin-bottom:1rem;">
-                            <i class="fas fa-folder-open" style="color:var(--primary-color);"></i> إدارة الموارد
-                        </h3>
-                        <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;background:rgba(255,255,255,0.02);padding:1.2rem;border-radius:12px;border:1px dashed rgba(255,255,255,0.15);">
-                            <label style="font-size:0.85rem;color:var(--text-secondary);text-align:center;">رفع ملف جديد للدرس الحالي</label>
-                            <div style="display:flex;gap:0.5rem;">
-                                <input type="file" id="inst-new-resource-file" class="form-input" style="flex:1;padding:0.5rem;background:rgba(0,0,0,0.2);font-size:0.82rem;">
-                                <button class="btn btn-primary" style="border-radius:8px;">
-                                    <i class="fas fa-upload"></i> رفع
-                                </button>
-                            </div>
+                     <div id="inst-view-resources" class="inst-view" style="display:none; flex-direction:column; height:100%; overflow:hidden;">
+                        
+                        <!-- Section Header -->
+                        <div style="padding: 0.75rem 0.9rem 0.5rem; flex-shrink:0; border-bottom: 1px solid rgba(255,255,255,0.06); display:flex; align-items:center; gap:0.5rem;">
+                            <i class="fas fa-folder-open" style="color:var(--primary-color); font-size:0.9rem;"></i>
+                            <span style="font-size:0.88rem; font-weight:600;">إدارة الموارد</span>
                         </div>
-                        <div id="inst-resource-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+
+                        <!-- Scrollable Content Area -->
+                        <div style="flex:1; overflow-y:auto; padding: 0.75rem 0.9rem; display:flex; flex-direction:column; gap: 0.75rem;">
+
+                            <!-- Upload Dropzone (Compact) -->
+                            <div id="inst-resource-dropzone" 
+                                 onclick="document.getElementById('inst-new-resource-file').click();"
+                                 style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:rgba(255,255,255,0.03); border:1.5px dashed rgba(255,255,255,0.18); border-radius:10px; cursor:pointer; transition:all 0.2s;"
+                                 onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='rgba(255,255,255,0.07)';"
+                                 onmouseout="this.style.borderColor='rgba(255,255,255,0.18)'; this.style.background='rgba(255,255,255,0.03)';">
+                                <i class="fas fa-cloud-upload-alt" style="font-size:1.6rem; color:var(--primary-color); flex-shrink:0;"></i>
+                                <div>
+                                    <div style="font-size:0.82rem; font-weight:600; margin-bottom:0.1rem;">اختر ملفات أو اسحبها</div>
+                                    <div style="font-size:0.7rem; color:var(--text-secondary);">PDF, صور, فيديو, مستندات · أقصى 100MB</div>
+                                </div>
+                                <input type="file" id="inst-new-resource-file" style="display:none;" multiple>
+                            </div>
+
+                            <!-- File Preview (hidden until files selected) -->
+                            <div id="inst-resource-preview-container" style="display:none; background:rgba(0,0,0,0.25); border-radius:10px; border:1px solid rgba(255,255,255,0.07); overflow:hidden;">
+                                <div style="padding: 0.5rem 0.75rem; background:rgba(255,255,255,0.04); font-size:0.75rem; color:var(--text-secondary); display:flex; align-items:center; gap:0.4rem;">
+                                    <i class="fas fa-list"></i> الملفات المختارة
+                                </div>
+                                <div id="inst-resource-preview-list" style="max-height:120px; overflow-y:auto; padding:0.4rem 0.5rem;"></div>
+                                <div style="padding:0.5rem;">
+                                    <button id="inst-resource-upload-btn" class="btn btn-primary" style="width:100%; border-radius:8px; font-family:var(--font-ar); font-size:0.85rem; padding:0.5rem;">
+                                        <i class="fas fa-upload"></i> بدء الرفع
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Active Upload Queue -->
+                            <div id="inst-resource-list" style="display:flex; flex-direction:column; gap:0.4rem;"></div>
+
+                            <!-- ── Published Resources (Instructor view with delete) ── -->
+                            <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:0.6rem;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                                    <span style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">
+                                        <i class="fas fa-paperclip" style="margin-left:0.3rem;"></i> الملفات المنشورة
+                                    </span>
+                                    <span id="inst-res-count-badge" style="font-size:0.68rem; background:rgba(255,255,255,0.08); padding:0.1rem 0.5rem; border-radius:10px; color:var(--text-secondary);">0</span>
+                                </div>
+                                <div id="inst-uploaded-resources-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                                    <div style="text-align:center; padding:1rem 0; color:var(--text-secondary); font-size:0.8rem;">
+                                        <i class="fas fa-inbox" style="font-size:1.5rem; opacity:0.3; display:block; margin-bottom:0.4rem;"></i>
+                                        لا توجد ملفات منشورة
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
 
 
@@ -947,8 +1005,8 @@ export class InstructorUIClass {
             floatStopBtn.addEventListener('click', async () => {
                 const mode = document.getElementById('float-mode-text')?.textContent;
                 if (mode === 'بث حي')       window.InstructorAPI.stopAgoraLiveDedicated();
-                else if (mode === 'صوت فقط') window.InstructorAPI.stopAudioOnly();
-                else if (mode === 'شرائح')   window.InstructorAPI.stopSlidesAudio();
+                else if (mode === 'صوت فقط')   window.InstructorAPI.stopAudioOnly();
+                else if (mode === 'شرائح')  window.InstructorAPI.stopSlidesAudio();
             });
         }
     }

@@ -31,7 +31,7 @@ export default defineConfig({
     }
   },
   esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    drop: [], // Console logs enabled for diagnostics
   },
   server: {
     port: 3000,

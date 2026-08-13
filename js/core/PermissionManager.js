@@ -17,7 +17,7 @@ export class PermissionManager {
         if (!Array.isArray(roles)) {
             roles = [roles];
         }
-        return roles.includes(role);
+        return roles.map(r => r.toLowerCase()).includes(role.toLowerCase());
     }
 
     static isAdmin(user = null) {

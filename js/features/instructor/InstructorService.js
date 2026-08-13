@@ -20,7 +20,10 @@ export class InstructorServiceClass {
         await InstructorRepository.updateTeachingMode(courseId, modePayload);
     }
 
-    async addChannelMessage(courseId, message) {
+    async addChannelMessage(courseId, lessonId, message) {
+        if (lessonId) {
+            message.lessonId = lessonId;
+        }
         await InstructorRepository.addChannelMessage(courseId, message);
     }
 

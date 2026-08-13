@@ -76,6 +76,14 @@ export class FirebaseManagerClass {
     }
 
     /**
+     * @returns {Object} Server timestamp token
+     */
+    getServerTimestamp() {
+        this._ensureFirebase();
+        return window.firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    /**
      * @returns {firebase.storage.Storage}
      */
     getStorage() {

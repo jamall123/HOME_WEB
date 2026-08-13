@@ -4,7 +4,7 @@
  * Enhanced with robust transitions, loading states, and error recovery.
  */
 
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 import { stateStore } from '../../core/StateStore.js';
 import { MediaRepository } from '../../repositories/MediaRepository.js';
 
@@ -32,11 +32,11 @@ export const MediaEngine = {
     },
 
     init() {
-        EventBus.subscribe(Events.MEDIA_MODE_CHANGED, (payload) => {
+        eventBus.subscribe(Events.MEDIA_MODE_CHANGED, (payload) => {
             this.handleModeChange(payload.mode, payload.data);
         });
 
-        EventBus.subscribe('INTERNAL_START_BROADCAST', async () => {
+        eventBus.subscribe('INTERNAL_START_BROADCAST', async () => {
             await this.startLiveWebRTC();
         });
     },
@@ -159,8 +159,6 @@ export const MediaEngine = {
     },
 
     async startLiveWebRTC(courseId) {
-        alert("MediaEngine: startLiveWebRTC triggered!");
-        console.log("[MediaEngine] startLiveWebRTC triggered with courseId:", courseId);
         if (!window.AgoraRTC) {
             let msg = "مكتبة البث المباشر (Agora) غير محملة. قد يكون هناك مانع إعلانات يمنع تحميلها.";
             this.showError(msg);
@@ -168,40 +166,121 @@ export const MediaEngine = {
             return;
         }
 
+        // Guard: prevent double-publishing
+        if (this._isPublishing) {
+            console.warn("[MediaEngine] Already broadcasting, ignoring duplicate call.");
+            return;
+        }
+        this._isPublishing = true;
+        
+        // Ensure any existing client is disconnected
+        if (this.agoraClient) {
+            try { await this.agoraClient.leave(); } catch (e) {}
+            this.agoraClient = null;
+            this._joinedChannel = null;
+        }
+
         this.showLoader('جاري الاتصال بالبث المباشر...');
 
+        // ── STEP 0: Check camera/mic permissions explicitly ───────────────────────
+        let permStream = null;
         try {
-            // Fetch dynamic token from Firebase Functions
-            const tokenData = await MediaRepository.generateAgoraToken(courseId);
+            permStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            // Immediately stop the test stream – we just needed the permission
+            permStream.getTracks().forEach(t => t.stop());
+        } catch (permErr) {
+            this._isPublishing = false;
+            this.hideLoader();
+            let permMsg = "تعذر الوصول إلى الكاميرا أو الميكروفون.";
+            if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+                permMsg = "❌ تم رفض صلاحية الوصول للكاميرا/الميكروفون.\n\nيرجى:\n1. النقر على أيقونة القفل في شريط العنوان\n2. السماح للموقع بالوصول للكاميرا والميكروفون\n3. تحديث الصفحة والمحاولة مرة أخرى";
+            } else if (permErr.name === 'NotFoundError') {
+                permMsg = "❌ لم يتم العثور على كاميرا أو ميكروفون. تأكد من توصيل الجهاز.";
+            } else if (permErr.name === 'NotReadableError') {
+                permMsg = "❌ الكاميرا/الميكروفون مستخدمة من تطبيق آخر. أغلقها وحاول مرة أخرى.";
+            } else {
+                permMsg = `❌ خطأ في الصلاحيات: ${permErr.name} - ${permErr.message}`;
+            }
+            this.showError(permMsg);
+            alert(permMsg);
+            return;
+        }
+
+        try {
+            // ── STEP 1: Fetch Agora Token ─────────────────────────────────────────
+            let tokenData;
+            let localUid = Math.floor(Math.random() * 100000) + 1;
+            try {
+                tokenData = await MediaRepository.generateAgoraToken({ channelName: courseId, role: 'publisher', uid: localUid });
+            } catch (tokenErr) {
+                throw new Error(`فشل في الحصول على رمز البث [STEP-TOKEN]: ${tokenErr.message}`);
+            }
             
             const APP_ID = tokenData.appId;
             const token = tokenData.token;
             const channel = tokenData.channel;
-            const uid = tokenData.uid || Math.floor(Math.random() * 100000);
+            const uid = tokenData.uid;
 
-            this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-
-            await this.agoraClient.join(APP_ID, channel, token, uid);
-
-            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack({
-                AEC: true, ANS: true, AGC: true
-            });
-            this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack({
-                // Moderate default bitrate/resolution keeps the main stream light on data.
-                encoderConfig: '480p_1'
-            });
-
-            // Publish both a high and a low quality stream so viewers on weak
-            // connections automatically receive the lighter stream (adaptive bitrate).
-            try {
-                await this.agoraClient.enableDualStream();
-                this.agoraClient.setLowStreamParameter({ width: 160, height: 120, framerate: 10, bitrate: 80 });
-            } catch (dualStreamError) {
-                console.warn('[MediaEngine] Dual stream not available:', dualStreamError);
+            if (!APP_ID || !token || !channel) {
+                throw new Error(`بيانات البث غير مكتملة [STEP-TOKEN-DATA]: appId=${APP_ID}, channel=${channel}, token=${!!token}`);
             }
 
-            await this.agoraClient.publish(Object.values(this.localTracks));
-            
+            // ── STEP 2: Create Agora Client ───────────────────────────────────────
+            let client;
+            try {
+                client = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+                this.agoraClient = client;
+            } catch (clientErr) {
+                throw new Error(`فشل في إنشاء عميل Agora [STEP-CLIENT]: ${clientErr.message}`);
+            }
+
+            // ── STEP 3: Join Channel ──────────────────────────────────────────────
+            try {
+                await client.join(APP_ID, channel, token, uid);
+            } catch (joinErr) {
+                throw new Error(`فشل في الانضمام للقناة [STEP-JOIN]: ${joinErr.message || joinErr.code || JSON.stringify(joinErr)}`);
+            }
+
+            // ── STEP 4: Create Audio Track ────────────────────────────────────────
+            try {
+                this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack({
+                    AEC: true,
+                    ANS: true,
+                    AGC: true
+                });
+            } catch (micErr) {
+                throw new Error(`فشل في فتح الميكروفون [STEP-MIC]: ${micErr.message || micErr.name}`);
+            }
+
+            // ── STEP 5: Create Video Track ────────────────────────────────────────
+            try {
+                this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack({ encoderConfig: '480p_1' });
+            } catch (camErr) {
+                throw new Error(`فشل في فتح الكاميرا [STEP-CAM]: ${camErr.message || camErr.name}`);
+            }
+
+            // ── STEP 6: Enable Dual Stream ────────────────────────────────────────
+            try {
+                await client.enableDualStream();
+                client.setLowStreamParameter({ width: 160, height: 120, framerate: 10, bitrate: 80 });
+            } catch (dualErr) {
+                console.warn('[MediaEngine] Dual stream not available:', dualErr);
+            }
+
+            // ── STEP 7: Publish Tracks ────────────────────────────────────────────
+            const tracksToPublish = [this.localTracks.audio, this.localTracks.video].filter(Boolean);
+            if (tracksToPublish.length === 0) {
+                throw new Error("لم يتم العثور على كاميرا أو ميكروفون [STEP-PUBLISH]");
+            }
+            try {
+                await client.publish(tracksToPublish);
+            } catch (pubErr) {
+                throw new Error(`فشل في نشر البث [STEP-PUBLISH]: ${pubErr.message || pubErr.code || JSON.stringify(pubErr)}`);
+            }
+
+            // Mark channel as joined
+            this._joinedChannel = channel;
+
             // Show video in the instructor dashboard immediately (InstructorUI handles button toggles)
             const videoContainer = document.getElementById('agora-live-container'); // FIX: Use the agora container
             if (videoContainer) {
@@ -227,8 +306,10 @@ export const MediaEngine = {
             await MediaRepository.setCourseLiveStatus(courseId, true, channel);
             
             // Toggle UI buttons
-            document.getElementById('btn-start-agora').style.display = 'none';
-            document.getElementById('btn-stop-agora').style.display = 'block';
+            const btnStartAgora = document.getElementById('btn-start-agora');
+            if (btnStartAgora) btnStartAgora.style.display = 'none';
+            const btnStopAgora = document.getElementById('btn-stop-agora');
+            if (btnStopAgora) btnStopAgora.style.display = 'block';
             
             // Setup Local Recording
             try {
@@ -264,6 +345,7 @@ export const MediaEngine = {
             }
             this.showError(errMsg);
             alert("حدث خطأ أثناء الاتصال: " + errMsg);
+            this._isPublishing = false; // Reset so user can retry
         }
     },
 
@@ -273,21 +355,34 @@ export const MediaEngine = {
             return;
         }
 
+        // Guard: don't join twice if already connected
+        if (this._joinedChannel === channel) {
+            console.log("[MediaEngine] Already joined channel:", channel);
+            return;
+        }
+        // If previously connected to a different channel, leave first
+        if (this.agoraClient && this._joinedChannel) {
+            try { await this.agoraClient.leave(); } catch(e) {}
+            this.agoraClient = null;
+            this._joinedChannel = null;
+        }
+
         try {
-            // Fetch dynamic token from Firebase Functions
-            const tokenData = await MediaRepository.generateAgoraToken(channel);
-            
+            // Fetch dynamic token from Firebase
+            let localUid = Math.floor(Math.random() * 100000) + 1;
+            const tokenData = await MediaRepository.generateAgoraToken({ channelName: channel, role: 'subscriber', uid: localUid });
             const APP_ID = tokenData.appId;
             const token = tokenData.token;
-            const uid = tokenData.uid || Math.floor(Math.random() * 100000);
+            const uid = tokenData.uid;
 
             if (!this.agoraClient) {
                 this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             }
 
-            // Continuously monitor connection quality and auto-switch this viewer
-            // to the low-quality/audio-only stream when the network is weak, then
-            // recover automatically once conditions improve (saves data, avoids buffering).
+            // Remove any existing listeners first to avoid stacking
+            this.agoraClient.removeAllListeners();
+
+            // Continuously monitor connection quality
             this.agoraClient.on("network-quality", (stats) => {
                 this.handleNetworkQuality(stats);
             });
@@ -327,8 +422,11 @@ export const MediaEngine = {
             });
 
             await this.agoraClient.join(APP_ID, channel, token, uid);
+            this._joinedChannel = channel;
+            console.log("[MediaEngine] Successfully joined channel:", channel);
         } catch (error) {
             console.error("[MediaEngine] Failed to join live stream:", error);
+            this._joinedChannel = null;
         }
     },
     
@@ -337,37 +435,87 @@ export const MediaEngine = {
             this.showError("مكتبة البث (Agora) غير متوفرة.");
             return;
         }
+
+        if (this._isPublishing) {
+            console.warn("[MediaEngine] Already publishing, ignoring duplicate call.");
+            return;
+        }
+        
+        this._isPublishing = true;
+
+        // Ensure any existing client is disconnected
+        if (this.agoraClient) {
+            try { await this.agoraClient.leave(); } catch (e) {}
+            this.agoraClient = null;
+            this._joinedChannel = null;
+        }
+
+        this.showLoader('جاري الاتصال بالبث الصوتي...');
+
+        // Explicit permission check for microphone
+        let permStream = null;
+        try {
+            permStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            permStream.getTracks().forEach(t => t.stop());
+        } catch (permErr) {
+            this._isPublishing = false;
+            this.hideLoader();
+            let permMsg = "تعذر الوصول إلى الميكروفون.";
+            if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
+                permMsg = "❌ تم رفض صلاحية الوصول للميكروفون.\n\nيرجى السماح بالوصول للميكروفون من إعدادات المتصفح لبدء البث.";
+            } else if (permErr.name === 'NotFoundError') {
+                permMsg = "❌ لم يتم العثور على ميكروفون. تأكد من توصيل الجهاز.";
+            } else if (permErr.name === 'NotReadableError') {
+                permMsg = "❌ الميكروفون مستخدم من تطبيق آخر. أغلقه وحاول مرة أخرى.";
+            }
+            this.showError(permMsg);
+            alert(permMsg);
+            return;
+        }
         
         try {
-            // Fetch dynamic token from Firebase Functions
-            const tokenData = await MediaRepository.generateAgoraToken(courseId);
+            // Fetch dynamic token from Firebase
+            let localUid = Math.floor(Math.random() * 100000) + 1;
+            const tokenData = await MediaRepository.generateAgoraToken({ channelName: courseId, role: 'publisher', uid: localUid });
             
             const APP_ID = tokenData.appId;
             const token = tokenData.token;
             const channel = tokenData.channel;
+            const uid = tokenData.uid;
             
-            if (!this.agoraClient) {
-                this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-            }
-            await this.agoraClient.join(APP_ID, channel, token, null);
+            this.agoraClient = window.AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            
+            await this.agoraClient.join(APP_ID, channel, token, uid);
+            this._joinedChannel = channel;
             
             // Create only audio track
-            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack();
+            this.localTracks.audio = await window.AgoraRTC.createMicrophoneAudioTrack({
+                AEC: true,
+                ANS: true,
+                AGC: true
+            });
             await this.agoraClient.publish([this.localTracks.audio]);
+            
+            this.hideLoader();
             
         } catch (error) {
             console.error("[MediaEngine] Audio WebRTC Error:", error);
-            this.showError("فشل في بدء البث الصوتي. " + error.message);
+            this._isPublishing = false;
+            this.hideLoader();
+            this.showError("فشل في بدء البث الصوتي. " + (error.message || ""));
         }
     },
 
     async leaveLiveWebRTC() {
         if (this.agoraClient) {
             try {
+                this.agoraClient.removeAllListeners();
                 await this.agoraClient.leave();
             } catch (e) {}
             this.agoraClient = null;
         }
+        this._joinedChannel = null;
+        this._isPublishing = false;
         const liveDiv = document.getElementById('agora-student-live');
         if (liveDiv) liveDiv.remove();
     },
@@ -405,16 +553,23 @@ export const MediaEngine = {
             this.localTracks.video = null;
         }
         if (this.agoraClient) {
-            await this.agoraClient.leave();
+            try {
+                this.agoraClient.removeAllListeners();
+                await this.agoraClient.leave();
+            } catch(e) {}
             this.agoraClient = null;
         }
+        // Reset state flags so instructor can re-broadcast
+        this._isPublishing = false;
+        this._joinedChannel = null;
 
         const liveDiv = document.getElementById('agora-local-live');
         if (liveDiv) liveDiv.style.display = 'none';
 
-        document.getElementById('btn-start-agora').style.display = 'block';
-        document.getElementById('btn-stop-agora').style.display = 'none';
-
+        const btnStartAgora = document.getElementById('btn-start-agora');
+        if (btnStartAgora) btnStartAgora.style.display = 'block';
+        const btnStopAgora = document.getElementById('btn-stop-agora');
+        if (btnStopAgora) btnStopAgora.style.display = 'none';
         // ── 3. Upload recording and link to current lesson ────────────────────────
         if (recordingBlob) {
             import('../global/NotificationManager.js').then(({ NotificationManager }) => {

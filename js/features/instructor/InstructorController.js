@@ -18,12 +18,14 @@ import { AnnouncementManager } from './AnnouncementManager.js';
 import { InstructorAnalytics } from './InstructorAnalytics.js';
 
 import { Constants } from '../../core/Constants.js';
+import { EventBus, Events } from '../../core/EventBus.js';
 
 class InstructorControllerClass {
     constructor() {
         this.engine = null;
         this.isInitialized = false;
         this.activeSessionsUnsubscribe = null;
+        this.activeLessonId = null;
     }
 
     /**
@@ -40,6 +42,13 @@ class InstructorControllerClass {
         }
 
         // console.log("[InstructorController] Initializing Enterprise Workspace...");
+
+        // Subscribe to lesson changes
+        EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+            if (lesson && lesson.id) {
+                this.activeLessonId = lesson.id;
+            }
+        });
 
         // Initialize UI
         InstructorUI.init(this);
@@ -178,9 +187,10 @@ class InstructorControllerClass {
     }
 
     _attachVideoSyncListeners(videoEl) {
-        this._removeVideoSyncListeners(videoEl); // Clean up if existing
+        this._removeVideoSyncListeners(); // Clean up if existing
         
         // Cache bound handlers so we can remove them later
+        this._videoTarget = videoEl;
         this._videoHandlers = {
             play: () => TeachingModes.setMode('video', { status: 'playing', timestamp: videoEl.currentTime }),
             pause: () => TeachingModes.setMode('video', { status: 'paused', timestamp: videoEl.currentTime }),
@@ -198,27 +208,30 @@ class InstructorControllerClass {
             })()
         };
 
-        videoEl.addEventListener('play', this._videoHandlers.play);
-        videoEl.addEventListener('pause', this._videoHandlers.pause);
-        videoEl.addEventListener('seeked', this._videoHandlers.seeked);
-        videoEl.addEventListener('timeupdate', this._videoHandlers.timeupdate);
+        if (this._videoTarget) {
+            this._videoTarget.addEventListener('play', this._videoHandlers.play);
+            this._videoTarget.addEventListener('pause', this._videoHandlers.pause);
+            this._videoTarget.addEventListener('seeked', this._videoHandlers.seeked);
+            this._videoTarget.addEventListener('timeupdate', this._videoHandlers.timeupdate);
+        }
     }
 
-    _removeVideoSyncListeners(videoEl) {
-        if (!videoEl || !this._videoHandlers) return;
-        videoEl.removeEventListener('play', this._videoHandlers.play);
-        videoEl.removeEventListener('pause', this._videoHandlers.pause);
-        videoEl.removeEventListener('seeked', this._videoHandlers.seeked);
-        videoEl.removeEventListener('timeupdate', this._videoHandlers.timeupdate);
+    _removeVideoSyncListeners() {
+        if (this._videoTarget && this._videoHandlers) {
+            this._videoTarget.removeEventListener('play', this._videoHandlers.play);
+            this._videoTarget.removeEventListener('pause', this._videoHandlers.pause);
+            this._videoTarget.removeEventListener('seeked', this._videoHandlers.seeked);
+            this._videoTarget.removeEventListener('timeupdate', this._videoHandlers.timeupdate);
+        }
         this._videoHandlers = null;
+        this._videoTarget = null;
     }
 
     /** Hide the video management panel (e.g. after deletion) */
     _hideVideoManagementPanel() {
         const panel = document.getElementById('video-management-panel');
         if (panel) panel.style.display = 'none';
-        const previewEl = document.getElementById('current-video-preview');
-        this._removeVideoSyncListeners(previewEl);
+        this._removeVideoSyncListeners();
     }
 
     /** Called on room init to restore the management panel if a video is already set */
@@ -248,8 +261,10 @@ class InstructorControllerClass {
     async startAgoraLive() {
         try {
             const { MediaEngine } = await import('../../features/media/MediaEngine.js');
-            await TeachingModes.setMode('live', { isLive: true });
+            // Connect Agora FIRST, then update mode so students can join
             await MediaEngine.startLiveWebRTC(this.engine.courseId);
+            // Only broadcast mode change after Agora is up and running
+            await TeachingModes.setMode('live', { isLive: true });
         } catch(e) {
             console.error('[InstructorController] Failed to start live stream:', e);
             const { NotificationManager } = await import('../../features/global/NotificationManager.js');
@@ -276,6 +291,28 @@ class InstructorControllerClass {
     }
 
     async setTeachingMode(modeName, metadata = {}) {
+        // Aggressive Cleanup: Stop any active broadcasts when switching modes
+        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
+        // Reset Slides Audio State
+        this.isSlidesAudioActive = false;
+        const btnSlidesStart = document.getElementById('btn-slides-mic-start');
+        const btnSlidesStop = document.getElementById('btn-slides-mic-stop');
+        if (btnSlidesStart) btnSlidesStart.style.display = 'inline-block';
+        if (btnSlidesStop) btnSlidesStop.style.display = 'none';
+
+        // Reset Audio Only State
+        this.isAudioOnlyActive = false;
+        const btnAudioStart = document.getElementById('btn-audio-start');
+        const btnAudioStop = document.getElementById('btn-audio-stop');
+        if (btnAudioStart) btnAudioStart.style.display = 'inline-block';
+        if (btnAudioStop) btnAudioStop.style.display = 'none';
+        
+        // Stop any Agora publisher client safely
+        if (MediaEngine.agoraClient || MediaEngine._isPublishing) {
+            try { await MediaEngine.stopLiveWebRTC(this.engine.courseId); } catch(e){}
+        }
+
         await TeachingModes.setMode(modeName, metadata);
         
         if (modeName === 'slides') {
@@ -487,7 +524,7 @@ class InstructorControllerClass {
 
         try {
             const { InstructorService } = await import('./InstructorService.js');
-            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
+            await InstructorService.addChannelMessage(this.engine.courseId, this.activeLessonId, msgData);
 
             await TeachingModes.setMode('channel', {
                 lastMessage: msgData
@@ -512,7 +549,7 @@ class InstructorControllerClass {
                 timestamp: Date.now()
             };
             
-            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
+            await InstructorService.addChannelMessage(this.engine.courseId, this.activeLessonId, msgData);
             await TeachingModes.setMode('channel', {
                 lastMessage: msgData
             });
@@ -537,7 +574,7 @@ class InstructorControllerClass {
                 timestamp: Date.now()
             };
 
-            await InstructorService.addChannelMessage(this.engine.courseId, msgData);
+            await InstructorService.addChannelMessage(this.engine.courseId, this.activeLessonId, msgData);
             await TeachingModes.setMode('channel', {
                 lastMessage: msgData
             });
@@ -616,7 +653,7 @@ class InstructorControllerClass {
                             timestamp: Date.now()
                         };
 
-                        await InstructorService.addChannelMessage(this.engine.courseId, msgData);
+                        await InstructorService.addChannelMessage(this.engine.courseId, this.activeLessonId, msgData);
                         await TeachingModes.setMode('channel', {
                             lastMessage: msgData
                         });
@@ -713,8 +750,20 @@ class InstructorControllerClass {
     async revokeStudentMic(studentUid) {
         try {
             await RoomRepository.revokeMicPermission(this.engine.courseId, studentUid);
-        } catch (e) {
-            console.error('[InstructorController] revokeStudentMic failed:', e);
+            NotificationManager.show('تم سحب صلاحية الميكروفون بنجاح', 'success');
+        } catch (error) {
+            console.error('[InstructorController] revoke mic error', error);
+            NotificationManager.show('حدث خطأ أثناء سحب الصلاحية', 'error');
+        }
+    }
+
+    async kickStudent(studentUid) {
+        try {
+            await RoomRepository.kickStudent(this.engine.courseId, studentUid);
+            NotificationManager.show('تم طرد الطالب من الغرفة بنجاح', 'success');
+        } catch (error) {
+            console.error('[InstructorController] kick student error', error);
+            NotificationManager.show('حدث خطأ أثناء محاولة طرد الطالب', 'error');
         }
     }
 
@@ -733,7 +782,47 @@ class InstructorControllerClass {
     }
 
     showHandRaiseNotification(name, id) {
-        // notification stub
+        const container = document.getElementById('hand-raise-toasts');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'hand-raise-toast';
+        toast.style.cssText = 'background:rgba(0,0,0,0.8); border:1px solid var(--primary-color); border-radius:10px; padding:1rem; display:flex; flex-direction:column; gap:0.5rem; animation: slideInRight 0.3s ease;';
+        toast.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold; color:var(--text-primary);"><i class="fas fa-hand-paper" style="color:var(--primary-color);"></i> ${name} يطلب الكلام</span>
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                <button class="btn btn-sm btn-primary" style="flex:1;" onclick="InstructorController.handleHandRaise('${id}', '${name}', true, this.parentElement.parentElement)">قبول</button>
+                <button class="btn btn-sm btn-dark" style="flex:1;" onclick="InstructorController.handleHandRaise('${id}', '${name}', false, this.parentElement.parentElement)">رفض</button>
+            </div>
+        `;
+        container.appendChild(toast);
+        
+        // Auto-remove after 20 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.animation = 'slideOutRight 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+                RoomRepository.cancelMicRequest(this.engine.courseId, id).catch(() => {});
+            }
+        }, 20000);
+    }
+
+    async handleHandRaise(studentUid, studentName, isAccepted, toastElement) {
+        if (toastElement) {
+            toastElement.style.animation = 'slideOutRight 0.3s ease forwards';
+            setTimeout(() => toastElement.remove(), 300);
+        }
+        
+        try {
+            await RoomRepository.cancelMicRequest(this.engine.courseId, studentUid); // Clear request
+            if (isAccepted) {
+                await this.allowStudentMic(studentUid, studentName);
+            }
+        } catch (e) {
+            console.error('[InstructorController] handleHandRaise error:', e);
+        }
     }
 
     destroy() {
@@ -745,8 +834,7 @@ class InstructorControllerClass {
             this.activeSessionsUnsubscribe();
             this.activeSessionsUnsubscribe = null;
         }
-        const previewEl = document.getElementById('current-video-preview');
-        this._removeVideoSyncListeners(previewEl);
+        this._removeVideoSyncListeners();
         this.isInitialized = false;
         this.engine = null;
     }

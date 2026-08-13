@@ -94,9 +94,17 @@ class ChatControllerClass {
     }
 
     handleNewMessages(channel, messages) {
-        const prevLength = this.cache.messages[channel].length;
-        // Merge: keep optimistic messages if server hasn't confirmed yet, then replace
-        this.cache.messages[channel] = messages;
+        const prevLength = this.cache.messages[channel] ? this.cache.messages[channel].length : 0;
+        
+        // Preserve optimistic messages that haven't arrived from the server yet
+        const currentMessages = this.cache.messages[channel] || [];
+        const optimisticMessages = currentMessages.filter(m => m.isOptimistic);
+        
+        // Simple deduplication based on text and proximity in time
+        const serverTexts = new Set(messages.map(m => m.text));
+        const remainingOptimistic = optimisticMessages.filter(m => !serverTexts.has(m.text));
+
+        this.cache.messages[channel] = [...messages, ...remainingOptimistic];
 
         // Increment unread count if channel isn't active or chat is closed
         if ((!this.cache.isChatOpen || this.cache.activeChannel !== channel) && messages.length > prevLength) {

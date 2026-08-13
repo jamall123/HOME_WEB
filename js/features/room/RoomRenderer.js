@@ -15,9 +15,10 @@ export class RoomRenderer {
         this.roomState.onRenderScheduled = () => this.scheduleRender();
     }
 
-    init(courseId, isInstructor) {
+    init(courseId, isInstructor, currentUser) {
         this.courseId = courseId;
         this.isInstructor = isInstructor;
+        this.currentUser = currentUser;
     }
 
     scheduleRender() {
@@ -73,6 +74,11 @@ export class RoomRenderer {
                 const playerVideo = document.getElementById('player-video');
                 if (playerVideo) {
                     playerVideo.controls = false; // Instructor must use the synced side-panel controls
+                    
+                    if (this.isInstructor) {
+                        playerVideo.muted = true; // Prevent double-audio for instructor
+                    }
+
                     if (playerVideo.getAttribute('src') !== state.presentation.videoUrl) {
                         playerVideo.src = state.presentation.videoUrl;
                         playerVideo.setAttribute('src', state.presentation.videoUrl);
@@ -118,16 +124,60 @@ export class RoomRenderer {
                 import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
                     MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
                 });
+            } else if (state.room.mode === 'audio' && state.presentation.audioStream && !this.isInstructor) {
+                import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
+                    MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
+                });
             } else if (prevState) {
                 const wasLiveOrAudio = (prevState.room.mode === 'live') || 
-                                       (prevState.room.mode === 'slides' && prevState.presentation.audioStream);
+                                       (prevState.room.mode === 'slides' && prevState.presentation.audioStream) ||
+                                       (prevState.room.mode === 'audio' && prevState.presentation.audioStream);
                 const isLiveOrAudio = (state.room.mode === 'live') || 
-                                      (state.room.mode === 'slides' && state.presentation.audioStream);
+                                      (state.room.mode === 'slides' && state.presentation.audioStream) ||
+                                      (state.room.mode === 'audio' && state.presentation.audioStream);
                                       
                 if (wasLiveOrAudio && !isLiveOrAudio && !this.isInstructor) {
                     import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
                         MediaEngine.leaveLiveWebRTC();
                     });
+                }
+            }
+        }
+
+        if (renderQueue.has('permissions')) {
+            if (!this.isInstructor && this.currentUser) {
+                const hasMic = state.permissions.micPermissions && state.permissions.micPermissions[this.currentUser.uid];
+                const hadMic = prevState && prevState.permissions.micPermissions && prevState.permissions.micPermissions[this.currentUser.uid];
+                
+                if (hasMic && !hadMic) {
+                    import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
+                        NotificationManager.show('لقد منحك المدرب صلاحية التحدث!', 'success');
+                    });
+                    import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
+                        MediaEngine.startAudioOnlyWebRTC(this.courseId);
+                    });
+                    
+                    const btn = document.getElementById('btn-student-mic');
+                    if (btn) {
+                        btn.style.background = '#10b981'; // green
+                        btn.title = 'تتحدث الآن';
+                        btn.querySelector('i').className = 'fas fa-microphone';
+                    }
+                } else if (!hasMic && hadMic) {
+                    import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
+                        NotificationManager.show('تم سحب صلاحية التحدث.', 'info');
+                    });
+                    import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
+                        MediaEngine.leaveLiveWebRTC();
+                    });
+                    
+                    const btn = document.getElementById('btn-student-mic');
+                    if (btn) {
+                        btn.style.background = '';
+                        btn.classList.remove('requesting');
+                        btn.title = 'طلب الكلام';
+                        btn.querySelector('i').className = 'fas fa-hand-paper';
+                    }
                 }
             }
         }
