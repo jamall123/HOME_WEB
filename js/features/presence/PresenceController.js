@@ -54,16 +54,34 @@ export class PresenceControllerClass {
         // Initial heartbeat
         this.sendHeartbeat();
 
-        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-        this.heartbeatInterval = setInterval(() => {
+        if (this.heartbeatInterval) clearTimeout(this.heartbeatInterval);
+        
+        const heartbeatLoop = () => {
             this.sendHeartbeat();
-        }, 30000); // Send heartbeat every 30 seconds
+            this.heartbeatInterval = setTimeout(heartbeatLoop, 30000);
+        };
+        
+        this.heartbeatInterval = setTimeout(heartbeatLoop, 30000);
 
         this.attachNetworkListeners();
         this.attachVisibilityListeners();
 
         // Listen for another device joining
         this.listenToActiveSession();
+
+        // Listen for global events to stop session
+        if (!this.globalListenersAttached) {
+            this.globalListenersAttached = true;
+            EventBus.subscribe(Events.AUTH_STATE_CHANGED, (user) => {
+                if (!user) {
+                    this.stopPresenceSession(this.courseId, this.userData?.username || this.userData?.uid);
+                }
+            });
+            EventBus.subscribe(Events.PLAY_LECTURE, () => {
+                // The lesson changed. We can send an immediate heartbeat to reflect the new lesson.
+                this.sendHeartbeat();
+            });
+        }
 
         // Cleanup on unload
         window.addEventListener('beforeunload', () => {
@@ -91,7 +109,7 @@ export class PresenceControllerClass {
 
     handleMultipleDevices() {
         if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
+            clearTimeout(this.heartbeatInterval);
             this.heartbeatInterval = null;
         }
         if (this.unsubscribeActiveSession) {
@@ -187,7 +205,7 @@ export class PresenceControllerClass {
      */
     async stopPresenceSession(courseId, username) {
         if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
+            clearTimeout(this.heartbeatInterval);
             this.heartbeatInterval = null;
         }
         if (this.unsubscribeActiveSession) {

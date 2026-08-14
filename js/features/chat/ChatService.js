@@ -18,6 +18,7 @@ class ChatServiceClass {
         }
 
         this.unsubscribeFunctions[channel] = ChatRepository.onMessagesSnapshot(lessonId, channel, onSnapshotCallback, limit);
+        return this.unsubscribeFunctions[channel];
     }
 
     unsubscribeAll() {

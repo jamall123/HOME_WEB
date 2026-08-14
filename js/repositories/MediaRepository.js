@@ -107,6 +107,28 @@ export class MediaRepositoryClass {
         }
     }
 
+    subscribeToResources(courseId, lessonId, callback) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            let query = db.collection(Constants.COLLECTIONS.LESSON_RESOURCES)
+                .where('courseId', '==', courseId)
+                .where('status', '==', 'active');
+            
+            // Note: We don't filter by lessonId here because we need backward compatibility
+            // where resources without lessonId ('global') are shown.
+            // Client-side filtering will handle this, similar to getResources().
+
+            return query.orderBy('createdAt', 'desc').onSnapshot((snap) => {
+                const resources = snap.docs.map(d => d.data());
+                if (callback) callback(resources);
+            }, (error) => {
+                console.error("[MediaRepository] subscribeToResources error:", error);
+            });
+        } catch (error) {
+            this._handleError(error, 'subscribeToResources');
+        }
+    }
+
     async softDeleteResource(resourceId) {
         try {
             const db = FirebaseManager.getFirestore();

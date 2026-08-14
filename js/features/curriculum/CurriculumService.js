@@ -9,6 +9,14 @@ export const CurriculumService = {
         return await CurriculumRepository.getLessons(sectionId);
     },
 
+    subscribeToSections(courseId, callback) {
+        return CurriculumRepository.subscribeToSections(courseId, callback);
+    },
+
+    subscribeToLessons(sectionId, callback) {
+        return CurriculumRepository.subscribeToLessons(sectionId, callback);
+    },
+
     async reorderSections(items) {
         await CurriculumRepository.reorderItems(items, 'curriculum');
     },

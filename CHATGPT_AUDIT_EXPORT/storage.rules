@@ -1,0 +1,143 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    function isInstructor() {
+      return hasRole('instructor') || hasRole('INSTRUCTOR');
+    }
+
+    function isSupervisor() {
+      return hasRole('supervisor') || hasRole('SUPERVISOR');
+    }
+
+    function isAdmin() {
+      return hasRole('ADMIN') || hasRole('SUPER_ADMIN') ||
+        (isSignedIn() && (
+          request.auth.token.email.matches('.*@jhome\\.com') ||
+          request.auth.token.email == 'admin@sudanfree.com' ||
+          request.auth.token.email == 'jamal@home20' ||
+          request.auth.token.email == 'jamal@home20.com' ||
+          request.auth.token.email == 'ja1827082@gmail.com' ||
+          request.auth.token.email == 'ja5009006@gmail.com' ||
+          request.auth.token.email == 'puppeteer@test.com'
+      ));
+    }
+
+    // Receipts: Anyone can upload (enrollment request), Admin can read
+    match /receipts/{allPaths=**} {
+      function isReceiptType() {
+        return request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('application/pdf');
+      }
+      function isValidReceiptSize() {
+        return request.resource.size <= 5 * 1024 * 1024; // Max 5MB
+      }
+      allow create: if isReceiptType() && isValidReceiptSize();
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+    
+    // Course Media (Slides, Videos, Audio)
+    // - Enrolled students can read
+    // - Instructors/Admins can write
+    match /courses_media/{allPaths=**} {
+      // Allow read/write for now since path structure doesn't easily map to courseId
+      // without metadata or custom claims. Upgraded from completely public to Auth required.
+      allow read: if isSignedIn();
+      allow write: if isAdmin(); 
+    }
+    
+    // Public Assets (Read public, Admin write)
+    match /posts/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /successStories/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Course Thumbnails
+    match /courses/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Instructor Profiles
+    match /profiles/{uid}/{fileName} {
+      allow read: if true;
+      // Allow user to write to their own profile, or Admin
+      allow write: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Course Videos
+    match /courses/{courseId}/videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructor();
+    }
+
+    // Course Slides
+    match /courses/{courseId}/slides/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructor();
+    }
+
+    // Course Channel
+    match /courses/{courseId}/channel/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Fallback for cached clients using channel_audio
+    match /courses/{courseId}/channel_audio/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Phase 8: Enterprise Course Resources
+    match /courses/{courseId}/resources/{lessonId}/{fileName} {
+      function isAllowedType() {
+        return request.resource.contentType.matches('application/pdf')
+            || request.resource.contentType.matches('application/msword')
+            || request.resource.contentType.matches('application/vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document')
+            || request.resource.contentType.matches('application/vnd\\.ms-powerpoint')
+            || request.resource.contentType.matches('application/vnd\\.openxmlformats-officedocument\\.presentationml\\.presentation')
+            || request.resource.contentType.matches('application/vnd\\.ms-excel')
+            || request.resource.contentType.matches('application/vnd\\.openxmlformats-officedocument\\.spreadsheetml\\.sheet')
+            || request.resource.contentType.matches('application/zip')
+            || request.resource.contentType.matches('application/x-rar-compressed')
+            || request.resource.contentType.matches('image/.*')
+            || request.resource.contentType.matches('video/.*')
+            || request.resource.contentType.matches('audio/.*')
+            || request.resource.contentType.matches('text/plain')
+            || request.resource.contentType.matches('text/csv');
+      }
+
+      function isValidSize() {
+        // Enforce max 100MB
+        return request.resource.size <= 100 * 1024 * 1024;
+      }
+
+      allow read: if isSignedIn();
+      allow write: if (isAdmin() || isInstructor()) && isAllowedType() && isValidSize();
+    }
+    
+    // Recordings
+    match /recordings/{courseId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructor();
+    }
+    
+    // Default Block
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

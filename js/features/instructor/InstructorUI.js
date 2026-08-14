@@ -1,3 +1,5 @@
+import { MediaEngine } from '../../features/media/MediaEngine.js';
+import { InstructorService } from './InstructorService.js';
 /**
  * InstructorUI.js
  * Renders the instructor control center in the DOM and binds event listeners.
@@ -821,7 +823,7 @@ export class InstructorUIClass {
             },
 
             toggleAgoraMic: async () => {
-                const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+                
                 const isMuted = MediaEngine.toggleMic();
                 const btnIds = ['btn-agora-mic', 'btn-live-mic'];
                 const floatMicBtn = document.getElementById('float-btn-mic');
@@ -843,7 +845,7 @@ export class InstructorUIClass {
             },
 
             switchAgoraCamera: async () => {
-                const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+                
                 MediaEngine.switchCamera();
             },
 
@@ -931,7 +933,7 @@ export class InstructorUIClass {
                 const cvFile    = document.getElementById('inst-prof-cv').files[0];
 
                 try {
-                    const { InstructorService } = await import('./InstructorService.js');
+                    
                     if (photoFile) {
                         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصورة...';
                         profileData.photo = await InstructorService.uploadMedia(photoFile, `profiles/${this.controller.engine.currentUser.uid}`);

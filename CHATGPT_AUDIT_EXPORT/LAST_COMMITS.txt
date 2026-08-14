@@ -1,0 +1,20 @@
+b4f961a feat(audit): apply forensic audit security patches, singleton fixes, broadcast timer logic, and attendance stress test fixes. Include audit reports.
+17cd137 Backup before full project audit
+e3b02a4 feat: implement Phase 2 Lesson-Based Archiving with backward compatibility
+11d187f fix: import CourseRepository in RoomController to fix instructor info render
+d6d7dcb fix: mute instructor side panel video to prevent double audio
+c4d3ad7 fix: instructor main video sync and disable controls
+0074d43 feat: master-slave video sync
+a888e04 style: change chat reactions to understand/didnt understand
+9dc19df feat: add advanced web audio api filtering for voice recording
+ee2c3b4 fix: 5 room fixes - instructor info, audio noise suppress, mutual reactions, optimistic messages, presence
+200ccf9 fix: correct chat input ID mismatch (chat-input-field vs chat-input-msg)
+9c18b63 fix: increase enrollment timeout to 60s and skip idempotency for public requests
+785c881 fix: use backendGateway instance instead of class in EnrollmentController
+4be8d52 fix: Improve error message logging for enrollment
+77305b2 Feat: Add image viewer (lightbox) for course room slides
+4fdd939 Fix: Correct double-escaped regexes in enrollment validation that wrongly rejected valid emails, names, and phone numbers
+c2e1ecd Fix: Add novalidate to enrollment form so custom validation triggers
+1286ef8 Fix: Force overflow-y: auto on modals to override glass-panel hidden overflow
+7e139d5 Fix: Add min-width/height 0 to slide images to prevent CSS grid blowout causing zoomed rendering
+95758d5 Fix: Wire modal close buttons (X, ESC, overlay click) in AcademyController

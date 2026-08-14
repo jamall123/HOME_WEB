@@ -13,6 +13,7 @@ export class ResourceControllerClass {
         this.engine = null;
         this.activeLessonId = null;
         this.onLessonChange = null;
+        this.unsubscribeFn = null;
     }
 
     init(engine) {
@@ -79,15 +80,35 @@ export class ResourceControllerClass {
         await ResourceService.deleteResource(id);
     }
 
+    startSync(onUpdateCallback) {
+        if (this.unsubscribeFn) {
+            this.unsubscribeFn();
+            this.unsubscribeFn = null;
+        }
+        const targetLesson = this.activeLessonId || 'global';
+        
+        // Subscribe to all course resources, then filter on client to avoid multiple index requirements
+        this.unsubscribeFn = ResourceService.subscribeToResources(this.engine.courseId, null, (allResources) => {
+            const filtered = allResources.filter(res => {
+                if (!res.lessonId || res.lessonId === 'global') return true;
+                return res.lessonId === targetLesson;
+            });
+            if (onUpdateCallback) onUpdateCallback(filtered);
+        });
+    }
+
+    stopSync() {
+        if (this.unsubscribeFn) {
+            this.unsubscribeFn();
+            this.unsubscribeFn = null;
+        }
+    }
+
     async getResources() {
         const targetLesson = this.activeLessonId || 'global';
-        // Fetch all resources for the course to avoid requiring new Firestore indexes
         const allResources = await ResourceService.getResources(this.engine.courseId, null);
         
-        // Client-side filtering
         return allResources.filter(res => {
-            // Backward compatibility: If no lessonId exists on the resource, show it everywhere 
-            // or show it only on the first lesson/global.
             if (!res.lessonId || res.lessonId === 'global') return true;
             return res.lessonId === targetLesson;
         });

@@ -153,6 +153,15 @@ export class ResourceServiceClass {
         }
     }
 
+    subscribeToResources(courseId, lessonId, callback) {
+        try {
+            return MediaRepository.subscribeToResources(courseId, lessonId, callback);
+        } catch (error) {
+            console.error("[ResourceService] Failed to subscribe to resources:", error);
+            return () => {};
+        }
+    }
+
     async deleteResource(resourceId) {
         await MediaRepository.softDeleteResource(resourceId);
     }

@@ -32,22 +32,24 @@ export class ResourceManagerClass {
             ResourceController.onProgressUpdate = (id, state, progress, preview) => {
                 this.updateProgressUI(id, progress);
                 if (state === 'success') {
-                    // Wait for OfflineSyncEngine to finish writing to Firestore
-                    setTimeout(() => {
-                        this.loadResources();           // Refresh student list
-                        this.loadInstructorResources(); // Refresh instructor list
-                    }, 2000);
+                    // In real-time sync mode, the onSnapshot listener will automatically 
+                    // fetch and render the new resource once OfflineSyncEngine writes to Firestore.
+                    // No need for manual reload here.
                 }
             };
         }
         
         ResourceController.onLessonChange = () => {
-            this.loadResources();
-            if (this.engine.isInstructor) this.loadInstructorResources();
+            ResourceController.startSync((resources) => {
+                this.renderStudentResources(resources);
+                if (this.engine.isInstructor) this.renderInstructorResources(resources);
+            });
         };
 
-        this.loadResources();
-        if (this.engine.isInstructor) this.loadInstructorResources();
+        ResourceController.startSync((resources) => {
+            this.renderStudentResources(resources);
+            if (this.engine.isInstructor) this.renderInstructorResources(resources);
+        });
     }
 
     setupDragAndDrop() {
@@ -300,12 +302,10 @@ export class ResourceManagerClass {
     }
 
     /** Renders uploaded resources inside the instructor panel with delete buttons */
-    async loadInstructorResources() {
+    async renderInstructorResources(resources) {
         const list = document.getElementById('inst-uploaded-resources-list');
         const badge = document.getElementById('inst-res-count-badge');
         if (!list) return;
-
-        const resources = await ResourceController.getResources();
 
         // Update badge
         if (badge) badge.textContent = resources.length;
@@ -382,9 +382,7 @@ export class ResourceManagerClass {
 
             try {
                 await ResourceController.deleteResource(id);
-                // Refresh both lists
-                this.loadResources();
-                this.loadInstructorResources();
+                // In real-time sync mode, the onSnapshot listener will handle the UI update automatically.
             } catch (err) {
                 console.error('[ResourceManager] Delete failed', err);
                 if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash-alt"></i>'; }
@@ -392,8 +390,7 @@ export class ResourceManagerClass {
         };
     }
 
-    async loadResources() {
-        const resources = await ResourceController.getResources();
+    async renderStudentResources(resources) {
         const displayContainer = document.getElementById('resources-container'); // The main student-facing list
         if (!displayContainer) return;
 
@@ -446,7 +443,7 @@ export class ResourceManagerClass {
                 window.ResourceAPI.delete = async (id) => {
                     if(confirm('هل أنت متأكد من حذف هذا الملف؟')) {
                         await ResourceController.deleteResource(id);
-                        this.loadResources();
+                        // In real-time mode, onSnapshot handles UI refresh automatically.
                     }
                 };
             }

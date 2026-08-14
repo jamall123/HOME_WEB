@@ -26,6 +26,11 @@ export class RoomSync {
 
     setupFirestoreListeners() {
         // 1. Room Session Sync
+        if (this.listeners.room) {
+            this.listeners.room();
+            this.listeners.room = null;
+        }
+
         this.listeners.room = RoomRepository.onRoomSessionSnapshot(this.courseId, data => {
             if (data) {
                 // Check if current student is kicked
@@ -96,6 +101,11 @@ export class RoomSync {
         });
 
         // 3. Real-time Online Users Count
+        if (this.listeners.presence) {
+            this.listeners.presence();
+            this.listeners.presence = null;
+        }
+
         this.listeners.presence = PresenceRepository.onPresenceSnapshot(this.courseId, users => {
             // Filter to users with a recent heartbeat (last 90 seconds)
             const now = Date.now();

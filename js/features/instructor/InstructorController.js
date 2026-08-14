@@ -191,10 +191,18 @@ class InstructorControllerClass {
         
         // Cache bound handlers so we can remove them later
         this._videoTarget = videoEl;
+        
+        let seekTimeout;
+
         this._videoHandlers = {
             play: () => TeachingModes.setMode('video', { status: 'playing', timestamp: videoEl.currentTime }),
             pause: () => TeachingModes.setMode('video', { status: 'paused', timestamp: videoEl.currentTime }),
-            seeked: () => TeachingModes.setMode('video', { timestamp: videoEl.currentTime }), // Preserve status, just update time
+            seeked: () => {
+                clearTimeout(seekTimeout);
+                seekTimeout = setTimeout(() => {
+                    TeachingModes.setMode('video', { timestamp: videoEl.currentTime });
+                }, 500);
+            },
             timeupdate: (() => {
                 let lastTime = 0;
                 return () => {
@@ -523,7 +531,7 @@ class InstructorControllerClass {
         };
 
         try {
-            const { InstructorService } = await import('./InstructorService.js');
+            
             await InstructorService.addChannelMessage(this.engine.courseId, this.activeLessonId, msgData);
 
             await TeachingModes.setMode('channel', {
@@ -540,7 +548,7 @@ class InstructorControllerClass {
         e.target.value = '';
         
         try {
-            const { InstructorService } = await import('./InstructorService.js');
+            
             const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
             
             const msgData = {
@@ -565,7 +573,7 @@ class InstructorControllerClass {
         e.target.value = '';
         
         try {
-            const { InstructorService } = await import('./InstructorService.js');
+            
             const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
             
             const msgData = {
@@ -644,7 +652,7 @@ class InstructorControllerClass {
                     const file = new File([audioBlob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
                     
                     try {
-                        const { InstructorService } = await import('./InstructorService.js');
+                        
                         const url = await InstructorService.uploadMedia(file, `courses/${this.engine.courseId}/channel`);
                         
                         const msgData = {

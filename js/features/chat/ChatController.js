@@ -1,5 +1,6 @@
 import { ChatService } from './ChatService.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js';
+import { ChatUI } from './ChatUI.js';
 
 /**
  * ChatController.js
@@ -29,6 +30,7 @@ class ChatControllerClass {
         
         this.typingTimeout = null;
         this.typingUnsubscribe = null;
+        this.channelUnsubscribe = null;
     }
 
     init(engine) {
@@ -48,8 +50,6 @@ class ChatControllerClass {
                 }
             });
         });
-        
-        // Wait for a lesson to be set before subscribing
     }
 
     setLessonId(lessonId) {
@@ -75,6 +75,11 @@ class ChatControllerClass {
     }
 
     switchChannel(channelName) {
+        if (this.channelUnsubscribe) {
+            this.channelUnsubscribe();
+            this.channelUnsubscribe = null;
+        }
+
         this.cache.activeChannel = channelName;
         this.cache.unreadCounts[channelName] = 0;
         
@@ -82,7 +87,7 @@ class ChatControllerClass {
         const lessonId = this.activeLessonId || this.engine?.courseId;
         if (!lessonId) return;
 
-        ChatService.subscribeToChannel(
+        this.channelUnsubscribe = ChatService.subscribeToChannel(
             lessonId, 
             channelName, 
             30, 
@@ -196,6 +201,7 @@ class ChatControllerClass {
             role: this.engine.isInstructor ? 'instructor' : 'student',
             isOffline: true
         });
+
         this.notifyUI();
     }
 
@@ -258,9 +264,7 @@ class ChatControllerClass {
     }
 
     notifyUI() {
-        import('./ChatUI.js').then(({ ChatUI }) => {
-            ChatUI.render(this.cache);
-        });
+        ChatUI.render(this.cache);
     }
 }
 
@@ -269,7 +273,7 @@ export const ChatController = new ChatControllerClass();
 window.ChatAPI = {
     toggleReaction: async (msgId, reactionType) => {
         try {
-            const { ChatController } = await import('./ChatController.js');
+            
             const userId = ChatController.engine?.currentUser?.uid;
             await ChatService.toggleReaction(msgId, reactionType, userId);
         } catch (error) {

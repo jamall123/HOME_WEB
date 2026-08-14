@@ -1,0 +1,189 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks Custom Claims set by Cloud Functions (api_v1_users changeRole action)
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('ADMIN') || hasRole('SUPER_ADMIN') || hasRole('admin') || hasRole('super_admin') ||
+        // Fallback: email-based (for initial setup before custom claims are set)
+        (isSignedIn() && (
+          request.auth.token.email == 'jamal@home20.com' ||
+          request.auth.token.email == 'admin@sudanfree.com' ||
+          request.auth.token.email == 'ja1827082@gmail.com' ||
+          request.auth.token.email.matches('.*@jhome\\.com') ||
+          request.auth.token.email == 'puppeteer@test.com'
+        ));
+    }
+
+    function isInstructorRole() {
+      return hasRole('INSTRUCTOR') || hasRole('instructor');
+    }
+
+    function isEnrolled(courseId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId));
+    }
+
+    // ── Academy ─────────────────────────────────────────────────────────────
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+
+      match /connected_users/{userId} {
+        allow read: if true;
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+      match /typing_status/{typingId} {
+        allow read: if true;
+        allow write: if isSignedIn() && request.auth.uid == typingId;
+      }
+      match /channelMessages/{msgId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin() || isInstructorRole();
+      }
+    }
+
+    match /enrollments/{enrollmentId} {
+      allow read: if isSignedIn() && enrollmentId.matches(request.auth.uid + '_.*');
+      allow write: if false; // Cloud Functions only
+    }
+
+    match /enrollmentRequests/{reqId} {
+      allow read, update, delete, create: if isSignedIn();
+    }
+
+    match /studentProgress/{docId} {
+      allow read: if isAdmin() || isInstructorRole() || (isSignedIn() && docId.matches(request.auth.uid + '_.*'));
+      allow write: if isSignedIn() && docId.matches(request.auth.uid + '_.*');
+    }
+
+    match /active_sessions/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /activeSessions/{sessionId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /course_chats/{chatId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() || isInstructorRole();
+    }
+
+    match /curriculum/{sectionId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /curriculumLessons/{lessonId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /lessonResources/{resourceId} {
+      allow read: if true;
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /certificates/{certId} {
+      allow read: if isAdmin() || (isSignedIn() && certId.matches(request.auth.uid + '_.*'));
+      allow write: if false; // Only Cloud Functions can generate certificates
+    }
+
+    match /courses_credentials/{credId} {
+      // Admins and instructors can read the list and create new credentials in the control panel.
+      allow read, write: if isSignedIn();
+    }
+
+    // ── CMS (Public Read, Admin Write) ────────────────────────────────────────
+    match /posts/{postId}            { allow read: if true; allow write: if isAdmin(); }
+    match /stories/{storyId}         { allow read: if true; allow write: if isAdmin(); }
+    match /successStories/{storyId}  { allow read: if true; allow write: if isAdmin(); }
+    match /projects/{projectId}      { allow read: if true; allow write: if isAdmin(); }
+    match /pages/{pageId}            { allow read: if true; allow write: if isAdmin(); }
+    match /pageContent/{docId}       { allow read: if true; allow write: if isAdmin(); }
+    match /bank_accounts/{docId}     { allow read: if isAdmin(); allow write: if isAdmin(); }
+    match /newsletter/{docId}        { allow read: if isAdmin(); allow create: if true; allow update, delete: if isAdmin(); }
+
+    // Story Submissions: anyone can submit, only admins can read/update
+    match /storySubmissions/{subId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if true;
+    }
+
+    match /media_library/{mediaId} {
+      allow read: if true;
+      // Hard delete allowed directly (triggers mediaController workflow)
+      allow delete: if isAdmin();
+      // Soft delete / restore = update
+      allow update: if isAdmin();
+      allow create: if false;
+    }
+
+    // ── Settings (Public Read, Admin Write via Functions) ────────────────────
+    match /settings/{docId}     { allow read: if true; allow write: if false; }
+    match /siteSettings/{docId} { allow read: if true; allow write: if false; }
+
+    // ── Users ────────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow update: if isAdmin() || (
+        request.auth != null && 
+        request.auth.uid == userId && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'specialty', 'bio', 'photo', 'cv'])
+      );
+      allow create, delete: if isAdmin();
+    }
+
+    // ── Contact / Messages ───────────────────────────────────────────────────
+    match /messages/{msgId} {
+      allow read: if isAdmin();
+      // Public can submit contact form (anonymous write is blocked — must be signed in)
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+
+      match /replies/{replyId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
+    }
+    // Legacy collection — keep readable for any existing data
+    match /contactMessages/{msgId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── Audit Logs (Read-Only for admins) ────────────────────────────────────
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── System ───────────────────────────────────────────────────────────────
+    match /system_config/{docId} { allow read: if true; allow write: if false; }
+    match /subscriptions/{subId} { allow read, write: if false; }
+    // Idempotency & Rate Limiting: only Cloud Functions (admin SDK) write to these
+    match /system_idempotency/{docId} { allow read, write: if false; }
+    match /system_rate_limits/{docId} { allow read, write: if false; }
+
+    // (pageContent admin write handled above under CMS section)
+
+    // ── Default: Deny Everything Else ───────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

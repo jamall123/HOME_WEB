@@ -92,13 +92,13 @@ service firebase.storage {
     // Course Channel
     match /courses/{courseId}/channel/{allPaths=**} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isAdmin() || isInstructor();
     }
 
     // Fallback for cached clients using channel_audio
     match /courses/{courseId}/channel_audio/{allPaths=**} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isAdmin() || isInstructor();
     }
 
     // Phase 8: Enterprise Course Resources

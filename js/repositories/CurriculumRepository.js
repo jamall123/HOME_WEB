@@ -49,6 +49,42 @@ export class CurriculumRepositoryClass {
         }
     }
 
+    subscribeToSections(courseId, callback) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            return db.collection(Constants.COLLECTIONS.CURRICULUM)
+                .where('courseId', '==', courseId)
+                .onSnapshot(snapshot => {
+                    let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    docs = docs.filter(doc => doc.status !== 'Deleted');
+                    docs.sort((a, b) => (a.order || 0) - (b.order || 0));
+                    callback(docs);
+                }, error => {
+                    this._handleError(error, 'subscribeToSections');
+                });
+        } catch (error) {
+            this._handleError(error, 'subscribeToSections');
+        }
+    }
+
+    subscribeToLessons(sectionId, callback) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            return db.collection(Constants.COLLECTIONS.CURRICULUM_LESSONS)
+                .where('sectionId', '==', sectionId)
+                .onSnapshot(snapshot => {
+                    let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    docs = docs.filter(doc => doc.status !== 'Deleted');
+                    docs.sort((a, b) => (a.order || 0) - (b.order || 0));
+                    callback(docs);
+                }, error => {
+                    this._handleError(error, 'subscribeToLessons');
+                });
+        } catch (error) {
+            this._handleError(error, 'subscribeToLessons');
+        }
+    }
+
     async reorderItems(items, collectionName) {
         if (!items || items.length === 0) return;
         try {

@@ -1,4 +1,8 @@
 import { CurriculumService } from './CurriculumService.js';
+import { CurriculumRepository } from '../../repositories/CurriculumRepository.js';
+import { AuthController } from '../auth/AuthController.js';
+import { CurriculumUI } from './CurriculumUI.js';
+import { CurriculumProgress } from './CurriculumProgress.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js'; // Assuming it was moved to core, or adjust accordingly
 
 /**
@@ -16,15 +20,15 @@ class CurriculumControllerClass {
             searchQuery: ''
         };
         this.courseId = null;
+        this.unsubscribeSections = null;
+        this.unsubscribeLessons = {};
     }
 
     async init(courseId) {
         this.courseId = courseId;
         
-        // Initialize Progress (using dynamic import to avoid circular dep)
-        const { CurriculumProgress } = await import('./CurriculumProgress.js');
-        const { AuthController: AuthService } = await import('../auth/AuthController.js');
-        const user = AuthService.getCurrentUser();
+        // Initialize Progress
+        const user = AuthController.getCurrentUser();
         
         CurriculumProgress.setController(this);
         await CurriculumProgress.init(courseId, user?.uid);
@@ -33,60 +37,107 @@ class CurriculumControllerClass {
     }
 
     /**
-     * Loads the entire curriculum into memory cache.
-     * Implements optimistic rendering by providing data immediately if cached.
+     * Subscribes to the curriculum for real-time updates.
      */
     async loadCurriculum() {
         try {
-            // 1. Fetch sections
-            const sections = await CurriculumService.getSections(this.courseId);
-            this.cache.sections = sections;
-
-            let totalLessonsCount = 0;
-            let activeLesson = null;
-
-            // 2. Fetch lessons for each section
-            for (const section of sections) {
-                const lessons = await CurriculumService.getLessons(section.id);
-                this.cache.lessons[section.id] = lessons;
-                totalLessonsCount += lessons.length;
-                
-                // Find active (uncompleted) lesson
-                const active = lessons.find(l => l.status !== 'Completed');
-                if (active) activeLesson = active;
+            if (this.unsubscribeSections) {
+                this.unsubscribeSections();
+                this.unsubscribeSections = null;
             }
 
-            // 3. Session-Based Logic: Auto-create an active lesson if none exists
-            if (this.isInstructor && !activeLesson) {
-                let defaultTitle = `الدرس ${totalLessonsCount + 1}`;
-                let title = defaultTitle;
-                let desc = '';
+            let initialLoadDone = false;
+
+            this.unsubscribeSections = CurriculumService.subscribeToSections(this.courseId, (sections) => {
+                this.cache.sections = sections;
                 
-                if (window.RoomPromptDialog) {
-                    const res = await window.RoomPromptDialog.show({
-                        title: 'بيانات الدرس الأول',
-                        body: 'الرجاء إدخال عنوان ووصف للدرس للبدء',
-                        okLabel: 'بدء الدرس'
-                    });
-                    if (res && res.title) {
-                        title = res.title;
-                        desc = res.description || '';
+                // Cleanup old lesson subscriptions that are no longer in sections
+                const currentSectionIds = new Set(sections.map(s => s.id));
+                for (const sectionId in this.unsubscribeLessons) {
+                    if (!currentSectionIds.has(sectionId)) {
+                        this.unsubscribeLessons[sectionId]();
+                        delete this.unsubscribeLessons[sectionId];
+                        delete this.cache.lessons[sectionId];
                     }
                 }
-                
-                activeLesson = await this.createAutomaticLesson(title, desc, totalLessonsCount + 1);
-            }
 
-            if (activeLesson) {
-                // Auto-select the active lesson
-                this.selectLesson(activeLesson.id);
-            }
+                sections.forEach(section => {
+                    if (!this.unsubscribeLessons[section.id]) {
+                        this.unsubscribeLessons[section.id] = CurriculumService.subscribeToLessons(section.id, async (lessons) => {
+                            this.cache.lessons[section.id] = lessons;
+                            
+                            // Perform initial active lesson logic ONLY on the first full load
+                            if (!initialLoadDone && this.isInitialLoadComplete()) {
+                                initialLoadDone = true;
+                                await this.handleInitialActiveLesson();
+                            } else {
+                                this.notifyUIRender();
+                            }
+                        });
+                    }
+                });
 
-            // console.log("[CurriculumController] Curriculum loaded into cache.");
+                if (!initialLoadDone && this.isInitialLoadComplete()) {
+                    initialLoadDone = true;
+                    this.handleInitialActiveLesson();
+                } else {
+                    this.notifyUIRender();
+                }
+            });
+
         } catch (error) {
             console.error("[CurriculumController] Failed to load curriculum:", error);
             NotificationManager.show("فشل تحميل المنهج. يرجى التحقق من اتصالك بالإنترنت.", "error");
         }
+    }
+
+    isInitialLoadComplete() {
+        if (!this.cache.sections) return false;
+        for (const section of this.cache.sections) {
+            if (!this.cache.lessons[section.id]) return false;
+        }
+        return true;
+    }
+
+    async handleInitialActiveLesson() {
+        let totalLessonsCount = 0;
+        let activeLesson = null;
+
+        for (const section of this.cache.sections) {
+            const lessons = this.cache.lessons[section.id] || [];
+            totalLessonsCount += lessons.length;
+            
+            // Find active (uncompleted) lesson
+            const active = lessons.find(l => l.status !== 'Completed');
+            if (active && !activeLesson) activeLesson = active; // Take first active
+        }
+
+        // 3. Session-Based Logic: Auto-create an active lesson if none exists
+        if (this.isInstructor && !activeLesson) {
+            let defaultTitle = `الدرس ${totalLessonsCount + 1}`;
+            let title = defaultTitle;
+            let desc = '';
+            
+            if (window.RoomPromptDialog) {
+                const res = await window.RoomPromptDialog.show({
+                    title: 'بيانات الدرس الأول',
+                    body: 'الرجاء إدخال عنوان ووصف للدرس للبدء',
+                    okLabel: 'بدء الدرس'
+                });
+                if (res && res.title) {
+                    title = res.title;
+                    desc = res.description || '';
+                }
+            }
+            
+            activeLesson = await this.createAutomaticLesson(title, desc, totalLessonsCount + 1);
+        }
+
+        if (activeLesson) {
+            // Auto-select the active lesson
+            this.selectLesson(activeLesson.id);
+        }
+        this.notifyUIRender();
     }
 
     /**
@@ -236,10 +287,10 @@ class CurriculumControllerClass {
             this.cache.lessons[docRef.id] = this.cache.lessons[tempId] || [];
             delete this.cache.lessons[tempId];
 
-            import('../auth/AuthController.js').then(async ({ AuthController }) => {
+            try {
                 const user = AuthController.getCurrentUser();
                 await CurriculumService.logAudit('create_section', docRef.id, 'section', null, newSection, user?.uid);
-            });
+            } catch (e) { console.error(e); }
             
             NotificationManager.show("تمت إضافة القسم بنجاح", "success");
             this.notifyUIRender();
@@ -365,9 +416,7 @@ class CurriculumControllerClass {
     }
 
     notifyUIRender() {
-        import('./CurriculumUI.js').then(({ CurriculumUI }) => {
-            CurriculumUI.render(this.cache);
-        });
+        CurriculumUI.render(this.cache);
     }
 
 }

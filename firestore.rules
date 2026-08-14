@@ -104,8 +104,7 @@ service cloud.firestore {
     }
 
     match /courses_credentials/{credId} {
-      // Admins and instructors can read the list and create new credentials in the control panel.
-      allow read, write: if isSignedIn();
+      allow read, write: if isAdmin() || isInstructorRole();
     }
 
     // ── CMS (Public Read, Admin Write) ────────────────────────────────────────

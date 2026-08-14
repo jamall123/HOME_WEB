@@ -1,0 +1,77 @@
+
+> home-web@1.0.0 build
+> vite build
+
+vite v8.1.5 building client environment for production...
+[2Ktransforming...<script src="js/firebase-config.js"> in "/verify.html" can't be bundled without type="module" attribute
+✓ 150 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/verify.html                                        5.74 kB │ gzip:  1.94 kB
+dist/post.html                                          6.40 kB │ gzip:  1.79 kB
+dist/story.html                                         6.41 kB │ gzip:  1.80 kB
+dist/blog.html                                          7.94 kB │ gzip:  2.11 kB
+dist/sudan-free.html                                    8.23 kB │ gzip:  2.35 kB
+dist/contact.html                                      10.90 kB │ gzip:  3.01 kB
+dist/about.html                                        12.52 kB │ gzip:  3.54 kB
+dist/privacy-policy.html                               13.39 kB │ gzip:  4.23 kB
+dist/services.html                                     17.62 kB │ gzip:  4.69 kB
+dist/projects.html                                     21.40 kB │ gzip:  5.31 kB
+dist/index.html                                        24.68 kB │ gzip:  6.14 kB
+dist/courses.html                                      27.72 kB │ gzip:  6.44 kB
+dist/course-room.html                                  38.02 kB │ gzip:  9.06 kB
+dist/assets/jamal_real-BuLbCD6l.jpg                   121.88 kB
+dist/assets/post-C1yHIdWP.css                           5.71 kB │ gzip:  1.66 kB
+dist/assets/sudanFree-CgE2LGLP.css                     10.61 kB │ gzip:  3.05 kB
+dist/assets/courseRoom-Dd8DccWn.css                    21.67 kB │ gzip:  4.96 kB
+dist/assets/InstructorService-DFH8LYX2.js               0.07 kB │ gzip:  0.08 kB
+dist/assets/rolldown-runtime-BQ-_32WO.js                0.16 kB │ gzip:  0.16 kB
+dist/assets/CoursesCredentialsRepository-CRe17y_H.js    0.46 kB │ gzip:  0.32 kB
+dist/assets/firebase-config-DkUYsNQt.js                 0.84 kB │ gzip:  0.47 kB
+dist/assets/CommandBus-C_R7KGFc.js                      1.02 kB │ gzip:  0.53 kB
+dist/assets/preload-helper-BATLnrmA.js                  1.22 kB │ gzip:  0.70 kB
+dist/assets/ProgressManager-DMIhw1SN.js                 1.35 kB │ gzip:  0.58 kB
+dist/assets/ReportGenerator-DGWhhGX1.js                 1.58 kB │ gzip:  0.84 kB
+dist/assets/StudentProgressRepository-kYhNGkTs.js       1.69 kB │ gzip:  0.56 kB
+dist/assets/EventBus-4Q0tYHVL.js                        1.77 kB │ gzip:  0.73 kB
+dist/assets/animations-BlPka5LK.js                      1.80 kB │ gzip:  0.80 kB
+dist/assets/NotificationManager-DMg0JkUo.js             2.16 kB │ gzip:  1.01 kB
+dist/assets/ProgressController-BaBRpWp7.js              2.85 kB │ gzip:  1.10 kB
+dist/assets/contact-DRKtOtqo.js                         3.07 kB │ gzip:  1.53 kB
+dist/assets/AdminRepository-CSPVwcb0.js                 3.12 kB │ gzip:  1.23 kB
+dist/assets/CurriculumRepository-BvNRSpvs.js            3.26 kB │ gzip:  1.03 kB
+dist/assets/ChatRepository-czIRHjD2.js                  3.50 kB │ gzip:  1.15 kB
+dist/assets/UserRepository-Qg-1MUAM.js                  3.60 kB │ gzip:  1.62 kB
+dist/assets/StudentProgressUI-CYeqy6dM.js               3.93 kB │ gzip:  1.42 kB
+dist/assets/MediaRepository-CV7UmlOS.js                 4.30 kB │ gzip:  1.27 kB
+dist/assets/OfflineSyncEngine-D8drYhpa.js               4.45 kB │ gzip:  1.64 kB
+dist/assets/CurriculumProgress-KEuHJ4WM.js              4.51 kB │ gzip:  1.61 kB
+dist/assets/post-D5phSpLH.js                            5.50 kB │ gzip:  2.02 kB
+dist/assets/InstructorAnalyticsUI-Bd4L8cCa.js           5.87 kB │ gzip:  1.91 kB
+dist/assets/GlobalController-DTbCEj-T.js                6.31 kB │ gzip:  2.07 kB
+dist/assets/CourseRepository-BkU7rJA0.js                7.32 kB │ gzip:  2.90 kB
+dist/assets/ResourceService-Cy6cgQZU.js                 8.27 kB │ gzip:  3.30 kB
+dist/assets/blog-CJtPlAc5.js                            8.98 kB │ gzip:  2.77 kB
+dist/assets/MediaManager-0xlys4DY.js                    9.43 kB │ gzip:  3.33 kB
+dist/assets/story-CqORjPY3.js                           9.65 kB │ gzip:  3.21 kB
+dist/assets/ArchiveManager-Df6Bzhjc.js                 11.65 kB │ gzip:  4.00 kB
+dist/assets/courses-CaLVb5ea.js                        13.77 kB │ gzip:  4.09 kB
+dist/assets/MediaEngine-MRBtyyxG.js                    18.43 kB │ gzip:  5.93 kB
+dist/assets/enrollment-Da4rmH6X.js                     19.29 kB │ gzip:  5.89 kB
+dist/assets/ResourceManager-CNsBU-MG.js                20.68 kB │ gzip:  5.98 kB
+dist/assets/instructor-DQ-uwuIE.js                     88.83 kB │ gzip: 17.53 kB
+dist/assets/courseRoom-C3iVTKTu.js                     93.22 kB │ gzip: 24.67 kB
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/auth/AuthController.js is dynamically imported by js/features/curriculum/CurriculumController.js but also statically imported by course-room.html?html-proxy&index=3.js, js/features/auth/AuthUI.js, js/features/room/RoomController.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/chat/ChatController.js is dynamically imported by js/features/chat/ChatController.js, js/features/room/RoomController.js but also statically imported by js/features/chat/ChatUI.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/chat/ChatUI.js is dynamically imported by js/features/chat/ChatController.js but also statically imported by js/features/room/RoomController.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/curriculum/CurriculumUI.js is dynamically imported by js/features/curriculum/CurriculumController.js but also statically imported by js/features/curriculum/index.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/curriculum/index.js is dynamically imported by js/features/archive/ArchiveController.js, js/features/instructor/InstructorUI.js, js/features/media/MediaEngine.js, js/features/resource/ResourceController.js, js/features/room/RoomController.js, ... but also statically imported by js/features/room/RoomController.js, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0mjs/features/instructor/InstructorService.js is dynamically imported by js/features/instructor/InstructorController.js, js/features/instructor/InstructorUI.js but also statically imported by js/features/instructor/ClassroomManager.js, js/features/instructor/InstructorController.js, js/features/instructor/TeachingModes.js, js/features/instructor/index.js, dynamic import will not move module into another chunk.
+
+✓ built in 763ms

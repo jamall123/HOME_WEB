@@ -336,7 +336,8 @@ export class CourseRoomController {
             alert("تم الحفظ بنجاح!");
             
             if (!id && rooms.length === 1) {
-                window.location.reload();
+                // In real-time sync mode, the listeners handle UI updates automatically.
+                // We don't need to reload the page anymore.
             }
 
         } catch (e) {
