@@ -1,117 +1,45 @@
 /**
  * @file PresenceRepository.js
  * @purpose Enterprise Data Layer for User Presence and Sessions.
- * @responsibilities
- *  - Manage active user sessions and online status.
- *  - Expose Firebase Realtime Database / Firestore presence connections.
- * @collectionsUsed Constants.COLLECTIONS.ACTIVE_SESSIONS, Constants.SUBCOLLECTIONS.CONNECTED_USERS
- * @cloudFunctionsUsed None
- * @snapshotListeners onPresenceSnapshot
- * @transactions None
- * @publicAPI updatePresence, onPresenceSnapshot, getActiveSessions
- * @futureMigrationPlan Replace RoomEngine and PresenceManager db calls with PresenceRepository.
  */
 
-import { FirebaseManager } from '../core/FirebaseManager.js';
-import { ErrorHandler, AppError, ErrorCategory } from '../core/ErrorHandler.js';
 import { Constants } from '../core/Constants.js';
+import { FirestorePresenceProvider } from '../features/presence/providers/FirestorePresenceProvider.js';
+import { RTDBPresenceProvider } from '../features/presence/providers/RTDBPresenceProvider.js';
 
 export class PresenceRepositoryClass {
-    _handleError(error, method) {
-        const enhancedError = new AppError(error.message, ErrorCategory.FIREBASE, error);
-        ErrorHandler.handleError(enhancedError, `PresenceRepository.${method}`);
-        throw enhancedError;
+    constructor() {
+        this.provider = Constants.FEATURE_FLAGS.USE_RTDB_PRESENCE 
+            ? new RTDBPresenceProvider() 
+            : new FirestorePresenceProvider();
     }
 
     async updatePresence(courseId, userId, data) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            const payload = {
-                ...data,
-                lastSeen: FirebaseManager.getFirestoreFieldValue().serverTimestamp()
-            };
-            await db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
-                .collection(Constants.SUBCOLLECTIONS.CONNECTED_USERS).doc(userId).set(payload, { merge: true });
-        } catch (error) {
-            this._handleError(error, 'updatePresence');
-        }
+        return this.provider.updatePresence(courseId, userId, data);
     }
 
     async deletePresence(courseId, userId) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            await db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
-                .collection(Constants.SUBCOLLECTIONS.CONNECTED_USERS).doc(userId).delete();
-        } catch (error) {
-            this._handleError(error, 'deletePresence');
-        }
+        return this.provider.deletePresence(courseId, userId);
     }
 
     async updateActiveSession(courseId, userId, data) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            const payload = {
-                ...data,
-                lastSeen: FirebaseManager.getFirestoreFieldValue().serverTimestamp()
-            };
-            await db.collection('activeSessions').doc(`${courseId}_${userId}`).set(payload, { merge: true });
-        } catch (error) {
-            this._handleError(error, 'updateActiveSession');
-        }
+        return this.provider.updateActiveSession(courseId, userId, data);
     }
 
     onActiveSessionSnapshot(courseId, userId, callback) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            return db.collection('activeSessions').doc(`${courseId}_${userId}`)
-                .onSnapshot(doc => {
-                    if (doc.exists) {
-                        callback({ id: doc.id, ...doc.data() });
-                    } else {
-                        callback(null);
-                    }
-                }, error => {
-                    this._handleError(error, 'onActiveSessionSnapshot');
-                });
-        } catch (error) {
-            this._handleError(error, 'onActiveSessionSnapshot');
-        }
+        return this.provider.onActiveSessionSnapshot(courseId, userId, callback);
     }
 
     async getActiveSessions(courseId) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            const snapshot = await db.collection(Constants.COLLECTIONS.ACTIVE_SESSIONS).where('courseId', '==', courseId).get();
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-            this._handleError(error, 'getActiveSessions');
-        }
+        return this.provider.getActiveSessions(courseId);
     }
 
     async getConnectedUsers(courseId) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            const snapshot = await db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
-                .collection(Constants.SUBCOLLECTIONS.CONNECTED_USERS).get();
-            return snapshot.docs.map(doc => doc.data());
-        } catch (error) {
-            this._handleError(error, 'getConnectedUsers');
-        }
+        return this.provider.getConnectedUsers(courseId);
     }
 
     onPresenceSnapshot(courseId, callback) {
-        try {
-            const db = FirebaseManager.getFirestore();
-            return db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
-                .collection(Constants.SUBCOLLECTIONS.CONNECTED_USERS)
-                .onSnapshot(snapshot => {
-                    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                }, error => {
-                    this._handleError(error, 'onPresenceSnapshot');
-                });
-        } catch (error) {
-            this._handleError(error, 'onPresenceSnapshot');
-        }
+        return this.provider.onPresenceSnapshot(courseId, callback);
     }
 }
 

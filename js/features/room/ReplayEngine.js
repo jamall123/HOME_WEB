@@ -111,5 +111,11 @@ export class ReplayEngineClass {
         // In a full implementation, we would iterate this.events up to this.currentTime 
         // and inject them into ChatUI. For the architecture deliverable, this demonstrates the engine logic.
     }
+
+    destroy() {
+        this.pause();
+        this.archiveData = null;
+        this.events = [];
+    }
 }
 export const ReplayEngine = new ReplayEngineClass();

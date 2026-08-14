@@ -94,5 +94,10 @@ export const Constants = Object.freeze({
         INACTIVE: 'inactive',
         PENDING: 'pending',
         DELETED: 'deleted'
+    },
+
+    // Feature Flags
+    FEATURE_FLAGS: {
+        USE_RTDB_PRESENCE: true
     }
 });

@@ -16,6 +16,15 @@ import { CourseRepository } from '../../repositories/CourseRepository.js';
 import { ChatRepository } from '../../repositories/ChatRepository.js';
 import { PresenceController } from '../presence/PresenceController.js';
 
+import { ChatController } from '../chat/ChatController.js';
+import { MediaManager } from '../../features/media/MediaManager.js';
+import { CurriculumController } from '../curriculum/index.js';
+import { ResourceManager } from '../../features/resource/ResourceManager.js';
+import { ArchiveManager } from '../../features/archive/ArchiveManager.js';
+import { OfflineSyncEngine } from '../../features/offline/OfflineSyncEngine.js';
+import { ProgressManager } from '../../features/progress/ProgressManager.js';
+import { InstructorController } from '../instructor/index.js';
+
 import { RoomState } from './RoomState.js';
 import { RoomRenderer } from './RoomRenderer.js';
 import { RoomEvents } from './RoomEvents.js';
@@ -107,37 +116,29 @@ class RoomControllerClass {
         try {
             await Promise.all([
                 PresenceController.startPresenceSession(this.courseId, this.currentUser, this.state),
-                import('../chat/ChatController.js').then(({ ChatController }) => ChatController.init(this)),
-                import('../../features/media/MediaManager.js').then(({ MediaManager }) => MediaManager.init(this))
+                ChatController.init(this),
+                MediaManager.init(this)
             ]);
 
             if (this.isInstructor) {
-                import('../instructor/index.js').then(({ InstructorController }) => {
-                    InstructorController.init(this);
-                    InstructorController.listenForHandRaises();
-                });
+                InstructorController.init(this);
+                InstructorController.listenForHandRaises();
             }
 
-            import('../../features/offline/OfflineSyncEngine.js').then(({ OfflineSyncEngine }) => OfflineSyncEngine.init());
-            import('../../features/progress/ProgressManager.js').then(({ ProgressManager }) => ProgressManager.init(this));
+            OfflineSyncEngine.init();
+            ProgressManager.init(this);
 
         } catch (error) {
             console.error("Feature initialization failed", error);
         }
 
-        import('../curriculum/index.js').then(({ CurriculumController }) => {
-            CurriculumController.isInstructor = this.isInstructor;
-            CurriculumController.init(this.courseId);
-        });
+        CurriculumController.isInstructor = this.isInstructor;
+        CurriculumController.init(this.courseId);
+        
         CurriculumUI.init(this.isInstructor);
 
-        import('../../features/resource/ResourceManager.js').then(({ ResourceManager }) => {
-            ResourceManager.init(this);
-        });
-
-        import('../../features/archive/ArchiveManager.js').then(({ ArchiveManager }) => {
-            ArchiveManager.init(this);
-        });
+        ResourceManager.init(this);
+        ArchiveManager.init(this);
 
         this.detectNetworkConditions();
 

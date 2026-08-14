@@ -87,5 +87,13 @@ export class OfflineSyncEngineClass {
             this.triggerBackgroundSync();
         }
     }
+
+    destroy() {
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+            this.syncInterval = null;
+        }
+        // Also could remove event listeners, but typically OfflineSyncEngine is a global singleton
+    }
 }
 export const OfflineSyncEngine = new OfflineSyncEngineClass();

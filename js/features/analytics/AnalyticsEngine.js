@@ -9,7 +9,7 @@ export class AnalyticsEngineClass {
     constructor() {
         this.buffer = new Map();
         // Flush buffer to firestore every 30 seconds to save writes
-        setInterval(() => this.flush(), 30000);
+        this.flushTimer = setInterval(() => this.flush(), 30000);
     }
 
     trackDownload(resourceId, courseId) {
@@ -46,6 +46,13 @@ export class AnalyticsEngineClass {
             }
         } catch (e) {
             console.error('[AnalyticsEngine] Failed to flush stats', e);
+        }
+    }
+
+    destroy() {
+        if (this.flushTimer) {
+            clearInterval(this.flushTimer);
+            this.flushTimer = null;
         }
     }
 }

@@ -30,25 +30,25 @@ service cloud.firestore {
 
     function isEnrolled(courseId) {
       return isSignedIn() &&
-        exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId));
+        exists(path("/databases/" + database + "/documents/enrollments/" + request.auth.uid + "_" + courseId));
     }
 
     // ── Academy ─────────────────────────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if true;
+      allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
       allow write: if isAdmin() || isInstructorRole();
 
       match /connected_users/{userId} {
-        allow read: if true;
+        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
         allow write: if isSignedIn() && request.auth.uid == userId;
       }
       match /typing_status/{typingId} {
-        allow read: if true;
+        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
         allow write: if isSignedIn() && request.auth.uid == typingId;
       }
       match /channelMessages/{msgId} {
-        allow read: if true;
-        allow create: if isSignedIn();
+        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
+        allow create: if isEnrolled(courseId) || isInstructorRole() || isAdmin();
         allow update, delete: if isAdmin() || isInstructorRole();
       }
     }
@@ -68,33 +68,33 @@ service cloud.firestore {
     }
 
     match /active_sessions/{courseId} {
-      allow read: if true;
+      allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
       allow write: if isAdmin() || isInstructorRole();
     }
 
     match /activeSessions/{sessionId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructorRole();
     }
 
     match /course_chats/{chatId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow create: if isSignedIn();
       allow update, delete: if isAdmin() || isInstructorRole();
     }
 
     match /curriculum/{sectionId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructorRole();
     }
 
     match /curriculumLessons/{lessonId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructorRole();
     }
 
     match /lessonResources/{resourceId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructorRole();
     }
 

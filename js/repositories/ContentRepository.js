@@ -74,7 +74,8 @@ export class ContentRepositoryClass {
 
     async getPublishedPostsCount() {
         try {
-            return await this._getPostsCollection().where('status', '==', 'published').count().get();
+            const snapshot = await this._getPostsCollection().where('status', '==', 'published').get();
+            return { data: () => ({ count: snapshot.size }) };
         } catch (error) {
             this._handleError(error, 'getPublishedPostsCount');
         }
@@ -125,7 +126,8 @@ export class ContentRepositoryClass {
 
     async getPublishedStoriesCount() {
         try {
-            return await this._getStoriesCollection().where('isPublished', '==', true).count().get();
+            const snapshot = await this._getStoriesCollection().where('isPublished', '==', true).get();
+            return { data: () => ({ count: snapshot.size }) };
         } catch (error) {
             this._handleError(error, 'getPublishedStoriesCount');
         }

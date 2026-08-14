@@ -40,7 +40,7 @@ service firebase.storage {
         return request.resource.size <= 5 * 1024 * 1024; // Max 5MB
       }
       allow create: if isReceiptType() && isValidReceiptSize();
-      allow read: if true;
+      allow read: if isAdmin();
       allow update, delete: if isAdmin();
     }
     
@@ -79,25 +79,25 @@ service firebase.storage {
 
     // Course Videos
     match /courses/{courseId}/videos/{allPaths=**} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructor();
     }
 
     // Course Slides
     match /courses/{courseId}/slides/{allPaths=**} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructor();
     }
 
     // Course Channel
     match /courses/{courseId}/channel/{allPaths=**} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructor();
     }
 
     // Fallback for cached clients using channel_audio
     match /courses/{courseId}/channel_audio/{allPaths=**} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow write: if isAdmin() || isInstructor();
     }
 

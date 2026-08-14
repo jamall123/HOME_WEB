@@ -38,7 +38,8 @@ export class CourseRepositoryClass {
 
     async getCoursesCount() {
         try {
-            return await this._getCollection().count().get();
+            const snapshot = await this._getCollection().get();
+            return { data: () => ({ count: snapshot.size }) };
         } catch (error) {
             this._handleError(error, 'getCoursesCount');
         }

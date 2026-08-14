@@ -6,6 +6,7 @@
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyCJ8I06UGVBOJdnU4Upp_EekS7txwX-fBg",
   authDomain: "jhomeweb-9ee56.firebaseapp.com",
+  databaseURL: "https://jhomeweb-9ee56-default-rtdb.firebaseio.com",
   projectId: "jhomeweb-9ee56",
   storageBucket: "jhomeweb-9ee56.firebasestorage.app",
   messagingSenderId: "572713499787",
@@ -28,6 +29,7 @@ if (typeof firebase !== 'undefined' && !window.firebase.apps.length) {
         console.log('Connecting to Firebase Emulators...');
         window.firebase.auth().useEmulator('http://127.0.0.1:9099');
         window.firebase.firestore().useEmulator('127.0.0.1', 8080);
+        window.firebase.database().useEmulator('127.0.0.1', 9000);
         window.firebase.storage().useEmulator('127.0.0.1', 9199);
         window.firebase.functions().useEmulator('127.0.0.1', 5001);
     }
