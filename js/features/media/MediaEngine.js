@@ -7,6 +7,8 @@
 import { eventBus, Events } from '../../core/EventBus.js';
 import { stateStore } from '../../core/StateStore.js';
 import { MediaRepository } from '../../repositories/MediaRepository.js';
+import { NotificationManager } from '../global/NotificationManager.js';
+import { CurriculumController } from '../curriculum/index.js';
 
 export const MediaEngine = {
     agoraClient: null,
@@ -26,9 +28,7 @@ export const MediaEngine = {
         if (now - this.lastNetworkWarningAt < 30000) return; // Throttle to once per 30s
         this.lastNetworkWarningAt = now;
 
-        import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-            NotificationManager.show('اتصالك بالإنترنت ضعيف، تم تقليل جودة البث تلقائياً لضمان استمرارية المشاهدة.', 'info');
-        }).catch(() => {});
+        NotificationManager.show('اتصالك بالإنترنت ضعيف، تم تقليل جودة البث تلقائياً لضمان استمرارية المشاهدة.', 'info');
     },
 
     init() {
@@ -38,6 +38,14 @@ export const MediaEngine = {
 
         eventBus.subscribe('INTERNAL_START_BROADCAST', async () => {
             await this.startLiveWebRTC();
+        });
+
+        eventBus.subscribe(Events.DESTROY_ROOM_SESSION, async () => {
+            if (typeof this.stopLiveWebRTC === 'function') await this.stopLiveWebRTC();
+            if (typeof this.leaveLiveWebRTC === 'function') await this.leaveLiveWebRTC();
+            if (this.agoraClient && typeof this.agoraClient.removeAllListeners === 'function') {
+                this.agoraClient.removeAllListeners();
+            }
         });
     },
 
@@ -316,12 +324,10 @@ export const MediaEngine = {
             const totalTime = performance.now() - startTotalTime;
             console.log(`[MediaEngine] Profiling: Cam=${camTime.toFixed(0)}ms, Join=${joinTime.toFixed(0)}ms, Publish=${publishTime.toFixed(0)}ms, Total=${totalTime.toFixed(0)}ms`);
             
-            import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-                eventBus.emit(Events.BROADCAST_STARTED, {
-                    courseId,
-                    channel,
-                    metrics: { camTime, joinTime, publishTime, totalTime }
-                });
+            eventBus.emit(Events.BROADCAST_STARTED, {
+                courseId,
+                channel,
+                metrics: { camTime, joinTime, publishTime, totalTime }
             });
             
             // Update Firestore so students know it's live
@@ -350,9 +356,7 @@ export const MediaEngine = {
                 
                 this.mediaRecorder.start(1000); // chunk every second
                 console.log("[MediaEngine] Local recording started");
-                import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-                    NotificationManager.show('بدأ تسجيل المحاضرة تلقائياً', 'info');
-                });
+                NotificationManager.show('بدأ تسجيل المحاضرة تلقائياً', 'info');
             } catch (recErr) {
                 console.warn("[MediaEngine] Failed to start local recording:", recErr);
             }
@@ -594,12 +598,9 @@ export const MediaEngine = {
         if (btnStopAgora) btnStopAgora.style.display = 'none';
         // ── 3. Upload recording and link to current lesson ────────────────────────
         if (recordingBlob) {
-            import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-                NotificationManager.show('جاري رفع تسجيل المحاضرة... انتظر لحظة', 'info', 8000);
-            });
+            NotificationManager.show('جاري رفع تسجيل المحاضرة... انتظر لحظة', 'info', 8000);
 
             try {
-                const { CurriculumController } = await import('../curriculum/index.js');
                 const lessonId = CurriculumController.cache?.currentLessonId;
 
                 const timestamp = Date.now();
@@ -611,20 +612,14 @@ export const MediaEngine = {
                     console.log('[MediaEngine] Recording saved to lesson:', lessonId, downloadUrl);
                 }
 
-                import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-                    NotificationManager.show('✅ تم حفظ تسجيل المحاضرة ورفعه للطلاب!', 'success', 6000);
-                });
+                NotificationManager.show('✅ تم حفظ تسجيل المحاضرة ورفعه للطلاب!', 'success', 6000);
             } catch (uploadErr) {
                 console.error('[MediaEngine] Failed to upload recording:', uploadErr);
-                import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-                    NotificationManager.show('⚠️ فشل رفع التسجيل. تحقق من الاتصال.', 'warning', 6000);
-                });
+                NotificationManager.show('⚠️ فشل رفع التسجيل. تحقق من الاتصال.', 'warning', 6000);
             }
         }
 
-        import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-            NotificationManager.show('تم إنهاء البث المباشر', 'info');
-        });
+        NotificationManager.show('تم إنهاء البث المباشر', 'info');
     },
     
     toggleMic() {

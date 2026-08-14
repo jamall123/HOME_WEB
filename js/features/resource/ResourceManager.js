@@ -50,6 +50,26 @@ export class ResourceManagerClass {
             this.renderStudentResources(resources);
             if (this.engine.isInstructor) this.renderInstructorResources(resources);
         });
+
+        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
+            EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+                this.destroy();
+            });
+        });
+    }
+
+    destroy() {
+        ResourceController.stopSync();
+        this.selectedFiles = [];
+        this._fileStore.clear();
+        
+        const list = document.getElementById('inst-uploaded-resources-list');
+        if (list) list.innerHTML = '';
+        
+        const studentList = document.getElementById('resources-container');
+        if (studentList) studentList.innerHTML = '';
+        
+        if (this.queueContainer) this.queueContainer.innerHTML = '';
     }
 
     setupDragAndDrop() {

@@ -28,6 +28,12 @@ export class ProgressManagerClass {
                 StudentProgressUI.init(this.engine);
             });
         }
+
+        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
+            EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+                this.destroy();
+            });
+        });
     }
 
     startActivityTracking() {

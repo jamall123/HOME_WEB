@@ -33,23 +33,31 @@ service cloud.firestore {
         exists(path("/databases/" + database + "/documents/enrollments/" + request.auth.uid + "_" + courseId));
     }
 
+    function isCourseInstructor(courseId) {
+      return isInstructorRole() &&
+        get(path("/databases/" + database + "/documents/courses/" + courseId)).data.instructorId == request.auth.uid;
+    }
+
     // ── Academy ─────────────────────────────────────────────────────────────
     match /courses/{courseId} {
-      allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
-      allow write: if isAdmin() || isInstructorRole();
+      allow read: if true; // Public metadata
+      allow write: if isAdmin() || isCourseInstructor(courseId);
 
       match /connected_users/{userId} {
-        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
+        allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
         allow write: if isSignedIn() && request.auth.uid == userId;
       }
       match /typing_status/{typingId} {
-        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
+        allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
         allow write: if isSignedIn() && request.auth.uid == typingId;
       }
       match /channelMessages/{msgId} {
-        allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
-        allow create: if isEnrolled(courseId) || isInstructorRole() || isAdmin();
-        allow update, delete: if isAdmin() || isInstructorRole();
+        allow read: if isEnrolled(courseId) || isCourseInstructor(courseId) || isAdmin();
+        allow create: if isEnrolled(courseId) || isCourseInstructor(courseId) || isAdmin();
+        allow update, delete: if isAdmin() || isCourseInstructor(courseId);
+      }
+      match /analytics/{docId} {
+        allow read, write: if isCourseInstructor(courseId) || isAdmin();
       }
     }
 
@@ -63,13 +71,13 @@ service cloud.firestore {
     }
 
     match /studentProgress/{docId} {
-      allow read: if isAdmin() || isInstructorRole() || (isSignedIn() && docId.matches(request.auth.uid + '_.*'));
+      allow read: if isAdmin() || (docId.split('_').size() > 1 && isCourseInstructor(docId.split('_')[1])) || (isSignedIn() && docId.matches(request.auth.uid + '_.*'));
       allow write: if isSignedIn() && docId.matches(request.auth.uid + '_.*');
     }
 
     match /active_sessions/{courseId} {
-      allow read: if isAdmin() || isInstructorRole() || isEnrolled(courseId);
-      allow write: if isAdmin() || isInstructorRole();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
 
     match /activeSessions/{sessionId} {
@@ -84,18 +92,18 @@ service cloud.firestore {
     }
 
     match /curriculum/{sectionId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructorRole();
+      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
+      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
     }
 
     match /curriculumLessons/{lessonId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructorRole();
+      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
+      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
     }
 
     match /lessonResources/{resourceId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructorRole();
+      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
+      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
     }
 
     match /certificates/{certId} {
@@ -138,7 +146,7 @@ service cloud.firestore {
 
     // ── Users ────────────────────────────────────────────────────────────────
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
       allow update: if isAdmin() || (
         request.auth != null && 
         request.auth.uid == userId && 

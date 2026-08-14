@@ -8,6 +8,12 @@ import { ArchiveService } from './ArchiveService.js';
 import { NotificationManager } from '../global/NotificationManager.js';
 import { RoomRepository } from '../../repositories/RoomRepository.js';
 
+import { CurriculumController } from '../curriculum/index.js';
+import { EventBus, Events } from '../../core/EventBus.js';
+import { CurriculumRepository } from '../../repositories/CurriculumRepository.js';
+import { ChatRepository } from '../../repositories/ChatRepository.js';
+import { ResourceService } from '../resource/ResourceService.js';
+
 export class ArchiveControllerClass {
     constructor() {
         this.engine = null;
@@ -23,12 +29,9 @@ export class ArchiveControllerClass {
         try {
             NotificationManager.show("جاري إنهاء الدرس الحالي...", "info");
 
-            const { CurriculumController } = await import('../curriculum/index.js');
-            const { EventBus, Events } = await import('../../core/EventBus.js');
             const currentLessonId = CurriculumController.cache?.currentLessonId;
 
             if (currentLessonId) {
-                const { CurriculumRepository } = await import('../../repositories/CurriculumRepository.js');
                 await CurriculumRepository.updateLessonStatus(currentLessonId, 'Completed');
                 // We're keeping the data in Firestore (messages, resources) linked to lessonId
             }
@@ -56,11 +59,14 @@ export class ArchiveControllerClass {
 
     async loadArchive(lessonId) {
         try {
-            const { ChatRepository } = await import('../../repositories/ChatRepository.js');
-            const { ResourceService } = await import('../resource/ResourceService.js');
-            
             // Note: chat channel is typically 'public' or whatever is default
-            const messages = await ChatRepository.getMessages(lessonId, 'public', 100);
+            let messages = [];
+            if (lessonId) {
+                messages = await ChatRepository.getMessages(lessonId, 'public', 100);
+            } else if (this.engine?.courseId) {
+                messages = await ChatRepository.getCourseMessages(this.engine.courseId);
+                messages = messages.filter(m => !m.lessonId || m.lessonId === 'global').slice(0, 100);
+            }
             
             // Fetch resources
             let resources = [];

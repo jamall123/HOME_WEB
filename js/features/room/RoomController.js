@@ -278,6 +278,45 @@ class RoomControllerClass {
             });
         }
     }
+
+    async destroyRoomSession() {
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.emit(Events.DESTROY_ROOM_SESSION);
+        });
+
+        // Safe teardown of controllers (if they implement destroy)
+        if (ChatController && typeof ChatController.destroy === 'function') await ChatController.destroy();
+        if (ResourceManager && typeof ResourceManager.destroy === 'function') await ResourceManager.destroy();
+        if (this.roomSync && typeof this.roomSync.destroy === 'function') this.roomSync.destroy();
+        if (PresenceController && typeof PresenceController.destroy === 'function') await PresenceController.destroy();
+        if (MediaManager && typeof MediaManager.destroy === 'function') await MediaManager.destroy();
+        
+        // Media Engine teardown
+        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        if (MediaEngine) {
+            if (typeof MediaEngine.stopLiveWebRTC === 'function') await MediaEngine.stopLiveWebRTC(this.courseId);
+            if (typeof MediaEngine.leaveLiveWebRTC === 'function') await MediaEngine.leaveLiveWebRTC();
+        }
+
+        if (OfflineSyncEngine && typeof OfflineSyncEngine.pause === 'function') await OfflineSyncEngine.pause();
+        if (ArchiveManager && typeof ArchiveManager.destroy === 'function') await ArchiveManager.destroy();
+        if (ProgressManager && typeof ProgressManager.destroy === 'function') await ProgressManager.destroy();
+
+        // Clear hanging UI/Cache
+        this.roomState.currentLesson = null;
+        this.roomState.currentSession = null;
+        
+        // Clear UI DOM elements (like chat, resources)
+        import('../../features/room/TeachingRenderer.js').then(({ TeachingRenderer }) => {
+            TeachingRenderer.clearChannelMessages();
+        });
+        
+        const resourceList = document.getElementById('resources-list');
+        if (resourceList) resourceList.innerHTML = '';
+        
+        const liveContainer = document.getElementById('agora-live-container');
+        if (liveContainer) liveContainer.innerHTML = '';
+    }
 }
 
 export const RoomEngine = new RoomControllerClass();

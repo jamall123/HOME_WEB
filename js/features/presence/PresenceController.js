@@ -230,6 +230,12 @@ export class PresenceControllerClass {
         // Return a new snapshot listener for each caller. Callers should manage their own unsubscribe functions.
         return PresenceService.onPresenceSnapshot(courseId, callback);
     }
+
+    async destroy() {
+        if (this.courseId && this.userData) {
+            await this.stopPresenceSession(this.courseId, this.userData.uid || this.userData.username);
+        }
+    }
 }
 
 export const PresenceController = new PresenceControllerClass();

@@ -30,8 +30,16 @@ export class ArchiveManagerClass {
             }
         });
 
+        EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+            this.destroy();
+        });
+
         // Setup Archive Tab Clicks
         this.setupArchiveTabs();
+    }
+
+    destroy() {
+        this.exitArchiveMode();
     }
 
     setupArchiveTabs() {

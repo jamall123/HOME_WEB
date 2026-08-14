@@ -1,6 +1,7 @@
 import { CourseRepository } from '../../repositories/CourseRepository.js';
 import { UserRepository } from '../../repositories/UserRepository.js';
 import { CertificateRepository } from '../../repositories/CertificateRepository.js';
+import { EventBus, Events } from '../../core/EventBus.js';
 
 export class CertificateService {
     static async generateAndStore(courseId, userId) {
@@ -38,7 +39,8 @@ export class CertificateService {
             verifyUrl
         });
 
-        // 4. Trigger UI modal
+        // 4. Trigger Event & UI modal
+        EventBus.emit(Events.CERTIFICATE_GENERATED, { certId, courseId, userId });
         this.showCertificateModal(certId, studentName, courseTitle, dateStr, verifyUrl);
     }
 
@@ -125,14 +127,23 @@ export class CertificateService {
         printBtn.style.cursor = 'pointer';
         printBtn.style.background = 'var(--primary-color)';
         printBtn.style.color = 'white';
+        
+        // Print Style to hide everything else
+        const printStyle = document.createElement('style');
+        printStyle.innerHTML = `
+            @media print {
+                body > * { display: none !important; }
+                #cert-overlay { display: flex !important; position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+                #cert-overlay > div:not(#cert-container) { display: none !important; }
+            }
+        `;
+        
         printBtn.onclick = () => {
+            document.head.appendChild(printStyle);
             btnContainer.style.display = 'none';
-            // Simple print strategy for canvas/div
-            const oldBody = document.body.innerHTML;
-            document.body.innerHTML = certContainer.outerHTML;
             window.print();
-            document.body.innerHTML = oldBody;
-            window.location.reload(); // Reload to restore event listeners
+            btnContainer.style.display = 'flex';
+            document.head.removeChild(printStyle);
         };
 
         btnContainer.appendChild(printBtn);

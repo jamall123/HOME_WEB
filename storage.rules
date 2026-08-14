@@ -14,6 +14,16 @@ service firebase.storage {
       return hasRole('instructor') || hasRole('INSTRUCTOR');
     }
 
+    function isCourseInstructor(courseId) {
+      return isInstructor() &&
+        firestore.get(/databases/(default)/documents/courses/$(courseId)).data.instructorId == request.auth.uid;
+    }
+
+    function isEnrolled(courseId) {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/enrollments/$(request.auth.uid)_$(courseId));
+    }
+
     function isSupervisor() {
       return hasRole('supervisor') || hasRole('SUPERVISOR');
     }
@@ -79,26 +89,26 @@ service firebase.storage {
 
     // Course Videos
     match /courses/{courseId}/videos/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructor();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
 
     // Course Slides
     match /courses/{courseId}/slides/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructor();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
 
     // Course Channel
     match /courses/{courseId}/channel/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructor();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
 
     // Fallback for cached clients using channel_audio
     match /courses/{courseId}/channel_audio/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructor();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
 
     // Phase 8: Enterprise Course Resources
@@ -125,14 +135,14 @@ service firebase.storage {
         return request.resource.size <= 100 * 1024 * 1024;
       }
 
-      allow read: if isSignedIn();
-      allow write: if (isAdmin() || isInstructor()) && isAllowedType() && isValidSize();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if (isAdmin() || isCourseInstructor(courseId)) && isAllowedType() && isValidSize();
     }
     
     // Recordings
     match /recordings/{courseId}/{allPaths=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructor();
+      allow read: if isAdmin() || isCourseInstructor(courseId) || isEnrolled(courseId);
+      allow write: if isAdmin() || isCourseInstructor(courseId);
     }
     
     // Default Block

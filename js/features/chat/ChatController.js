@@ -1,6 +1,7 @@
 import { ChatService } from './ChatService.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js';
 import { ChatUI } from './ChatUI.js';
+import { SessionCache } from '../../core/SessionCache.js';
 
 /**
  * ChatController.js
@@ -56,8 +57,8 @@ class ChatControllerClass {
         if (this.activeLessonId === lessonId) return;
         this.activeLessonId = lessonId;
         
-        // Clear messages when switching lessons
-        this.cache.messages = { public: [], questions: [], announcements: [], system: [] };
+        // Restore messages from Session Cache or initialize empty
+        this.cache.messages = SessionCache.getLessonCache(lessonId).chat;
         
         if (this.cache.activeChannel) {
             this.switchChannel(this.cache.activeChannel);
@@ -110,6 +111,10 @@ class ChatControllerClass {
         const remainingOptimistic = optimisticMessages.filter(m => !serverTexts.has(m.text));
 
         this.cache.messages[channel] = [...messages, ...remainingOptimistic];
+        
+        if (this.activeLessonId) {
+            SessionCache.setChat(this.activeLessonId, this.cache.messages[channel], channel);
+        }
 
         // Increment unread count if channel isn't active or chat is closed
         if ((!this.cache.isChatOpen || this.cache.activeChannel !== channel) && messages.length > prevLength) {
@@ -162,6 +167,9 @@ class ChatControllerClass {
             isOptimistic: true
         };
         this.cache.messages[channel] = [...(this.cache.messages[channel] || []), optimisticMsg];
+        if (this.activeLessonId) {
+            SessionCache.setChat(this.activeLessonId, this.cache.messages[channel], channel);
+        }
         this.notifyUI();
 
         try {
@@ -201,6 +209,10 @@ class ChatControllerClass {
             role: this.engine.isInstructor ? 'instructor' : 'student',
             isOffline: true
         });
+
+        if (this.activeLessonId) {
+            SessionCache.setChat(this.activeLessonId, this.cache.messages[channel], channel);
+        }
 
         this.notifyUI();
     }
@@ -265,6 +277,26 @@ class ChatControllerClass {
 
     notifyUI() {
         ChatUI.render(this.cache);
+    }
+
+    destroy() {
+        if (this.channelUnsubscribe) {
+            this.channelUnsubscribe();
+            this.channelUnsubscribe = null;
+        }
+        if (this.typingUnsubscribe) {
+            this.typingUnsubscribe();
+            this.typingUnsubscribe = null;
+        }
+        clearTimeout(this.typingTimeout);
+        this.cache = {
+            activeChannel: 'public',
+            messages: { public: [], questions: [], announcements: [], system: [] },
+            unreadCounts: { public: 0, questions: 0, announcements: 0, system: 0 },
+            typingUsers: [],
+            isChatOpen: false
+        };
+        this.activeLessonId = null;
     }
 }
 

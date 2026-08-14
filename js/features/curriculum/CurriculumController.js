@@ -236,7 +236,7 @@ class CurriculumControllerClass {
         this.notifyUIRender();
     }
 
-    selectLesson(lessonId, autoResume = false) {
+    async selectLesson(lessonId, autoResume = false) {
         this.cache.currentLessonId = lessonId;
         this.notifyUIRender();
         
@@ -248,9 +248,18 @@ class CurriculumControllerClass {
         }
 
         if (lesson) {
-            import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-                EventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
-            });
+            try {
+                // Ensure the previous session is fully destroyed before opening the new one
+                const { RoomEngine } = await import('../../features/room/RoomController.js');
+                if (RoomEngine && typeof RoomEngine.destroyRoomSession === 'function') {
+                    await RoomEngine.destroyRoomSession();
+                }
+
+                const { eventBus, Events } = await import('../../core/EventBus.js');
+                eventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
+            } catch (error) {
+                console.error("[CurriculumController] Failed to transition session:", error);
+            }
         }
         
         // Example: Emit event for Analytics

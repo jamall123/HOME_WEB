@@ -7,6 +7,7 @@ import { ResourceService } from './ResourceService.js';
 import { UploadQueue } from '../room/UploadQueue.js';
 import { PreviewEngine } from '../media/PreviewEngine.js';
 import { NotificationManager } from '../global/NotificationManager.js';
+import { SessionCache } from '../../core/SessionCache.js';
 
 export class ResourceControllerClass {
     constructor() {
@@ -87,12 +88,20 @@ export class ResourceControllerClass {
         }
         const targetLesson = this.activeLessonId || 'global';
         
+        // Check cache first
+        const cached = SessionCache.getResources(targetLesson);
+        if (cached && cached.length > 0 && onUpdateCallback) {
+            onUpdateCallback(cached);
+        }
+        
         // Subscribe to all course resources, then filter on client to avoid multiple index requirements
         this.unsubscribeFn = ResourceService.subscribeToResources(this.engine.courseId, null, (allResources) => {
             const filtered = allResources.filter(res => {
                 if (!res.lessonId || res.lessonId === 'global') return true;
                 return res.lessonId === targetLesson;
             });
+            
+            SessionCache.setResources(targetLesson, filtered);
             if (onUpdateCallback) onUpdateCallback(filtered);
         });
     }

@@ -5,6 +5,9 @@
 import { NotificationManager } from '../../features/global/NotificationManager.js';
 import { RoomRepository } from '../../repositories/RoomRepository.js';
 
+import { EventBus, Events } from '../../core/EventBus.js';
+import { CurriculumProgress } from '../curriculum/index.js';
+
 export class RoomEvents {
     constructor(roomState) {
         this.roomState = roomState;
@@ -31,83 +34,75 @@ export class RoomEvents {
             NotificationManager.show('انقطع الاتصال بالإنترنت', 'error', 0);
         });
 
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
-                if (!lesson) return;
-                let mode = 'video';
-                if (lesson.type && lesson.type !== 'video' && lesson.type !== 'audio') mode = 'link';
-                
-                // Update Overview metadata
-                const titleEl = document.getElementById('info-title');
-                const descEl = document.getElementById('info-desc');
-                if (titleEl) titleEl.textContent = lesson.title || 'درس بدون عنوان';
-                if (descEl) descEl.textContent = lesson.description || 'لا يوجد وصف متاح لهذا الدرس.';
-                
-                this.roomState.updateState({
-                    room: { mode: mode },
-                    presentation: { videoUrl: lesson.contentUrl || lesson.url, activeLessonId: lesson.id }
-                });
+        EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+            if (!lesson) return;
+            let mode = 'video';
+            if (lesson.type && lesson.type !== 'video' && lesson.type !== 'audio') mode = 'link';
+            
+            // Update Overview metadata
+            const titleEl = document.getElementById('info-title');
+            const descEl = document.getElementById('info-desc');
+            if (titleEl) titleEl.textContent = lesson.title || 'درس بدون عنوان';
+            if (descEl) descEl.textContent = lesson.description || 'لا يوجد وصف متاح لهذا الدرس.';
+            
+            this.roomState.updateState({
+                room: { mode: mode },
+                presentation: { videoUrl: lesson.contentUrl || lesson.url, activeLessonId: lesson.id }
+            });
 
-                // If instructor: broadcast lessonId to active_sessions so students auto-sync their curriculum
-                if (this.isInstructor && lesson.id) {
-                    RoomRepository.setSessionState(this.courseId, { lessonId: lesson.id })
-                        .catch(e => console.warn('[RoomEngine] Failed to sync lessonId', e));
-                }
+            // If instructor: broadcast lessonId to active_sessions so students auto-sync their curriculum
+            if (this.isInstructor && lesson.id) {
+                RoomRepository.setSessionState(this.courseId, { lessonId: lesson.id })
+                    .catch(e => console.warn('[RoomEngine] Failed to sync lessonId', e));
+            }
 
-                const playerVideo = document.getElementById('player-video');
-                if (playerVideo && (lesson.contentUrl || lesson.url)) {
-                    playerVideo.src = lesson.contentUrl || lesson.url;
-                    playerVideo.load();
+            const playerVideo = document.getElementById('player-video');
+            if (playerVideo && (lesson.contentUrl || lesson.url)) {
+                playerVideo.src = lesson.contentUrl || lesson.url;
+                playerVideo.load();
 
-                    if (lesson.autoResume && lesson.id) {
-                        import('../curriculum/index.js').then(({ CurriculumProgress }) => {
-                            const savedTime = CurriculumProgress.getVideoTimestamp(lesson.id);
-                            if (savedTime > 0) {
-                                playerVideo.currentTime = savedTime;
-                            }
-                            playerVideo.play().catch(e => console.log('Autoplay prevented', e));
-                        });
-                    } else {
-                        playerVideo.play().catch(e => console.log('Autoplay prevented', e));
+                if (lesson.autoResume && lesson.id) {
+                    const savedTime = CurriculumProgress.getVideoTimestamp(lesson.id);
+                    if (savedTime > 0) {
+                        playerVideo.currentTime = savedTime;
                     }
-                    
-                    playerVideo.onended = () => {
-                        import('../curriculum/index.js').then(({ CurriculumProgress }) => {
-                            if (this.roomState.state.presentation.activeLessonId) {
-                                CurriculumProgress.markLessonComplete(this.roomState.state.presentation.activeLessonId);
-                            }
-                        });
-                    };
-                    
-                    playerVideo.ontimeupdate = () => {
-                        if (playerVideo.currentTime > 0 && Math.floor(playerVideo.currentTime) % 5 === 0) {
-                            import('../curriculum/index.js').then(({ CurriculumProgress }) => {
-                                if (this.roomState.state.presentation.activeLessonId) {
-                                    CurriculumProgress.updateVideoTimestamp(this.roomState.state.presentation.activeLessonId, playerVideo.currentTime);
-                                }
-                            });
-                        }
-                    };
-                }
-            });
-
-            EventBus.subscribe(Events.MULTIPLE_DEVICES_DETECTED, (payload) => {
-                if (window.Swal) {
-                    window.Swal.fire({
-                        title: 'تنبيه الأمان',
-                        text: payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.',
-                        icon: 'warning',
-                        confirmButtonText: 'حسناً',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false
-                    }).then(() => {
-                        window.location.href = 'courses.html';
-                    });
+                    playerVideo.play().catch(e => console.log('Autoplay prevented', e));
                 } else {
-                    alert(payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.');
-                    window.location.href = 'courses.html';
+                    playerVideo.play().catch(e => console.log('Autoplay prevented', e));
                 }
-            });
+                
+                playerVideo.onended = () => {
+                    if (this.roomState.state.presentation.activeLessonId) {
+                        CurriculumProgress.markLessonComplete(this.roomState.state.presentation.activeLessonId);
+                    }
+                };
+                
+                playerVideo.ontimeupdate = () => {
+                    if (playerVideo.currentTime > 0 && Math.floor(playerVideo.currentTime) % 5 === 0) {
+                        if (this.roomState.state.presentation.activeLessonId) {
+                            CurriculumProgress.updateVideoTimestamp(this.roomState.state.presentation.activeLessonId, playerVideo.currentTime);
+                        }
+                    }
+                };
+            }
+        });
+
+        EventBus.subscribe(Events.MULTIPLE_DEVICES_DETECTED, (payload) => {
+            if (window.Swal) {
+                window.Swal.fire({
+                    title: 'تنبيه الأمان',
+                    text: payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.',
+                    icon: 'warning',
+                    confirmButtonText: 'حسناً',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then(() => {
+                    window.location.href = 'courses.html';
+                });
+            } else {
+                alert(payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.');
+                window.location.href = 'courses.html';
+            }
         });
 
         // Low bandwidth toggle handler

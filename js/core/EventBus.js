@@ -164,6 +164,7 @@ export const Events = {
     
     // Playback Events
     PLAY_LECTURE: 'PLAY_LECTURE',
+    DESTROY_ROOM_SESSION: 'DESTROY_ROOM_SESSION',
     
     // Auth & Session
     MULTIPLE_DEVICES_DETECTED: 'MULTIPLE_DEVICES_DETECTED'
