@@ -284,11 +284,9 @@ class RoomControllerClass {
             eventBus.emit(Events.DESTROY_ROOM_SESSION);
         });
 
-        // Safe teardown of controllers (if they implement destroy)
+        // Safe teardown of lesson-specific controllers (if they implement destroy)
         if (ChatController && typeof ChatController.destroy === 'function') await ChatController.destroy();
         if (ResourceManager && typeof ResourceManager.destroy === 'function') await ResourceManager.destroy();
-        if (this.roomSync && typeof this.roomSync.destroy === 'function') this.roomSync.destroy();
-        if (PresenceController && typeof PresenceController.destroy === 'function') await PresenceController.destroy();
         if (MediaManager && typeof MediaManager.destroy === 'function') await MediaManager.destroy();
         
         // Media Engine teardown
