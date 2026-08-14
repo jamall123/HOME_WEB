@@ -129,17 +129,18 @@
         /* ── Instructor Mode Workspace Animation ── */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
     </style>
-  <script type="module" crossorigin src="/assets/courseRoom-CGZ0-5rq.js"></script>
+  <script type="module" crossorigin src="/assets/courseRoom-C3iVTKTu.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-BQ-_32WO.js">
   <link rel="modulepreload" crossorigin href="/assets/CourseRepository-BkU7rJA0.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-DkUYsNQt.js">
   <link rel="modulepreload" crossorigin href="/assets/UserRepository-Qg-1MUAM.js">
-  <link rel="modulepreload" crossorigin href="/assets/EventBus-DICkJXLp.js">
+  <link rel="modulepreload" crossorigin href="/assets/EventBus-4Q0tYHVL.js">
   <link rel="modulepreload" crossorigin href="/assets/NotificationManager-DMg0JkUo.js">
+  <link rel="modulepreload" crossorigin href="/assets/ChatRepository-czIRHjD2.js">
   <link rel="modulepreload" crossorigin href="/assets/preload-helper-BATLnrmA.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumRepository-BAvZwOTt.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumRepository-BvNRSpvs.js">
   <link rel="modulepreload" crossorigin href="/assets/StudentProgressRepository-kYhNGkTs.js">
-  <link rel="modulepreload" crossorigin href="/assets/CurriculumProgress-BAAnDeGs.js">
+  <link rel="modulepreload" crossorigin href="/assets/CurriculumProgress-KEuHJ4WM.js">
   <link rel="stylesheet" crossorigin href="/assets/courseRoom-Dd8DccWn.css">
   <link rel="stylesheet" crossorigin href="/assets/sudanFree-CgE2LGLP.css">
 </head>
@@ -284,6 +285,25 @@
                 
                 <!-- Unified Teaching Renderer -->
                 <div class="teaching-renderer" id="teaching-renderer">
+
+                    <!-- ── Archive Mode Top Bar (Hidden by Default) ── -->
+                    <div id="archive-mode-bar" style="display: none; background: rgba(30, 41, 59, 0.95); border-bottom: 1px solid var(--room-border); padding: 1rem; flex-direction: column; gap: 0.5rem; z-index: 50; position: absolute; top: 0; left: 0; right: 0; backdrop-filter: blur(10px);">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1.2rem;">📚</span>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: bold; color: var(--text-primary); font-size: 0.95rem;">وضع الأرشيف</span>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">هذا الدرس مكتمل ولا يمكن التفاعل معه.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem;">
+                            <button class="btn btn-sm btn-archive-tab active" data-mode="video" style="background: rgba(255,255,255,0.1); border: 1px solid transparent; border-radius: var(--radius-pill); padding: 0.3rem 0.8rem; color: white; display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;"><i class="fas fa-video"></i> الفيديو</button>
+                            <button class="btn btn-sm btn-archive-tab" data-mode="chat" style="background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: var(--radius-pill); padding: 0.3rem 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;"><i class="fas fa-comments"></i> الدردشة</button>
+                            <button class="btn btn-sm btn-archive-tab" data-mode="resources" style="background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: var(--radius-pill); padding: 0.3rem 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;"><i class="fas fa-folder-open"></i> الموارد</button>
+                            <button class="btn btn-sm btn-archive-tab" data-mode="slides" style="background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: var(--radius-pill); padding: 0.3rem 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;"><i class="fas fa-images"></i> الشرائح</button>
+                        </div>
+                    </div>
 
                     <!-- ── Floating Instructor Control Bar ── -->
                     <div class="instructor-float-bar" id="instructor-float-bar">

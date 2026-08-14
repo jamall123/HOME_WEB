@@ -635,6 +635,37 @@ export class InstructorUIClass {
     attachListeners() {
         if (!this.mountPoint) return;
 
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.BROADCAST_STARTED, (payload) => {
+                const btnStart = document.getElementById('btn-start-agora-live');
+                const btnStop = document.getElementById('btn-stop-agora-live');
+                if (btnStart) btnStart.style.display = 'none';
+                if (btnStop) btnStop.style.display  = 'block';
+                
+                const liveBadge = document.getElementById('live-on-badge');
+                if (liveBadge) liveBadge.style.display = 'inline';
+                
+                const liveStatus = document.getElementById('live-ws-status');
+                if (liveStatus) liveStatus.textContent  = 'البث نشط الآن';
+                
+                const btnMic = document.getElementById('float-btn-mic');
+                const btnCam = document.getElementById('float-btn-cam');
+                const btnFloatStop = document.getElementById('float-btn-stop');
+                if (btnMic) btnMic.style.display  = 'inline-flex';
+                if (btnCam) btnCam.style.display  = 'inline-flex';
+                if (btnFloatStop) btnFloatStop.style.display = 'inline-flex';
+                
+                this._startTimer('live-ws-timer');
+                
+                // Show profiling metrics notification to instructor (for auditing/debugging)
+                import('../global/NotificationManager.js').then(({ NotificationManager }) => {
+                    const m = payload.metrics;
+                    const msg = `زمن فتح الكاميرا: ${m.camTime.toFixed(0)}ms | الاتصال: ${m.joinTime.toFixed(0)}ms | النشر: ${m.publishTime.toFixed(0)}ms`;
+                    NotificationManager.show(msg, 'info', 5000);
+                });
+            });
+        });
+
         // ── Expose global InstructorAPI ──
         window.InstructorAPI = {
 
@@ -769,14 +800,7 @@ export class InstructorUIClass {
                 this.controller.startAgoraLive().catch(async (err) => {
                     await RoomConfirmDialog.alert({ icon: '❌', title: 'خطأ', body: 'تعذر بدء البث: ' + err.message });
                 });
-                document.getElementById('btn-start-agora-live').style.display = 'none';
-                document.getElementById('btn-stop-agora-live').style.display  = 'block';
-                document.getElementById('live-on-badge').style.display = 'inline';
-                document.getElementById('live-ws-status').textContent  = 'البث نشط الآن';
-                document.getElementById('float-btn-mic').style.display  = 'inline-flex';
-                document.getElementById('float-btn-cam').style.display  = 'inline-flex';
-                document.getElementById('float-btn-stop').style.display = 'inline-flex';
-                this._startTimer('live-ws-timer');
+                // Note: Timer and UI updates are now handled by BROADCAST_STARTED listener
             },
             stopAgoraLiveDedicated: async () => {
                 const ok = await RoomConfirmDialog.show({

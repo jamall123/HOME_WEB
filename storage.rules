@@ -80,25 +80,25 @@ service firebase.storage {
     // Course Videos
     match /courses/{courseId}/videos/{allPaths=**} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin() || isInstructor();
     }
 
     // Course Slides
     match /courses/{courseId}/slides/{allPaths=**} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin() || isInstructor();
     }
 
     // Course Channel
     match /courses/{courseId}/channel/{allPaths=**} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isSignedIn();
     }
 
     // Fallback for cached clients using channel_audio
     match /courses/{courseId}/channel_audio/{allPaths=**} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isSignedIn();
     }
 
     // Phase 8: Enterprise Course Resources
@@ -126,17 +126,13 @@ service firebase.storage {
       }
 
       allow read: if isSignedIn();
-      // JS layer enforces instructor-only access.
-      // JWT custom claims are not always available (role stored in Firestore, not always in token).
-      // Any authenticated user who passes JS-layer checks can write.
-      allow write: if isSignedIn() && isAllowedType() && isValidSize();
+      allow write: if (isAdmin() || isInstructor()) && isAllowedType() && isValidSize();
     }
     
     // Recordings
     match /recordings/{courseId}/{allPaths=**} {
       allow read: if isSignedIn();
-      // Allow any signed in user to upload a recording for now (will be refined later)
-      allow write: if isSignedIn();
+      allow write: if isAdmin() || isInstructor();
     }
     
     // Default Block

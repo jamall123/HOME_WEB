@@ -182,6 +182,10 @@ export const MediaEngine = {
 
         this.showLoader('جاري الاتصال بالبث المباشر...');
 
+        // ── Profiling Metrics ──
+        const startTotalTime = performance.now();
+        let camTime = 0, joinTime = 0, publishTime = 0;
+
         // ── STEP 0: Check camera/mic permissions explicitly ───────────────────────
         let permStream = null;
         try {
@@ -236,7 +240,9 @@ export const MediaEngine = {
 
             // ── STEP 3: Join Channel ──────────────────────────────────────────────
             try {
+                const startJoin = performance.now();
                 await client.join(APP_ID, channel, token, uid);
+                joinTime = performance.now() - startJoin;
             } catch (joinErr) {
                 throw new Error(`فشل في الانضمام للقناة [STEP-JOIN]: ${joinErr.message || joinErr.code || JSON.stringify(joinErr)}`);
             }
@@ -254,7 +260,9 @@ export const MediaEngine = {
 
             // ── STEP 5: Create Video Track ────────────────────────────────────────
             try {
+                const startCam = performance.now();
                 this.localTracks.video = await window.AgoraRTC.createCameraVideoTrack({ encoderConfig: '480p_1' });
+                camTime = performance.now() - startCam;
             } catch (camErr) {
                 throw new Error(`فشل في فتح الكاميرا [STEP-CAM]: ${camErr.message || camErr.name}`);
             }
@@ -273,7 +281,9 @@ export const MediaEngine = {
                 throw new Error("لم يتم العثور على كاميرا أو ميكروفون [STEP-PUBLISH]");
             }
             try {
+                const startPublish = performance.now();
                 await client.publish(tracksToPublish);
+                publishTime = performance.now() - startPublish;
             } catch (pubErr) {
                 throw new Error(`فشل في نشر البث [STEP-PUBLISH]: ${pubErr.message || pubErr.code || JSON.stringify(pubErr)}`);
             }
@@ -301,6 +311,18 @@ export const MediaEngine = {
                 liveDiv.style.display = 'block';
                 this.localTracks.video.play(liveDiv.id);
             }
+            
+            // ── Emit BROADCAST_STARTED EVENT ──
+            const totalTime = performance.now() - startTotalTime;
+            console.log(`[MediaEngine] Profiling: Cam=${camTime.toFixed(0)}ms, Join=${joinTime.toFixed(0)}ms, Publish=${publishTime.toFixed(0)}ms, Total=${totalTime.toFixed(0)}ms`);
+            
+            import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+                eventBus.emit(Events.BROADCAST_STARTED, {
+                    courseId,
+                    channel,
+                    metrics: { camTime, joinTime, publishTime, totalTime }
+                });
+            });
             
             // Update Firestore so students know it's live
             await MediaRepository.setCourseLiveStatus(courseId, true, channel);
