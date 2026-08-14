@@ -65,6 +65,10 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    match /activeSessions/{sessionId} {
+      allow read, write: if true;
+    }
+
     match /course_chats/{chatId} {
       allow read, write: if true;
     }

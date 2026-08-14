@@ -120,13 +120,13 @@ export class AcademyController {
             : `<span class="course-price-tag course-price-tag--free"><i class="fas fa-check-circle"></i> مجاني</span>`;
 
         return `
-        <article class="course-card" data-category="${category}" style="display: flex; flex-direction: column; background: transparent; border: none; box-shadow: none; overflow: visible;">
+        <article class="course-card" data-category="${category}" style="display: flex; flex-direction: column; background: transparent; border: none; box-shadow: none; overflow: hidden; border-radius: var(--radius-lg);">
             <div class="course-card__media">
                 ${cover ? `<img src="${cover}" alt="${title}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div class="fallback-cover-logo"><span>J</span><span>home</span></div>`}
                 ${badge}
                 ${livePill}
             </div>
-            <div class="course-card__content glass-panel" style="margin-top: -30px; position: relative; z-index: 2; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08);">
+            <div class="course-card__content" style="background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem; flex: 1; display: flex; flex-direction: column; margin-top: -30px; position: relative; z-index: 2; box-shadow: var(--elevation-2);">
                 <div class="course-card__meta">
                     <span class="caption-meta" style="color: var(--primary-light);">${level}</span>
                     <span class="caption-meta en-text" style="background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">${duration}</span>

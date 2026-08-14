@@ -18,7 +18,7 @@ import { AnnouncementManager } from './AnnouncementManager.js';
 import { InstructorAnalytics } from './InstructorAnalytics.js';
 
 import { Constants } from '../../core/Constants.js';
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 
 class InstructorControllerClass {
     constructor() {
@@ -44,7 +44,7 @@ class InstructorControllerClass {
         // console.log("[InstructorController] Initializing Enterprise Workspace...");
 
         // Subscribe to lesson changes
-        EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
             if (lesson && lesson.id) {
                 this.activeLessonId = lesson.id;
             }

@@ -109,6 +109,23 @@ export const TeachingRenderer = {
     },
 
     /**
+     * Clears all channel messages and restores the placeholder.
+     */
+    clearChannelMessages() {
+        const feed = document.getElementById('channel-feed');
+        if (feed) {
+            feed.innerHTML = `
+                <div style="text-align:center;color:rgba(255,255,255,0.25);padding:3rem 1rem;" class="channel-placeholder">
+                    <i class="fas fa-bullhorn" style="font-size:2.5rem;margin-bottom:0.75rem;display:block;opacity:0.3;"></i>
+                    <p style="font-size:0.9rem;">في انتظار رسائل المدرب...</p>
+                </div>
+            `;
+            const msgCount = document.getElementById('channel-msg-count');
+            if (msgCount) msgCount.textContent = '0 رسالة';
+        }
+    },
+
+    /**
      * Renders a channel message in the channel feed.
      * @param {Object} message - { type, content, url, timestamp }
      */
@@ -123,6 +140,12 @@ export const TeachingRenderer = {
         // Clear placeholder text on first real message
         const placeholder = feed.querySelector('.channel-placeholder');
         if (placeholder) placeholder.remove();
+
+        const msgCount = document.getElementById('channel-msg-count');
+        if (msgCount) {
+            const currentCount = feed.querySelectorAll('.channel-message-card').length + 1;
+            msgCount.textContent = `${currentCount} رسالة`;
+        }
 
         const msgDiv = document.createElement('div');
         msgDiv.className = 'channel-message-card';

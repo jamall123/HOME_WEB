@@ -21,35 +21,61 @@ export class ArchiveControllerClass {
         if (!this.engine.isInstructor) return;
 
         try {
-            NotificationManager.show("جاري تجميع وإنهاء الجلسة...", "info");
+            NotificationManager.show("جاري إنهاء الدرس الحالي...", "info");
 
-            // 1. Export Data
-            const archiveData = await SessionExporter.exportSession(this.engine.courseId);
+            const { CurriculumController } = await import('../curriculum/index.js');
+            const { EventBus, Events } = await import('../../core/EventBus.js');
+            const currentLessonId = CurriculumController.cache?.currentLessonId;
 
-            // 2. Save Archive
-            const sessionId = await ArchiveService.saveArchive(archiveData);
+            if (currentLessonId) {
+                const { CurriculumRepository } = await import('../../repositories/CurriculumRepository.js');
+                await CurriculumRepository.updateLessonStatus(currentLessonId, 'Completed');
+                // We're keeping the data in Firestore (messages, resources) linked to lessonId
+            }
 
-            // 3. Clear Active Session State (Shutdown Room)
+            // 1. Export Data (Optional: if we still want to package it for an offline archive)
+            // const archiveData = await SessionExporter.exportSession(this.engine.courseId);
+            // const sessionId = await ArchiveService.saveArchive(archiveData);
+
+            // 2. Shut down the LIVE room broadcast
             await RoomRepository.deleteSession(this.engine.courseId);
 
-            NotificationManager.show("تم أرشفة الجلسة بنجاح", "success");
+            NotificationManager.show("تم إنهاء الدرس بنجاح", "success");
             
-            // Redirect or update UI
-            setTimeout(() => {
-                window.location.href = `admin-dashboard.html`; // Or wherever the instructor goes next
-            }, 2000);
+            // 3. Reset the UI locally without redirecting
+            EventBus.publish(Events.LESSON_ENDED, { lessonId: currentLessonId });
+            
+            // Reset active lesson locally
+            CurriculumController.cache.currentLessonId = null;
 
         } catch (error) {
-            console.error("Archive Failed", error);
-            NotificationManager.show("حدث خطأ أثناء إنهاء الجلسة", "error");
+            console.error("End Lesson Failed", error);
+            NotificationManager.show("حدث خطأ أثناء إنهاء الدرس", "error");
         }
     }
 
-    async loadArchive(sessionId) {
+    async loadArchive(lessonId) {
         try {
-            return await ArchiveService.getArchive(sessionId);
+            const { ChatRepository } = await import('../../repositories/ChatRepository.js');
+            const { ResourceService } = await import('../resource/ResourceService.js');
+            
+            // Note: chat channel is typically 'public' or whatever is default
+            const messages = await ChatRepository.getMessages(lessonId, 'public', 100);
+            
+            // Fetch resources
+            let resources = [];
+            if (this.engine?.courseId) {
+                const allResources = await ResourceService.getResources(this.engine.courseId, null);
+                // Filter by lessonId
+                resources = allResources.filter(res => {
+                    if (!res.lessonId || res.lessonId === 'global') return true;
+                    return res.lessonId === lessonId;
+                });
+            }
+
+            return { messages, resources };
         } catch (error) {
-            console.error("Failed to load archive", error);
+            console.error("Failed to load archive data", error);
             return null;
         }
     }

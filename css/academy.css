@@ -238,7 +238,6 @@
 }
 
 .course-card__media { 
-    border-radius: 24px;
     position: relative;
     height: 210px;
     overflow: hidden;
@@ -287,7 +286,7 @@
 
 .course-card__pill {
     left: 1rem;
-    bottom: 1rem;
+    top: 1rem;
     background: rgba(2, 6, 23, 0.72);
 }
 

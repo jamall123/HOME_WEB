@@ -163,5 +163,8 @@ export const Events = {
     UI_CHANGE_MODE: 'UI_CHANGE_MODE',
     
     // Playback Events
-    PLAY_LECTURE: 'PLAY_LECTURE'
+    PLAY_LECTURE: 'PLAY_LECTURE',
+    
+    // Auth & Session
+    MULTIPLE_DEVICES_DETECTED: 'MULTIPLE_DEVICES_DETECTED'
 };

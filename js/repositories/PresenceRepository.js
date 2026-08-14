@@ -47,6 +47,37 @@ export class PresenceRepositoryClass {
         }
     }
 
+    async updateActiveSession(courseId, userId, data) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            const payload = {
+                ...data,
+                lastSeen: FirebaseManager.getFirestoreFieldValue().serverTimestamp()
+            };
+            await db.collection('activeSessions').doc(`${courseId}_${userId}`).set(payload, { merge: true });
+        } catch (error) {
+            this._handleError(error, 'updateActiveSession');
+        }
+    }
+
+    onActiveSessionSnapshot(courseId, userId, callback) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            return db.collection('activeSessions').doc(`${courseId}_${userId}`)
+                .onSnapshot(doc => {
+                    if (doc.exists) {
+                        callback({ id: doc.id, ...doc.data() });
+                    } else {
+                        callback(null);
+                    }
+                }, error => {
+                    this._handleError(error, 'onActiveSessionSnapshot');
+                });
+        } catch (error) {
+            this._handleError(error, 'onActiveSessionSnapshot');
+        }
+    }
+
     async getActiveSessions(courseId) {
         try {
             const db = FirebaseManager.getFirestore();

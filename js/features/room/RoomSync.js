@@ -79,6 +79,8 @@ export class RoomSync {
             }
         });
         // 2. Channel Messages Sync (Now handled dynamically via EventBus)
+        this.subscribeToChannelMessages(null); // Subscribe initially to load messages
+
         import('../../core/EventBus.js').then(({ EventBus, Events }) => {
             EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
                 if (lesson && lesson.id) {
@@ -138,9 +140,8 @@ export class RoomSync {
                     // Client-side filtering as requested by architectural rules
                     // If message has lessonId, it must match.
                     // If it doesn't have lessonId (old message), show it everywhere for backward compatibility
-                    // OR only show it in the first lesson. The user said: "استخدم التوافقية العكسية"
-                    // We'll show old messages if data.lessonId is missing (backward compatibility).
-                    if (data.lessonId && data.lessonId !== lessonId) return;
+                    // If lessonId is null (instructor hasn't played a lesson yet), show all messages.
+                    if (lessonId && data.lessonId && data.lessonId !== lessonId) return;
 
                     TeachingRenderer.renderChannelMessage(data, change.doc.id);
                     

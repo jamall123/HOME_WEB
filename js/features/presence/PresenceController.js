@@ -11,6 +11,7 @@ import { eventBus as EventBus, Events } from '../../core/EventBus.js';
 export class PresenceControllerClass {
     constructor() {
         this.unsubscribe = null;
+        this.unsubscribeActiveSession = null;
         this.heartbeatInterval = null;
         this.sessionStartTime = null;
         this.reconnectCount = 0;
@@ -20,6 +21,14 @@ export class PresenceControllerClass {
         this.tabId = Math.random().toString(36).substring(2) + Date.now().toString(36);
         this.masterKey = null;
         this.heartbeatKey = null;
+
+        // Device session (persisted across reloads and tabs on the same browser)
+        this.deviceSessionId = localStorage.getItem('device_session_id') || sessionStorage.getItem('device_session_id');
+        if (!this.deviceSessionId) {
+            this.deviceSessionId = this.tabId;
+            localStorage.setItem('device_session_id', this.deviceSessionId);
+            sessionStorage.setItem('device_session_id', this.deviceSessionId);
+        }
 
         this.courseId = null;
         this.userData = null;
@@ -53,9 +62,45 @@ export class PresenceControllerClass {
         this.attachNetworkListeners();
         this.attachVisibilityListeners();
 
+        // Listen for another device joining
+        this.listenToActiveSession();
+
         // Cleanup on unload
         window.addEventListener('beforeunload', () => {
             this.stopPresenceSession(this.courseId, this.userData.username || this.userData.uid);
+        });
+    }
+
+    listenToActiveSession() {
+        if (this.unsubscribeActiveSession) {
+            this.unsubscribeActiveSession();
+        }
+        
+        const userId = this.userData.uid || this.userData.username;
+        this.unsubscribeActiveSession = PresenceService.onActiveSessionSnapshot(this.courseId, userId, (doc) => {
+            if (doc && doc.deviceSessionId && doc.deviceSessionId !== this.deviceSessionId) {
+                // Wait 3 seconds grace period to ensure this isn't just a race condition
+                setTimeout(() => {
+                    // Check if it's still mismatched
+                    // (we could check doc again but we assume if they are still mismatched after 3s we kick)
+                    this.handleMultipleDevices();
+                }, 3000);
+            }
+        });
+    }
+
+    handleMultipleDevices() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
+        if (this.unsubscribeActiveSession) {
+            this.unsubscribeActiveSession();
+            this.unsubscribeActiveSession = null;
+        }
+
+        EventBus.emit(Events.MULTIPLE_DEVICES_DETECTED, {
+            message: 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.'
         });
     }
 
@@ -119,6 +164,7 @@ export class PresenceControllerClass {
             name: this.userData.name || this.userData.displayName || 'طالب',
             username: this.userData.username || 'student',
             role: this.userData.role || 'student',
+            deviceSessionId: this.deviceSessionId, // Used for multiple device kicking
             lastSeen: new Date(), // Replaced by serverTimestamp in service
             currentLesson: this.engineState?.presentation?.videoUrl || null,
             teachingMode: this.engineState?.room?.mode || 'video',
@@ -130,6 +176,7 @@ export class PresenceControllerClass {
 
         try {
             await PresenceService.markUserOnline(this.courseId, data.userId, data);
+            await PresenceService.updateActiveSession(this.courseId, data.userId, data);
         } catch (e) {
             console.warn("[PresenceController] Heartbeat failed", e);
         }
@@ -142,6 +189,10 @@ export class PresenceControllerClass {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
             this.heartbeatInterval = null;
+        }
+        if (this.unsubscribeActiveSession) {
+            this.unsubscribeActiveSession();
+            this.unsubscribeActiveSession = null;
         }
         
         if (this.isMaster()) {

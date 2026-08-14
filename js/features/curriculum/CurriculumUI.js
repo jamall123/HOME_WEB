@@ -262,14 +262,27 @@ class CurriculumUIClass {
             sectionLessons.forEach(lesson => {
                 const handler = LessonRegistry.getHandler(lesson.type);
                 const isActive = state.currentLessonId === lesson.id;
+                const isCompleted = lesson.status === 'Completed';
                 const hasRecordings = lesson.recordings && lesson.recordings.length > 0;
                 const isInstructor = this.isInstructor;
+
+                let iconHtml = `<i class="fas ${handler.icon}"></i>`;
+                let statusLabel = '';
+                
+                if (isActive) {
+                    iconHtml = `<span style="font-size:0.8rem; margin-right:4px;">🟢</span>`;
+                    statusLabel = `<span style="font-size:0.7rem; color:var(--success); margin-right:4px;">(نشط)</span>`;
+                } else if (isCompleted) {
+                    iconHtml = `<span style="font-size:0.8rem; margin-right:4px;">📚</span>`;
+                    statusLabel = `<span style="font-size:0.7rem; color:var(--text-muted); margin-right:4px;">(مكتمل)</span>`;
+                }
 
                 html += `
                     <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.4rem;">
                         <div style="display:flex;align-items:center;flex: 1 1 150px;min-width:0;">
-                            <i class="fas ${handler.icon}"></i>
-                            <span style="margin-right: 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${lesson.title}">${lesson.title}</span>
+                            ${iconHtml}
+                            <span style="margin-right: 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${lesson.title}">${lesson.title}</span>
+                            ${statusLabel}
                         </div>
                         <div style="display:flex;align-items:center;gap:0.3rem;flex-shrink:0;">
                             ${hasRecordings ? `<button class="btn-view-recordings" data-id="${lesson.id}" data-recordings='${JSON.stringify(lesson.recordings)}' title="مشاهدة التسجيلات" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:0.15rem 0.5rem;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;"><i class="fas fa-circle" style="color:#ef4444;font-size:0.5rem;"></i>تسجيل</button>` : ''}

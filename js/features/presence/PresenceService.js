@@ -34,5 +34,15 @@ export class PresenceServiceClass {
     onPresenceSnapshot(courseId, callback) {
         return PresenceRepository.onPresenceSnapshot(courseId, callback);
     }
+
+    async updateActiveSession(courseId, userId, data) {
+        if (!courseId || !userId) return;
+        await PresenceRepository.updateActiveSession(courseId, userId, data);
+    }
+
+    onActiveSessionSnapshot(courseId, userId, callback) {
+        if (!courseId || !userId) return () => {};
+        return PresenceRepository.onActiveSessionSnapshot(courseId, userId, callback);
+    }
 }
 export const PresenceService = new PresenceServiceClass();

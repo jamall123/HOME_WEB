@@ -90,6 +90,24 @@ export class RoomEvents {
                     };
                 }
             });
+
+            EventBus.subscribe(Events.MULTIPLE_DEVICES_DETECTED, (payload) => {
+                if (window.Swal) {
+                    window.Swal.fire({
+                        title: 'تنبيه الأمان',
+                        text: payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.',
+                        icon: 'warning',
+                        confirmButtonText: 'حسناً',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then(() => {
+                        window.location.href = 'courses.html';
+                    });
+                } else {
+                    alert(payload.message || 'تم تسجيل الدخول من جهاز آخر. سيتم إنهاء الجلسة الحالية.');
+                    window.location.href = 'courses.html';
+                }
+            });
         });
 
         // Low bandwidth toggle handler

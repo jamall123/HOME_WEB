@@ -113,6 +113,18 @@ export class CurriculumRepositoryClass {
         }
     }
 
+    async updateLessonStatus(lessonId, status) {
+        try {
+            const db = FirebaseManager.getFirestore();
+            await db.collection(Constants.COLLECTIONS.CURRICULUM_LESSONS).doc(lessonId).update({
+                status: status,
+                updatedAt: FirebaseManager.getServerTimestamp()
+            });
+        } catch (error) {
+            this._handleError(error, 'updateLessonStatus');
+        }
+    }
+
     async softDelete(collectionName, documentId, userId) {
         try {
             const db = FirebaseManager.getFirestore();
