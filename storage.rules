@@ -21,7 +21,7 @@ service firebase.storage {
 
     function isEnrolled(courseId) {
       return isSignedIn() &&
-        firestore.exists(/databases/(default)/documents/enrollments/$(request.auth.uid)_$(courseId));
+        firestore.exists(path('/databases/(default)/documents/enrollments/' + request.auth.uid + '_' + courseId));
     }
 
     function isSupervisor() {
