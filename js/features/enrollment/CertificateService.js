@@ -1,7 +1,7 @@
 import { CourseRepository } from '../../repositories/CourseRepository.js';
 import { UserRepository } from '../../repositories/UserRepository.js';
 import { CertificateRepository } from '../../repositories/CertificateRepository.js';
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus as EventBus, Events } from '../../core/EventBus.js';
 
 export class CertificateService {
     static async generateAndStore(courseId, userId) {

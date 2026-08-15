@@ -29,8 +29,14 @@ export class ProgressManagerClass {
             });
         }
 
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+                ProgressController.logLessonView(lesson.id);
+            });
+            eventBus.subscribe(Events.LESSON_ENDED, () => {
+                ProgressController.syncPendingProgress();
+            });
+            eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
                 this.destroy();
             });
         });

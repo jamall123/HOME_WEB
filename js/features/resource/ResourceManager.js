@@ -51,8 +51,8 @@ export class ResourceManagerClass {
             if (this.engine.isInstructor) this.renderInstructorResources(resources);
         });
 
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
                 this.destroy();
             });
         });

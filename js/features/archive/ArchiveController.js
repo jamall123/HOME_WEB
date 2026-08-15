@@ -9,7 +9,7 @@ import { NotificationManager } from '../global/NotificationManager.js';
 import { RoomRepository } from '../../repositories/RoomRepository.js';
 
 import { CurriculumController } from '../curriculum/index.js';
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 import { CurriculumRepository } from '../../repositories/CurriculumRepository.js';
 import { ChatRepository } from '../../repositories/ChatRepository.js';
 import { ResourceService } from '../resource/ResourceService.js';
@@ -46,7 +46,7 @@ export class ArchiveControllerClass {
             NotificationManager.show("تم إنهاء الدرس بنجاح", "success");
             
             // 3. Reset the UI locally without redirecting
-            EventBus.publish(Events.LESSON_ENDED, { lessonId: currentLessonId });
+            eventBus.emit(Events.LESSON_ENDED, { lessonId: currentLessonId });
             
             // Reset active lesson locally
             CurriculumController.cache.currentLessonId = null;

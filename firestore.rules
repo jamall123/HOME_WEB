@@ -92,18 +92,18 @@ service cloud.firestore {
     }
 
     match /curriculum/{sectionId} {
-      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
-      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
     }
 
     match /curriculumLessons/{lessonId} {
-      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
-      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
     }
 
     match /lessonResources/{resourceId} {
-      allow read: if isEnrolled(resource.data.courseId) || isCourseInstructor(resource.data.courseId) || isAdmin();
-      allow write: if isAdmin() || isCourseInstructor(resource.data.courseId);
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
     }
 
     match /certificates/{certId} {

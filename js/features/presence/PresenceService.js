@@ -8,9 +8,9 @@ export class PresenceServiceClass {
     /**
      * Mark a user as online in a specific course.
      */
-    async markUserOnline(courseId, userId, userData) {
+    async markUserOnline(courseId, lessonId, userId, userData) {
         if (!courseId || !userId) return;
-        await PresenceRepository.updatePresence(courseId, userId, userData);
+        await PresenceRepository.updatePresence(courseId, lessonId, userId, userData);
     }
 
     /**
@@ -31,8 +31,8 @@ export class PresenceServiceClass {
     /**
      * Start listening to presence for a course.
      */
-    onPresenceSnapshot(courseId, callback) {
-        return PresenceRepository.onPresenceSnapshot(courseId, callback);
+    onPresenceSnapshot(courseId, lessonId, callback) {
+        return PresenceRepository.onPresenceSnapshot(courseId, lessonId, callback);
     }
 
     async updateActiveSession(courseId, userId, data) {

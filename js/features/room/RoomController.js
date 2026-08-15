@@ -5,6 +5,7 @@
 import { AuthController as AuthService } from '../auth/AuthController.js';
 import { stateStore } from '../../core/StateStore.js';
 import { ThemeManager } from '../../features/global/ThemeManager.js';
+import { SessionManager } from '../../core/SessionManager.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js';
 import { TeachingRenderer } from '../../features/room/TeachingRenderer.js';
 import { WorkspaceUI } from '../../features/global/WorkspaceUI.js';
@@ -105,6 +106,12 @@ class RoomControllerClass {
         
         this.roomRenderer.init(this.courseId, this.isInstructor, this.currentUser);
         this.roomEvents.init(this.courseId, this.currentUser, this.isInstructor);
+
+        // Read lessonId from URL for initial tab session
+        const params = new URLSearchParams(window.location.search);
+        const urlLessonId = params.get('lessonId');
+        await SessionManager.createSession(this.courseId, urlLessonId);
+
         this.roomSync.init(this.courseId, this.isInstructor, this.currentUser);
 
         ThemeManager.init();
@@ -299,6 +306,9 @@ class RoomControllerClass {
         if (OfflineSyncEngine && typeof OfflineSyncEngine.pause === 'function') await OfflineSyncEngine.pause();
         if (ArchiveManager && typeof ArchiveManager.destroy === 'function') await ArchiveManager.destroy();
         if (ProgressManager && typeof ProgressManager.destroy === 'function') await ProgressManager.destroy();
+
+        // Let SessionManager clear the session state and invalidate tokens
+        await SessionManager.destroySession();
 
         // Clear hanging UI/Cache
         this.roomState.currentLesson = null;

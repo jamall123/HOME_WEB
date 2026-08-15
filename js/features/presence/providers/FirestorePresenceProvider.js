@@ -14,11 +14,12 @@ export class FirestorePresenceProvider extends PresenceProvider {
         throw enhancedError;
     }
 
-    async updatePresence(courseId, userId, data) {
+    async updatePresence(courseId, lessonId, userId, data) {
         try {
             const db = FirebaseManager.getFirestore();
             const payload = {
                 ...data,
+                lessonId: lessonId || 'global',
                 lastSeen: FirebaseManager.getFirestoreFieldValue().serverTimestamp()
             };
             await db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
@@ -90,11 +91,12 @@ export class FirestorePresenceProvider extends PresenceProvider {
         }
     }
 
-    onPresenceSnapshot(courseId, callback) {
+    onPresenceSnapshot(courseId, lessonId, callback) {
         try {
             const db = FirebaseManager.getFirestore();
             return db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
                 .collection(Constants.SUBCOLLECTIONS.CONNECTED_USERS)
+                .where('lessonId', '==', lessonId || 'global')
                 .onSnapshot(snapshot => {
                     callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
                 }, error => {

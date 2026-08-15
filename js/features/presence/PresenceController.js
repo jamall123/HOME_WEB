@@ -7,6 +7,7 @@
 import { PresenceService } from './PresenceService.js';
 import { stateStore } from '../../core/StateStore.js';
 import { eventBus as EventBus, Events } from '../../core/EventBus.js';
+import { SessionManager } from '../../core/SessionManager.js';
 
 export class PresenceControllerClass {
     constructor() {
@@ -193,7 +194,8 @@ export class PresenceControllerClass {
         };
 
         try {
-            await PresenceService.markUserOnline(this.courseId, data.userId, data);
+            const lessonId = SessionManager.currentLessonId || 'global';
+            await PresenceService.markUserOnline(this.courseId, lessonId, data.userId, data);
             await PresenceService.updateActiveSession(this.courseId, data.userId, data);
         } catch (e) {
             console.warn("[PresenceController] Heartbeat failed", e);
@@ -224,11 +226,11 @@ export class PresenceControllerClass {
     }
 
     /**
-     * Listen to active users in a course
+     * Listen to active users in a course/lesson
      */
-    listenToActiveUsers(courseId, callback) {
+    listenToActiveUsers(courseId, lessonId, callback) {
         // Return a new snapshot listener for each caller. Callers should manage their own unsubscribe functions.
-        return PresenceService.onPresenceSnapshot(courseId, callback);
+        return PresenceService.onPresenceSnapshot(courseId, lessonId, callback);
     }
 
     async destroy() {

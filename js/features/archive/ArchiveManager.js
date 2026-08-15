@@ -5,7 +5,7 @@
 
 import { ArchiveController } from './ArchiveController.js';
 import { ReplayEngine } from '../room/ReplayEngine.js';
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 
 export class ArchiveManagerClass {
     constructor() {
@@ -22,7 +22,7 @@ export class ArchiveManagerClass {
         }
 
         // Listen for lesson selection
-        EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
             if (lesson.status === 'Completed') {
                 this.bootArchiveMode(lesson);
             } else {

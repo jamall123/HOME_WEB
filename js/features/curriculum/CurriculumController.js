@@ -3,6 +3,7 @@ import { CurriculumRepository } from '../../repositories/CurriculumRepository.js
 import { AuthController } from '../auth/AuthController.js';
 import { CurriculumUI } from './CurriculumUI.js';
 import { CurriculumProgress } from './CurriculumProgress.js';
+import { SessionManager } from '../../core/SessionManager.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js'; // Assuming it was moved to core, or adjust accordingly
 
 /**
@@ -27,6 +28,13 @@ class CurriculumControllerClass {
     async init(courseId) {
         this.courseId = courseId;
         
+        // Read lessonId from URL for tab isolation
+        const params = new URLSearchParams(window.location.search);
+        const urlLessonId = params.get('lessonId');
+        if (urlLessonId) {
+            this.cache.currentLessonId = urlLessonId;
+        }
+
         // Initialize Progress
         const user = AuthController.getCurrentUser();
         
@@ -134,8 +142,13 @@ class CurriculumControllerClass {
         }
 
         if (activeLesson) {
+            // If we have a currentLessonId from URL, try to use it if valid
+            let targetLessonId = activeLesson.id;
+            if (this.cache.currentLessonId) {
+                targetLessonId = this.cache.currentLessonId;
+            }
             // Auto-select the active lesson
-            this.selectLesson(activeLesson.id);
+            this.selectLesson(targetLessonId);
         }
         this.notifyUIRender();
     }
@@ -238,6 +251,12 @@ class CurriculumControllerClass {
 
     async selectLesson(lessonId, autoResume = false) {
         this.cache.currentLessonId = lessonId;
+        
+        // Update URL to ensure multi-tab isolation
+        const url = new URL(window.location);
+        url.searchParams.set('lessonId', lessonId);
+        window.history.pushState({ path: url.href }, '', url.href);
+        
         this.notifyUIRender();
         
         // Find lesson object
@@ -254,6 +273,9 @@ class CurriculumControllerClass {
                 if (RoomEngine && typeof RoomEngine.destroyRoomSession === 'function') {
                     await RoomEngine.destroyRoomSession();
                 }
+
+                // Switch the session globally
+                await SessionManager.switchSession(this.courseId, lessonId);
 
                 const { eventBus, Events } = await import('../../core/EventBus.js');
                 eventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
@@ -414,8 +436,8 @@ class CurriculumControllerClass {
             NotificationManager.show("تم إنهاء الدرس بنجاح وبدء دورة جديدة", "success");
             
             // Notify other controllers to clear their caches
-            import('../../core/EventBus.js').then(({ EventBus }) => {
-                EventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
+            import('../../core/EventBus.js').then(({ eventBus }) => {
+                eventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
             });
             
         } catch(error) {

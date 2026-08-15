@@ -5,7 +5,7 @@
 import { NotificationManager } from '../../features/global/NotificationManager.js';
 import { RoomRepository } from '../../repositories/RoomRepository.js';
 
-import { EventBus, Events } from '../../core/EventBus.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 import { CurriculumProgress } from '../curriculum/index.js';
 
 export class RoomEvents {

@@ -14,8 +14,8 @@ export class PresenceRepositoryClass {
             : new FirestorePresenceProvider();
     }
 
-    async updatePresence(courseId, userId, data) {
-        return this.provider.updatePresence(courseId, userId, data);
+    async updatePresence(courseId, lessonId, userId, data) {
+        return this.provider.updatePresence(courseId, lessonId, userId, data);
     }
 
     async deletePresence(courseId, userId) {
@@ -38,8 +38,8 @@ export class PresenceRepositoryClass {
         return this.provider.getConnectedUsers(courseId);
     }
 
-    onPresenceSnapshot(courseId, callback) {
-        return this.provider.onPresenceSnapshot(courseId, callback);
+    onPresenceSnapshot(courseId, lessonId, callback) {
+        return this.provider.onPresenceSnapshot(courseId, lessonId, callback);
     }
 }
 

@@ -8,11 +8,11 @@ import { UploadQueue } from '../room/UploadQueue.js';
 import { PreviewEngine } from '../media/PreviewEngine.js';
 import { NotificationManager } from '../global/NotificationManager.js';
 import { SessionCache } from '../../core/SessionCache.js';
+import { SessionManager } from '../../core/SessionManager.js';
 
 export class ResourceControllerClass {
     constructor() {
         this.engine = null;
-        this.activeLessonId = null;
         this.onLessonChange = null;
         this.unsubscribeFn = null;
     }
@@ -21,12 +21,9 @@ export class ResourceControllerClass {
         this.engine = engine;
         UploadQueue.init(this.engine.courseId);
         
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
-                if (lesson && lesson.id && this.activeLessonId !== lesson.id) {
-                    this.activeLessonId = lesson.id;
-                    if (this.onLessonChange) this.onLessonChange(lesson.id);
-                }
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+                if (this.onLessonChange) this.onLessonChange(lesson?.id);
             });
         });
     }
@@ -38,7 +35,7 @@ export class ResourceControllerClass {
         }
 
         let currentLessonTitle = '';
-        const activeId = this.activeLessonId || lessonId || 'global';
+        const activeId = SessionManager.getSessionId() || lessonId || 'global';
         if (activeId !== 'global') {
             const { CurriculumController } = await import('../curriculum/index.js');
             const sections = CurriculumController.getSections();
@@ -86,7 +83,7 @@ export class ResourceControllerClass {
             this.unsubscribeFn();
             this.unsubscribeFn = null;
         }
-        const targetLesson = this.activeLessonId || 'global';
+        const targetLesson = SessionManager.getSessionId() || 'global';
         
         // Check cache first
         const cached = SessionCache.getResources(targetLesson);
@@ -114,7 +111,7 @@ export class ResourceControllerClass {
     }
 
     async getResources() {
-        const targetLesson = this.activeLessonId || 'global';
+        const targetLesson = SessionManager.getSessionId() || 'global';
         const allResources = await ResourceService.getResources(this.engine.courseId, null);
         
         return allResources.filter(res => {

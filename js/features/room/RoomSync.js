@@ -7,6 +7,7 @@ import { ChatRepository } from '../../repositories/ChatRepository.js';
 import { PresenceRepository } from '../../repositories/PresenceRepository.js';
 import { TeachingRenderer } from '../../features/room/TeachingRenderer.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js';
+import { SessionManager } from '../../core/SessionManager.js';
 
 export class RoomSync {
     constructor(roomState) {
@@ -21,6 +22,10 @@ export class RoomSync {
         this.courseId = courseId;
         this.isInstructor = isInstructor;
         this.currentUser = currentUser;
+        
+        this.lessonId = SessionManager.currentLessonId || 'global';
+        this.sessionToken = SessionManager.sessionToken;
+        
         this.setupFirestoreListeners();
     }
 
@@ -32,6 +37,8 @@ export class RoomSync {
         }
 
         this.listeners.room = RoomRepository.onRoomSessionSnapshot(this.courseId, data => {
+            if (!SessionManager.isValidSession(this.sessionToken)) return;
+
             if (data) {
                 // Check if current student is kicked
                 if (!this.isInstructor && data.kickedUsers && this.currentUser && data.kickedUsers.includes(this.currentUser.uid)) {
@@ -86,8 +93,8 @@ export class RoomSync {
         // 2. Channel Messages Sync (Now handled dynamically via EventBus)
         this.subscribeToChannelMessages(null); // Subscribe initially to load messages
 
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
                 if (lesson && lesson.id) {
                     this.subscribeToChannelMessages(lesson.id);
                 }
@@ -106,7 +113,9 @@ export class RoomSync {
             this.listeners.presence = null;
         }
 
-        this.listeners.presence = PresenceRepository.onPresenceSnapshot(this.courseId, users => {
+        this.listeners.presence = PresenceRepository.onPresenceSnapshot(this.courseId, this.lessonId, users => {
+            if (!SessionManager.isValidSession(this.sessionToken)) return;
+
             // Filter to users with a recent heartbeat (last 90 seconds)
             const now = Date.now();
             let activeCount = 0;
@@ -142,7 +151,9 @@ export class RoomSync {
 
         TeachingRenderer.clearChannelMessages();
 
-        this.listeners.channel = ChatRepository.onCourseChannelMessagesSnapshot(this.courseId, docChanges => {
+        this.listeners.channel = ChatRepository.onCourseChannelMessagesSnapshot(this.courseId, lessonId, docChanges => {
+            if (!SessionManager.isValidSession(this.sessionToken)) return;
+
             docChanges.forEach(change => {
                 if (change.type === 'added' || change.type === 'modified') {
                     const data = change.doc.data();
@@ -181,5 +192,6 @@ export class RoomSync {
             }
         }
         this.listeners = {};
+        this.sessionToken = null;
     }
 }

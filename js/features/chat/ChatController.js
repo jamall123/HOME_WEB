@@ -44,8 +44,8 @@ class ChatControllerClass {
             this.switchChannel('public');
         }
         
-        import('../../core/EventBus.js').then(({ EventBus, Events }) => {
-            EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
+            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
                 if (lesson && lesson.id) {
                     this.setLessonId(lesson.id);
                 }
