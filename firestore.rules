@@ -115,6 +115,45 @@ service cloud.firestore {
       allow read, write: if isAdmin() || isInstructorRole();
     }
 
+    // ── Missing Academy Features (Analytics, Announcements, Archives) ──
+    match /courseAnalytics/{courseId} {
+      allow read, write: if isCourseInstructor(courseId) || isAdmin();
+    }
+    
+    match /lessonAnnouncements/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /notifications/{docId} {
+      allow read, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isAdmin() || isInstructorRole();
+    }
+
+    match /archived_sessions/{sessionId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    match /resource_ai_metadata/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isInstructorRole();
+    }
+
+    // ── Missing Audit & Analytics Collections ──
+    match /system_audit_logs/{docId} {
+      allow read, write: if isAdmin();
+    }
+    match /curriculumAnalytics/{docId} {
+      allow read, write: if isAdmin() || isInstructorRole();
+    }
+    match /curriculumAuditLogs/{docId} {
+      allow read, write: if isAdmin() || isInstructorRole();
+    }
+    match /curriculumVersions/{docId} {
+      allow read, write: if isAdmin() || isInstructorRole();
+    }
+
     // ── CMS (Public Read, Admin Write) ────────────────────────────────────────
     match /posts/{postId}            { allow read: if true; allow write: if isAdmin(); }
     match /stories/{storyId}         { allow read: if true; allow write: if isAdmin(); }
