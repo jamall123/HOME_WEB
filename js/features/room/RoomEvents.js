@@ -34,7 +34,7 @@ export class RoomEvents {
             NotificationManager.show('انقطع الاتصال بالإنترنت', 'error', 0);
         });
 
-        EventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
             if (!lesson) return;
             let mode = 'video';
             if (lesson.type && lesson.type !== 'video' && lesson.type !== 'audio') mode = 'link';
@@ -87,7 +87,7 @@ export class RoomEvents {
             }
         });
 
-        EventBus.subscribe(Events.MULTIPLE_DEVICES_DETECTED, (payload) => {
+        eventBus.subscribe(Events.MULTIPLE_DEVICES_DETECTED, (payload) => {
             if (window.Swal) {
                 window.Swal.fire({
                     title: 'تنبيه الأمان',

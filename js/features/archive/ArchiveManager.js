@@ -30,7 +30,13 @@ export class ArchiveManagerClass {
             }
         });
 
-        EventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+        eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+            if (this.unsubscribe) {
+                this.unsubscribe();
+                this.unsubscribe = null;
+            }
+            const container = document.getElementById('archive-sessions-list');
+            if (container) container.innerHTML = '';
             this.destroy();
         });
 
