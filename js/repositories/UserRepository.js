@@ -39,7 +39,10 @@ export class UserRepositoryClass {
 
     async updateUser(userId, data) {
         try {
-            await this._getCollection().doc(userId).update(data);
+            const safeData = { ...data };
+            delete safeData.role;
+            delete safeData.permissions;
+            await this._getCollection().doc(userId).update(safeData);
         } catch (error) {
             this._handleError(error, 'updateUser');
         }

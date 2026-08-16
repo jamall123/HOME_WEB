@@ -47,6 +47,17 @@ export class AuthControllerClass {
     getCurrentUser() {
         return stateStore.getState('user') || AuthService.getCurrentUser();
     }
+
+    async waitForUser() {
+        const currentUser = this.getCurrentUser();
+        if (currentUser) return currentUser;
+        return new Promise(resolve => {
+            const unsubscribe = AuthRepository.onAuthStateChanged(user => {
+                resolve(user);
+                unsubscribe();
+            });
+        });
+    }
 }
 
 export const AuthController = new AuthControllerClass();

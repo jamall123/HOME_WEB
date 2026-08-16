@@ -381,7 +381,7 @@ class AdminControllerClass {
             case 'approve-req': {
                 const name = btn.getAttribute('data-name');
                 const course = btn.getAttribute('data-course');
-                this.approveRequest(id, name, course);
+                this.approveRequest(id, name, course, btn);
                 break;
             }
             case 'reject-req': {
@@ -415,6 +415,11 @@ class AdminControllerClass {
     }
 
     async deleteUser(id) {
+        const userToDelete = this.loadedData.users?.find(u => u.id === id);
+        if (userToDelete && userToDelete.role === 'ADMIN') {
+            alert('لا يمكنك حذف مشرف آخر أو حسابك الشخصي');
+            return;
+        }
         if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.')) return;
         try {
             await this.service.deleteUser(id);
@@ -428,14 +433,16 @@ class AdminControllerClass {
         NotificationManager.show(message, 'error');
     }
 
-    async approveRequest(id, fullName, courseId) {
+    async approveRequest(id, fullName, courseId, btn) {
         if (!confirm(`هل أنت متأكد من الموافقة على طلب: ${fullName}؟ سيتم تفعيل حسابه تلقائياً.`)) return;
+        if (btn) btn.disabled = true;
         try {
-            const requestData = this.requestsData?.find(r => r.id === id);
+            const requestData = this.loadedData.requests?.find(r => r.id === id);
             await this.service.approveEnrollment(id, requestData);
             this.loadRequests();
             alert('تمت الموافقة على الطلب بنجاح.');
         } catch (e) { this.handleError(e); }
+        finally { if (btn) btn.disabled = false; }
     }
 
     async rejectRequest(id, fullName) {

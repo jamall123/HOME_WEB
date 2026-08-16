@@ -51,6 +51,17 @@ export class AuthServiceClass {
             const tokenResult = await AuthRepository.getIdTokenResult();
             return tokenResult?.claims?.permissions || [];
         } catch (e) {
+            if (e.code === 'auth/id-token-expired' || (e.message && e.message.includes('expired'))) {
+                const user = AuthRepository.getCurrentUser();
+                if (user) {
+                    try {
+                        const refreshedToken = await user.getIdTokenResult(true);
+                        return refreshedToken?.claims?.permissions || [];
+                    } catch (refreshErr) {
+                        return [];
+                    }
+                }
+            }
             return [];
         }
     }
