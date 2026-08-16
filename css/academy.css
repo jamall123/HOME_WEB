@@ -1046,25 +1046,25 @@
         height: calc(100dvh - var(--header-height));
         width: 100%;
         max-width: 400px;
-        z-index: 100;
+        z-index: 9999;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
 
     .panel-curriculum {
         right: 0; /* RTL start */
-        transform: translateX(100%);
+        transform: translate3d(100%, 0, 0);
     }
     .panel-curriculum.active-mobile {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 
     .panel-chat {
         left: 0; /* RTL end */
-        transform: translateX(-100%);
+        transform: translate3d(-100%, 0, 0);
     }
     .panel-chat.active-mobile {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 
     /* Mobile Bottom Sheet conversion */

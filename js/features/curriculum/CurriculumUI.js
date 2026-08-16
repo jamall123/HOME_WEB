@@ -221,7 +221,12 @@ class CurriculumUIClass {
         }
 
         if (!state.sections || state.sections.length === 0) {
-            this.elements.container.innerHTML = '<div class="empty-state">لا يوجد محتوى متاح.</div>';
+            this.elements.container.innerHTML = `
+                <div class="empty-state" style="color: var(--text-secondary); text-align: center; padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 1rem;"></i>
+                    <p style="margin: 0; font-size: 1.1rem;">لا يوجد محتوى متاح حالياً.</p>
+                </div>
+            `;
             return;
         }
 

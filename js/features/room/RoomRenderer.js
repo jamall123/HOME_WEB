@@ -26,8 +26,13 @@ export class RoomRenderer {
         this.roomState.isRendering = true;
         
         requestAnimationFrame(() => {
-            this.processRenderQueue();
-            this.roomState.isRendering = false;
+            try {
+                this.processRenderQueue();
+            } catch (error) {
+                console.error("[RoomRenderer] Error during render queue processing:", error);
+            } finally {
+                this.roomState.isRendering = false;
+            }
         });
     }
 

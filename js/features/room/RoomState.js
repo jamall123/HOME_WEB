@@ -27,7 +27,8 @@ export class RoomState {
             },
             layout: {
                 activeTab: 'overview',
-                sidebarOpen: true
+                sidebarOpen: window.innerWidth > 1024,
+                chatOpen: window.innerWidth > 1024
             },
             permissions: {
                 chatLocked: false,

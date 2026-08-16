@@ -71,7 +71,9 @@ service cloud.firestore {
     }
 
     match /studentProgress/{docId} {
-      allow read: if isAdmin() || (docId.split('_').size() > 1 && isCourseInstructor(docId.split('_')[1])) || (isSignedIn() && docId.matches(request.auth.uid + '_.*'));
+      allow read: if isAdmin() || 
+                  (isSignedIn() && resource != null && isCourseInstructor(resource.data.courseId)) || 
+                  (isSignedIn() && docId.matches(request.auth.uid + '_.*'));
       allow write: if isSignedIn() && docId.matches(request.auth.uid + '_.*');
     }
 
@@ -82,7 +84,7 @@ service cloud.firestore {
 
     match /activeSessions/{sessionId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin() || isInstructorRole();
+      allow write: if isAdmin() || (isSignedIn() && request.resource != null && isCourseInstructor(request.resource.data.courseId)) || (isSignedIn() && resource != null && isCourseInstructor(resource.data.courseId));
     }
 
     match /course_chats/{chatId} {
