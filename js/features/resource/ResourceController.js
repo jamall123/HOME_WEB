@@ -9,6 +9,7 @@ import { PreviewEngine } from '../media/PreviewEngine.js';
 import { NotificationManager } from '../global/NotificationManager.js';
 import { SessionCache } from '../../core/SessionCache.js';
 import { SessionManager } from '../../core/SessionManager.js';
+import { CurriculumController } from '../curriculum/index.js';
 
 export class ResourceControllerClass {
     constructor() {
@@ -37,7 +38,6 @@ export class ResourceControllerClass {
         let currentLessonTitle = '';
         const activeId = SessionManager.getSessionId() || lessonId || 'global';
         if (activeId !== 'global') {
-            const { CurriculumController } = await import('../curriculum/index.js');
             const sections = CurriculumController.getSections();
             for (const section of sections) {
                 const lessons = CurriculumController.getLessons(section.id);

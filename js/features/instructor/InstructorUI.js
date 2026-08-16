@@ -1,5 +1,7 @@
 import { MediaEngine } from '../../features/media/MediaEngine.js';
 import { InstructorService } from './InstructorService.js';
+import { NotificationManager } from '../global/NotificationManager.js';
+import { CurriculumController } from '../curriculum/index.js';
 /**
  * InstructorUI.js
  * Renders the instructor control center in the DOM and binds event listeners.
@@ -660,11 +662,9 @@ export class InstructorUIClass {
                 this._startTimer('live-ws-timer');
                 
                 // Show profiling metrics notification to instructor (for auditing/debugging)
-                import('../global/NotificationManager.js').then(({ NotificationManager }) => {
-                    const m = payload.metrics;
-                    const msg = `زمن فتح الكاميرا: ${m.camTime.toFixed(0)}ms | الاتصال: ${m.joinTime.toFixed(0)}ms | النشر: ${m.publishTime.toFixed(0)}ms`;
-                    NotificationManager.show(msg, 'info', 5000);
-                });
+                const m = payload.metrics;
+                const msg = `زمن فتح الكاميرا: ${m.camTime.toFixed(0)}ms | الاتصال: ${m.joinTime.toFixed(0)}ms | النشر: ${m.publishTime.toFixed(0)}ms`;
+                NotificationManager.show(msg, 'info', 5000);
             });
         });
 
@@ -686,7 +686,7 @@ export class InstructorUIClass {
                     okLabel: 'نعم، إنهاء', danger: true
                 });
                 if (ok) {
-                    import('../curriculum/index.js').then(({ CurriculumController }) => CurriculumController.endCurrentLesson());
+                    CurriculumController.endCurrentLesson();
                 }
             },
 

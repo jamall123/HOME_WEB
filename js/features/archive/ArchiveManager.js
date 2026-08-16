@@ -22,7 +22,7 @@ export class ArchiveManagerClass {
         }
 
         // Listen for lesson selection
-        eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+        this._unsubscribePlayLecture = eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
             if (lesson.status === 'Completed') {
                 this.bootArchiveMode(lesson);
             } else {
@@ -30,11 +30,7 @@ export class ArchiveManagerClass {
             }
         });
 
-        eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
-            if (this.unsubscribe) {
-                this.unsubscribe();
-                this.unsubscribe = null;
-            }
+        this._unsubscribeDestroy = eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
             const container = document.getElementById('archive-sessions-list');
             if (container) container.innerHTML = '';
             this.destroy();
@@ -45,6 +41,19 @@ export class ArchiveManagerClass {
     }
 
     destroy() {
+        if (this.injectionInterval) {
+            clearInterval(this.injectionInterval);
+            this.injectionInterval = null;
+        }
+        if (this._unsubscribePlayLecture) {
+            this._unsubscribePlayLecture();
+            this._unsubscribePlayLecture = null;
+        }
+        if (this._unsubscribeDestroy) {
+            this._unsubscribeDestroy();
+            this._unsubscribeDestroy = null;
+        }
+        this._btnInjected = false;
         this.exitArchiveMode();
     }
 
@@ -58,39 +67,15 @@ export class ArchiveManagerClass {
         });
     }
 
-    switchArchiveTab(mode) {
-        // Update active class on tabs
-        document.querySelectorAll('.btn-archive-tab').forEach(t => t.classList.remove('active'));
-        const activeTab = document.querySelector(`.btn-archive-tab[data-mode="${mode}"]`);
-        if (activeTab) {
-            activeTab.classList.add('active');
-            activeTab.style.background = 'rgba(255,255,255,0.1)';
-            activeTab.style.color = 'white';
-        }
-
-        // Hide all layers
-        document.querySelectorAll('.renderer-layer').forEach(l => l.classList.remove('active'));
-
-        // Show the target layer
-        if (mode === 'video') {
-            document.getElementById('layer-video')?.classList.add('active');
-        } else if (mode === 'chat') {
-            document.getElementById('layer-channel')?.classList.add('active');
-        } else if (mode === 'resources') {
-            // Re-use the resources tab in the curriculum panel or show a custom layer
-            // For now, let's trigger a click on the resources side tab
-            const resTab = document.querySelector('.side-tab[data-target="resources"]');
-            if (resTab) resTab.click();
-        } else if (mode === 'slides') {
-            document.getElementById('layer-slides')?.classList.add('active');
-        }
-    }
-
     injectEndSessionButton() {
-        const checkInterval = setInterval(() => {
+        if (this._btnInjected) return;
+        this._btnInjected = true;
+
+        this.injectionInterval = setInterval(() => {
             const overviewContent = document.getElementById('side-content-overview');
             if (overviewContent) {
-                clearInterval(checkInterval);
+                clearInterval(this.injectionInterval);
+                this.injectionInterval = null;
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-primary';
                 btn.style.width = '100%';

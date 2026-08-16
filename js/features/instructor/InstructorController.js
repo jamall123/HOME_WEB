@@ -1,3 +1,5 @@
+import { MediaEngine } from '../../features/media/MediaEngine.js';
+import { NotificationManager } from '../../features/global/NotificationManager.js';
 /**
  * InstructorController.js
  * The brain of the Instructor Workspace.
@@ -268,39 +270,39 @@ class InstructorControllerClass {
 
     async startAgoraLive() {
         try {
-            const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+            
             // Connect Agora FIRST, then update mode so students can join
             await MediaEngine.startLiveWebRTC(this.engine.courseId);
             // Only broadcast mode change after Agora is up and running
             await TeachingModes.setMode('live', { isLive: true });
         } catch(e) {
             console.error('[InstructorController] Failed to start live stream:', e);
-            const { NotificationManager } = await import('../../features/global/NotificationManager.js');
+            
             NotificationManager.show('تعذر بدء البث المباشر: ' + e.message, 'error');
             throw e;
         }
     }
 
     async stopAgoraLive() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         await TeachingModes.setMode('video', { isLive: false }); // Fallback to video mode when stopped
         MediaEngine.stopLiveWebRTC(this.engine.courseId);
     }
 
     async toggleAgoraMic() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         const isMuted = MediaEngine.toggleMic();
         document.getElementById('btn-agora-mic').innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i> تم الكتم' : '<i class="fas fa-microphone"></i> كتم المايك';
     }
 
     async switchAgoraCamera() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         MediaEngine.switchCamera();
     }
 
     async setTeachingMode(modeName, metadata = {}) {
         // Aggressive Cleanup: Stop any active broadcasts when switching modes
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         
         // Reset Slides Audio State
         this.isSlidesAudioActive = false;
@@ -454,7 +456,7 @@ class InstructorControllerClass {
     }
 
     async startSlidesAudio() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         this.isSlidesAudioActive = true;
         
         document.getElementById('btn-slides-mic-start').style.display = 'none';
@@ -470,7 +472,7 @@ class InstructorControllerClass {
     }
 
     async stopSlidesAudio() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         this.isSlidesAudioActive = false;
         
         document.getElementById('btn-slides-mic-start').style.display = 'block';
@@ -488,7 +490,7 @@ class InstructorControllerClass {
     // --- AUDIO MODE CONTROLS ---
     
     async startAudioOnly() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         this.isAudioOnlyActive = true;
         
         document.getElementById('btn-audio-start').style.display = 'none';
@@ -502,7 +504,7 @@ class InstructorControllerClass {
     }
 
     async stopAudioOnly() {
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
+        
         this.isAudioOnlyActive = false;
         
         document.getElementById('btn-audio-start').style.display = 'block';
@@ -667,7 +669,7 @@ class InstructorControllerClass {
                         });
                     } catch (error) {
                         console.error("Failed to upload audio:", error);
-                        const { NotificationManager } = await import('../../features/global/NotificationManager.js');
+                        
                         NotificationManager.show('فشل رفع المقطع الصوتي: ' + error.message, 'error');
                     }
                 };
@@ -678,7 +680,7 @@ class InstructorControllerClass {
                 btn.classList.replace('btn-dark', 'btn-danger');
             } catch (err) {
                 console.error("Error accessing microphone:", err);
-                const { NotificationManager } = await import('../../features/global/NotificationManager.js');
+                
                 NotificationManager.show('لم نتمكن من الوصول إلى الميكروفون. يرجى التأكد من منح الصلاحيات.', 'error');
             }
         } else {
@@ -745,7 +747,7 @@ class InstructorControllerClass {
             await RoomRepository.setSessionState(this.engine.courseId, {
                 [`micPermissions.${studentUid}`]: true
             });
-            const { NotificationManager } = await import('../../features/global/NotificationManager.js');
+            
             NotificationManager.show(`تم السماح لـ ${studentName} بالكلام`, 'success');
         } catch (e) {
             console.error('[InstructorController] allowStudentMic failed:', e);

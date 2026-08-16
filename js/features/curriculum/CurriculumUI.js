@@ -7,6 +7,21 @@ import { LessonRegistry } from './LessonRegistry.js';
  * Responsible solely for DOM updates and capturing user interactions.
  */
 
+/**
+ * Escapes HTML special characters to prevent XSS injection.
+ * @param {*} str - Raw value from Firestore data.
+ * @returns {string} Sanitized string safe for innerHTML.
+ */
+function escapeHTML(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 class CurriculumUIClass {
     constructor() {
         this.elements = {};
@@ -80,6 +95,9 @@ class CurriculumUIClass {
                 }, 300);
             }
         });
+
+        // Initialize search and drag-and-drop listeners
+        this.attachSearchListener();
     }
 
     showRecordingsModal(recordings) {
@@ -144,7 +162,8 @@ class CurriculumUIClass {
 
     attachSearchListener() {
         // Search Listener (Debounced)
-        if (this.elements.searchInput) {
+        if (this.elements.searchInput && !this.elements.searchInput._listenerAttached) {
+            this.elements.searchInput._listenerAttached = true;
             let timeout = null;
             this.elements.searchInput.addEventListener('input', (e) => {
                 clearTimeout(timeout);
@@ -158,7 +177,7 @@ class CurriculumUIClass {
         if (this.isInstructor) {
             this.setupDragAndDrop();
         }
-        this.attachSearchListener();
+        // NOTE: Removed recursive self-call that caused infinite recursion / stack overflow
     }
 
     setupDragAndDrop() {
@@ -255,7 +274,7 @@ class CurriculumUIClass {
                 <div class="curriculum-section ${dragClass}" data-id="${section.id}" ${draggableAttr}>
                     <div class="curriculum-section-header" data-id="${section.id}">
                         <div style="display: flex; flex-direction: column;">
-                            <span style="font-weight: bold;">${section.title}</span>
+                            <span style="font-weight: bold;">${escapeHTML(section.title)}</span>
                             <span class="text-sm text-muted">${sectionLessons.length} دروس</span>
                         </div>
                         <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i>
@@ -286,7 +305,7 @@ class CurriculumUIClass {
                     <div class="curriculum-item ${isActive ? 'active' : ''} ${lesson.locked ? 'locked' : ''}" data-id="${lesson.id}" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.4rem;">
                         <div style="display:flex;align-items:center;flex: 1 1 150px;min-width:0;">
                             ${iconHtml}
-                            <span style="margin-right: 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${lesson.title}">${lesson.title}</span>
+                            <span style="margin-right: 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHTML(lesson.title)}">${escapeHTML(lesson.title)}</span>
                             ${statusLabel}
                         </div>
                         <div style="display:flex;align-items:center;gap:0.3rem;flex-shrink:0;">

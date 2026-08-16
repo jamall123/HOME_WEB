@@ -4,6 +4,9 @@
  */
 
 import { ProgressController } from './ProgressController.js';
+import { InstructorAnalyticsUI } from '../instructor/InstructorAnalyticsUI.js';
+import { StudentProgressUI } from './StudentProgressUI.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 
 export class ProgressManagerClass {
     constructor() {
@@ -20,25 +23,19 @@ export class ProgressManagerClass {
 
         // Boot specific UI based on role
         if (this.engine.isInstructor) {
-            import('../instructor/InstructorAnalyticsUI.js').then(({ InstructorAnalyticsUI }) => {
-                InstructorAnalyticsUI.init(this.engine);
-            });
+            InstructorAnalyticsUI.init(this.engine);
         } else {
-            import('./StudentProgressUI.js').then(({ StudentProgressUI }) => {
-                StudentProgressUI.init(this.engine);
-            });
+            StudentProgressUI.init(this.engine);
         }
 
-        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
-                ProgressController.logLessonView(lesson.id);
-            });
-            eventBus.subscribe(Events.LESSON_ENDED, () => {
-                ProgressController.syncPendingProgress();
-            });
-            eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
-                this.destroy();
-            });
+        eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+            ProgressController.logLessonView(lesson.id);
+        });
+        eventBus.subscribe(Events.LESSON_ENDED, () => {
+            ProgressController.syncPendingProgress();
+        });
+        eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+            this.destroy();
         });
     }
 

@@ -25,6 +25,8 @@ import { ArchiveManager } from '../../features/archive/ArchiveManager.js';
 import { OfflineSyncEngine } from '../../features/offline/OfflineSyncEngine.js';
 import { ProgressManager } from '../../features/progress/ProgressManager.js';
 import { InstructorController } from '../instructor/index.js';
+import { eventBus, Events } from '../../core/EventBus.js';
+import { MediaEngine } from '../../features/media/MediaEngine.js';
 
 import { RoomState } from './RoomState.js';
 import { RoomRenderer } from './RoomRenderer.js';
@@ -278,18 +280,14 @@ class RoomControllerClass {
     destroy() {
         this.roomSync.destroy();
         if (this.isInstructor) {
-            import('../instructor/index.js').then(({ InstructorController }) => {
-                if (typeof InstructorController.destroy === 'function') {
-                    InstructorController.destroy();
-                }
-            });
+            if (typeof InstructorController.destroy === 'function') {
+                InstructorController.destroy();
+            }
         }
     }
 
     async destroyRoomSession() {
-        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-            eventBus.emit(Events.DESTROY_ROOM_SESSION);
-        });
+        eventBus.emit(Events.DESTROY_ROOM_SESSION);
 
         // Safe teardown of lesson-specific controllers (if they implement destroy)
         if (ChatController && typeof ChatController.destroy === 'function') await ChatController.destroy();
@@ -297,7 +295,6 @@ class RoomControllerClass {
         if (MediaManager && typeof MediaManager.destroy === 'function') await MediaManager.destroy();
         
         // Media Engine teardown
-        const { MediaEngine } = await import('../../features/media/MediaEngine.js');
         if (MediaEngine) {
             if (typeof MediaEngine.stopLiveWebRTC === 'function') await MediaEngine.stopLiveWebRTC(this.courseId);
             if (typeof MediaEngine.leaveLiveWebRTC === 'function') await MediaEngine.leaveLiveWebRTC();
@@ -315,9 +312,7 @@ class RoomControllerClass {
         this.roomState.currentSession = null;
         
         // Clear UI DOM elements (like chat, resources)
-        import('../../features/room/TeachingRenderer.js').then(({ TeachingRenderer }) => {
-            TeachingRenderer.clearChannelMessages();
-        });
+        TeachingRenderer.clearChannelMessages();
         
         const resourceList = document.getElementById('resources-list');
         if (resourceList) resourceList.innerHTML = '';
@@ -328,4 +323,19 @@ class RoomControllerClass {
 }
 
 export const RoomEngine = new RoomControllerClass();
-window.RoomEngine = RoomEngine;
+
+// Expose a READ-ONLY debug facade to the window.
+// Intentionally excludes sensitive flags like isInstructor to prevent
+// client-side privilege escalation via browser console manipulation.
+window.RoomEngine = Object.freeze({
+    get courseId()      { return RoomEngine.courseId; },
+    get state()         { return RoomEngine.state; },
+    destroyRoomSession: () => RoomEngine.destroyRoomSession(),
+    // Debug helper — shows session info without exposing role flags
+    debugInfo: () => ({
+        courseId: RoomEngine.courseId,
+        sessionId: RoomEngine.roomState?.state?.room?.sessionId,
+        mode: RoomEngine.roomState?.state?.room?.mode,
+    }),
+});
+

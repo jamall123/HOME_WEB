@@ -8,6 +8,8 @@ import { PresenceRepository } from '../../repositories/PresenceRepository.js';
 import { TeachingRenderer } from '../../features/room/TeachingRenderer.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js';
 import { SessionManager } from '../../core/SessionManager.js';
+import { CurriculumController } from '../curriculum/index.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 
 export class RoomSync {
     constructor(roomState) {
@@ -42,12 +44,10 @@ export class RoomSync {
             if (data) {
                 // Check if current student is kicked
                 if (!this.isInstructor && data.kickedUsers && this.currentUser && data.kickedUsers.includes(this.currentUser.uid)) {
-                    import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
-                        NotificationManager.show('تم إزالتك من الغرفة بواسطة المدرب.', 'error');
-                        setTimeout(() => {
-                            window.location.href = '/dashboard/student.html';
-                        }, 2000);
-                    });
+                    NotificationManager.show('تم إزالتك من الغرفة بواسطة المدرب.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/student.html';
+                    }, 2000);
                     return;
                 }
 
@@ -82,30 +82,27 @@ export class RoomSync {
 
                 // Force student Curriculum to match instructor's active lesson
                 if (!this.isInstructor && data.lessonId) {
-                    import('../curriculum/index.js').then(({ CurriculumController }) => {
-                        if (data.lessonId !== CurriculumController.cache?.currentLessonId) {
-                            CurriculumController.selectLesson(data.lessonId);
-                        }
-                    });
+                    if (data.lessonId !== CurriculumController.cache?.currentLessonId) {
+                        CurriculumController.selectLesson(data.lessonId);
+                    }
                 }
             }
         });
         // 2. Channel Messages Sync (Now handled dynamically via EventBus)
         this.subscribeToChannelMessages(null); // Subscribe initially to load messages
 
-        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
-                if (lesson && lesson.id) {
-                    this.subscribeToChannelMessages(lesson.id);
-                }
-            });
-            // Handle initial load if active lesson already set
-            import('../curriculum/index.js').then(({ CurriculumController }) => {
-                if (CurriculumController.cache?.currentLessonId) {
-                    this.subscribeToChannelMessages(CurriculumController.cache.currentLessonId);
-                }
-            });
+        if (this.listeners.eventPlayLecture) {
+            this.listeners.eventPlayLecture();
+        }
+        this.listeners.eventPlayLecture = eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+            if (lesson && lesson.id) {
+                this.subscribeToChannelMessages(lesson.id);
+            }
         });
+        // Handle initial load if active lesson already set
+        if (CurriculumController.cache?.currentLessonId) {
+            this.subscribeToChannelMessages(CurriculumController.cache.currentLessonId);
+        }
 
         // 3. Real-time Online Users Count
         if (this.listeners.presence) {
@@ -157,12 +154,6 @@ export class RoomSync {
             docChanges.forEach(change => {
                 if (change.type === 'added' || change.type === 'modified') {
                     const data = change.doc.data();
-                    
-                    // Client-side filtering as requested by architectural rules
-                    // If message has lessonId, it must match.
-                    // If it doesn't have lessonId (old message), show it everywhere for backward compatibility
-                    // If lessonId is null (instructor hasn't played a lesson yet), show all messages.
-                    if (lessonId && data.lessonId && data.lessonId !== lessonId) return;
 
                     TeachingRenderer.renderChannelMessage(data, change.doc.id);
                     
@@ -170,9 +161,7 @@ export class RoomSync {
                     if (change.type === 'added' && Date.now() - data.timestamp < 10000 && !document.hasFocus() && !this.isInstructor) {
                         let notifBody = 'مرفق جديد';
                         if (data.type === 'text') notifBody = data.content;
-                        import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
-                            NotificationManager.showBrowserNotification('رسالة جديدة في القناة', { body: notifBody });
-                        });
+                        NotificationManager.showBrowserNotification('رسالة جديدة في القناة', { body: notifBody });
                     }
 
                     this.roomState.updateState({

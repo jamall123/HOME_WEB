@@ -4,6 +4,8 @@
  */
 import { TeachingRenderer } from '../../features/room/TeachingRenderer.js';
 import { WorkspaceUI } from '../../features/global/WorkspaceUI.js';
+import { MediaEngine } from '../../features/media/MediaEngine.js';
+import { NotificationManager } from '../../features/global/NotificationManager.js';
 
 export class RoomRenderer {
     constructor(roomState) {
@@ -122,17 +124,11 @@ export class RoomRenderer {
 
             // Agora Student Subscriptions
             if (state.room.mode === 'live' && !this.isInstructor) {
-                import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.joinLiveWebRTC(this.courseId);
-                });
+                MediaEngine.joinLiveWebRTC(this.courseId);
             } else if (state.room.mode === 'slides' && state.presentation.audioStream && !this.isInstructor) {
-                import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
-                });
+                MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
             } else if (state.room.mode === 'audio' && state.presentation.audioStream && !this.isInstructor) {
-                import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                    MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
-                });
+                MediaEngine.joinLiveWebRTC(this.courseId); // Subscribes to audio
             } else if (prevState) {
                 const wasLiveOrAudio = (prevState.room.mode === 'live') || 
                                        (prevState.room.mode === 'slides' && prevState.presentation.audioStream) ||
@@ -142,9 +138,7 @@ export class RoomRenderer {
                                       (state.room.mode === 'audio' && state.presentation.audioStream);
                                       
                 if (wasLiveOrAudio && !isLiveOrAudio && !this.isInstructor) {
-                    import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                        MediaEngine.leaveLiveWebRTC();
-                    });
+                    MediaEngine.leaveLiveWebRTC();
                 }
             }
         }
@@ -155,12 +149,8 @@ export class RoomRenderer {
                 const hadMic = prevState && prevState.permissions.micPermissions && prevState.permissions.micPermissions[this.currentUser.uid];
                 
                 if (hasMic && !hadMic) {
-                    import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
-                        NotificationManager.show('لقد منحك المدرب صلاحية التحدث!', 'success');
-                    });
-                    import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                        MediaEngine.startAudioOnlyWebRTC(this.courseId);
-                    });
+                    NotificationManager.show('لقد منحك المدرب صلاحية التحدث!', 'success');
+                    MediaEngine.startAudioOnlyWebRTC(this.courseId);
                     
                     const btn = document.getElementById('btn-student-mic');
                     if (btn) {
@@ -169,12 +159,8 @@ export class RoomRenderer {
                         btn.querySelector('i').className = 'fas fa-microphone';
                     }
                 } else if (!hasMic && hadMic) {
-                    import('../../features/global/NotificationManager.js').then(({ NotificationManager }) => {
-                        NotificationManager.show('تم سحب صلاحية التحدث.', 'info');
-                    });
-                    import('../../features/media/MediaEngine.js').then(({ MediaEngine }) => {
-                        MediaEngine.leaveLiveWebRTC();
-                    });
+                    NotificationManager.show('تم سحب صلاحية التحدث.', 'info');
+                    MediaEngine.leaveLiveWebRTC();
                     
                     const btn = document.getElementById('btn-student-mic');
                     if (btn) {

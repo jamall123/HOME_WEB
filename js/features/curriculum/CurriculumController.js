@@ -4,7 +4,9 @@ import { AuthController } from '../auth/AuthController.js';
 import { CurriculumUI } from './CurriculumUI.js';
 import { CurriculumProgress } from './CurriculumProgress.js';
 import { SessionManager } from '../../core/SessionManager.js';
+import { RoomEngine } from '../../features/room/RoomController.js';
 import { NotificationManager } from '../../features/global/NotificationManager.js'; // Assuming it was moved to core, or adjust accordingly
+import { eventBus, Events } from '../../core/EventBus.js';
 
 /**
  * CurriculumController.js
@@ -132,9 +134,14 @@ class CurriculumControllerClass {
                     body: 'الرجاء إدخال عنوان ووصف للدرس للبدء',
                     okLabel: 'بدء الدرس'
                 });
-                if (res && res.title) {
+                // If instructor cancelled the dialog, abort lesson creation entirely
+                if (!res) return;
+                if (res.title) {
                     title = res.title;
                     desc = res.description || '';
+                } else {
+                    // Dialog was submitted but no title provided — still abort
+                    return;
                 }
             }
             
@@ -269,7 +276,6 @@ class CurriculumControllerClass {
         if (lesson) {
             try {
                 // Ensure the previous session is fully destroyed before opening the new one
-                const { RoomEngine } = await import('../../features/room/RoomController.js');
                 if (RoomEngine && typeof RoomEngine.destroyRoomSession === 'function') {
                     await RoomEngine.destroyRoomSession();
                 }
@@ -277,7 +283,6 @@ class CurriculumControllerClass {
                 // Switch the session globally
                 await SessionManager.switchSession(this.courseId, lessonId);
 
-                const { eventBus, Events } = await import('../../core/EventBus.js');
                 eventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
             } catch (error) {
                 console.error("[CurriculumController] Failed to transition session:", error);
@@ -436,9 +441,7 @@ class CurriculumControllerClass {
             NotificationManager.show("تم إنهاء الدرس بنجاح وبدء دورة جديدة", "success");
             
             // Notify other controllers to clear their caches
-            import('../../core/EventBus.js').then(({ eventBus }) => {
-                eventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
-            });
+            eventBus.emit('LESSON_ENDED', this.cache.currentLessonId);
             
         } catch(error) {
             console.error("End lesson failed:", error);
@@ -447,6 +450,8 @@ class CurriculumControllerClass {
     }
 
     notifyUIRender() {
+        // Apply visibility rules before rendering (hides draft/hidden/future lessons for students)
+        this.evaluateVisibility();
         CurriculumUI.render(this.cache);
     }
 

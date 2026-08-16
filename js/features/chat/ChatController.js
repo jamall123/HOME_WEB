@@ -32,6 +32,7 @@ class ChatControllerClass {
         this.typingTimeout = null;
         this.typingUnsubscribe = null;
         this.channelUnsubscribe = null;
+        this._playLectureUnsub = null; // EventBus unsubscribe ref
     }
 
     init(engine) {
@@ -45,7 +46,8 @@ class ChatControllerClass {
         }
         
         import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-            eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
+            // Store reference so we can unsubscribe on destroy
+            this._playLectureUnsub = eventBus.subscribe(Events.PLAY_LECTURE, (lesson) => {
                 if (lesson && lesson.id) {
                     this.setLessonId(lesson.id);
                 }
@@ -222,18 +224,31 @@ class ChatControllerClass {
         const queue = JSON.parse(localStorage.getItem(key) || '[]');
         if (queue.length === 0 || !navigator.onLine) return;
 
+        const failed = [];
         for (const msg of queue) {
-            await ChatService.sendMessage(
-                this.engine.courseId,
-                this.engine.currentUser.uid,
-                this.engine.currentUser.displayName,
-                this.engine.isInstructor ? 'instructor' : 'student',
-                msg.text,
-                msg.channel,
-                msg.replyToId
-            );
+            try {
+                await ChatService.sendMessage(
+                    this.engine.courseId,
+                    this.engine.currentUser.uid,
+                    this.engine.currentUser.displayName,
+                    this.engine.isInstructor ? 'instructor' : 'student',
+                    msg.text,
+                    msg.channel,
+                    msg.replyToId
+                );
+                // Successfully sent — do NOT re-add to failed list
+            } catch (err) {
+                // Keep failed messages so they can be retried next time
+                failed.push(msg);
+            }
         }
-        localStorage.removeItem(key);
+
+        // Persist only the messages that failed to send
+        if (failed.length > 0) {
+            localStorage.setItem(key, JSON.stringify(failed));
+        } else {
+            localStorage.removeItem(key);
+        }
     }
 
     // Typing Logic
@@ -280,6 +295,12 @@ class ChatControllerClass {
     }
 
     destroy() {
+        // Unsubscribe EventBus listener to prevent memory leak on re-init
+        if (this._playLectureUnsub) {
+            this._playLectureUnsub();
+            this._playLectureUnsub = null;
+        }
+
         if (this.channelUnsubscribe) {
             this.channelUnsubscribe();
             this.channelUnsubscribe = null;
@@ -288,7 +309,19 @@ class ChatControllerClass {
             this.typingUnsubscribe();
             this.typingUnsubscribe = null;
         }
+
+        // Clear ghost typing status in Firestore before destroying
         clearTimeout(this.typingTimeout);
+        if (this.engine?.courseId && this.engine?.currentUser?.uid && this.cache?.activeChannel) {
+            ChatService.setTypingStatus(
+                this.engine.courseId,
+                this.cache.activeChannel,
+                this.engine.currentUser.uid,
+                this.engine.currentUser.displayName,
+                false
+            ).catch(() => {}); // Fire-and-forget
+        }
+
         this.cache = {
             activeChannel: 'public',
             messages: { public: [], questions: [], announcements: [], system: [] },
@@ -297,6 +330,7 @@ class ChatControllerClass {
             isChatOpen: false
         };
         this.activeLessonId = null;
+        this.engine = null;
     }
 }
 

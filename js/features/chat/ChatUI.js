@@ -6,6 +6,19 @@ import { PermissionManager } from '../../core/PermissionManager.js';
  * Presentation Layer for Advanced Multi-Channel Chat.
  */
 
+/**
+ * Escapes HTML special characters to prevent XSS injection from user content.
+ */
+function escapeHTML(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 class ChatUIClass {
     constructor() {
         this.elements = {};
@@ -141,8 +154,8 @@ class ChatUIClass {
             html += `
                 <div class="chat-message ${msg.isOptimistic ? 'optimistic' : ''}" style="align-self: ${isSelf ? 'flex-end' : 'flex-start'}; max-width: 85%; opacity: ${msg.isOptimistic ? '0.75' : '1'}; transition: opacity 0.3s;">
                     <div style="font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: center; gap: 0.5rem; justify-content: ${isSelf ? 'flex-end' : 'flex-start'};">
-                        <span style="font-weight: bold; color: ${isInst ? 'var(--primary-color)' : 'var(--text-secondary)'};">
-                            ${msg.userName} ${isInst ? '<i class="fas fa-check-circle"></i>' : ''}
+                        <span style="font-weight: bold; color: ${isInst ? 'var(--primary-color)' : 'var(--text-secondary)'};"
+                            >${escapeHTML(msg.userName)} ${isInst ? '<i class="fas fa-check-circle"></i>' : ''}
                         </span>
                         <span style="font-size: 0.7rem; color: #666;">${timeStr}${msg.isOptimistic ? ' <i class="fas fa-clock" style="font-size:0.65rem;opacity:0.6;"></i>' : ''}</span>
                     </div>
@@ -151,7 +164,7 @@ class ChatUIClass {
                                 padding: 0.8rem 1rem; 
                                 border-radius: 12px;
                                 border-${isSelf ? 'bottom-left' : 'bottom-right'}-radius: 0;">
-                        ${msg.text}
+                        ${escapeHTML(msg.text)}
                         ${!msg.isOptimistic ? `
                         <div style="display:flex;gap:0.3rem;margin-top:0.4rem;justify-content:${isSelf ? 'flex-end' : 'flex-start'};">
                             <button onclick="if(window.ChatAPI) window.ChatAPI.toggleReaction('${msgId}', 'like')"
@@ -170,7 +183,14 @@ class ChatUIClass {
         });
         
         this.elements.container.innerHTML = html;
-        this.elements.container.scrollTop = this.elements.container.scrollHeight;
+
+        // Only auto-scroll to bottom if the user was already near the bottom
+        // This prevents jarring scroll-snap when user manually scrolls up to read history
+        const container = this.elements.container;
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+        if (isNearBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 }
 

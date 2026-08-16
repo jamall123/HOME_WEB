@@ -6,6 +6,7 @@
 
 import { ResourceController } from './ResourceController.js';
 import { UploadQueue } from '../room/UploadQueue.js';
+import { eventBus, Events } from '../../core/EventBus.js';
 
 export class ResourceManagerClass {
     constructor() {
@@ -51,10 +52,8 @@ export class ResourceManagerClass {
             if (this.engine.isInstructor) this.renderInstructorResources(resources);
         });
 
-        import('../../core/EventBus.js').then(({ eventBus, Events }) => {
-            eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
-                this.destroy();
-            });
+        eventBus.subscribe(Events.DESTROY_ROOM_SESSION, () => {
+            this.destroy();
         });
     }
 
@@ -282,18 +281,14 @@ export class ResourceManagerClass {
                 const file = this._fileStore.get(id);
                 if (!file) return;
                 // Remove the old failed entry from queue display
-                import('../room/UploadQueue.js').then(({ UploadQueue }) => {
-                    UploadQueue.removeUpload(id);
-                });
+                UploadQueue.removeUpload(id);
                 this._fileStore.delete(id);
                 // Re-upload the file
                 ResourceController.handleFilesDropped([file]);
             },
             dismiss: (id) => {
                 this._fileStore.delete(id);
-                import('../room/UploadQueue.js').then(({ UploadQueue }) => {
-                    UploadQueue.removeUpload(id);
-                });
+                UploadQueue.removeUpload(id);
             }
         });
 
@@ -439,7 +434,7 @@ export class ResourceManagerClass {
                 <div style="display: flex; gap: 1rem; align-items: center; flex: 1 1 200px; min-width: 0;">
                     <i class="fas fa-file" style="font-size: 2rem; color: var(--primary-color); flex-shrink: 0;"></i>
                     <div style="min-width: 0; overflow: hidden;">
-                        <h4 style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${res.fileName}">${res.fileName}</h4>
+                        <h4 style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${res.fileName?.replace(/"/g, '&quot;') || ''}">${res.fileName ? String(res.fileName).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''}</h4>
                         <span style="font-size: 0.8rem; color: var(--text-secondary);">${sizeMb} MB | ${new Date(res.createdAt?.toDate() || Date.now()).toLocaleDateString()}</span>
                     </div>
                 </div>

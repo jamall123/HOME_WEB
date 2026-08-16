@@ -34,6 +34,12 @@ export class PresenceControllerClass {
         this.courseId = null;
         this.userData = null;
         this.engineState = null;
+        
+        // Stored references to remove event listeners later
+        this._beforeUnloadHandler = null;
+        this._networkOnlineHandler = null;
+        this._networkOfflineHandler = null;
+        this._visibilityHandler = null;
     }
 
     /**
@@ -84,10 +90,14 @@ export class PresenceControllerClass {
             });
         }
 
-        // Cleanup on unload
-        window.addEventListener('beforeunload', () => {
+        // Cleanup on unload — remove any previously registered handler first
+        if (this._beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+        }
+        this._beforeUnloadHandler = () => {
             this.stopPresenceSession(this.courseId, this.userData.username || this.userData.uid);
-        });
+        };
+        window.addEventListener('beforeunload', this._beforeUnloadHandler);
     }
 
     listenToActiveSession() {
@@ -143,27 +153,29 @@ export class PresenceControllerClass {
     attachNetworkListeners() {
         if (this.networkListenersAttached) return;
         this.networkListenersAttached = true;
-        window.addEventListener('offline', () => {
+        this._networkOfflineHandler = () => {
             this.wasOffline = true;
-        });
-
-        window.addEventListener('online', () => {
+        };
+        this._networkOnlineHandler = () => {
             if (this.wasOffline) {
                 this.reconnectCount++;
                 this.wasOffline = false;
                 this.sendHeartbeat(); // Immediate heartbeat on reconnect
             }
-        });
+        };
+        window.addEventListener('offline', this._networkOfflineHandler);
+        window.addEventListener('online', this._networkOnlineHandler);
     }
 
     attachVisibilityListeners() {
         if (this.visibilityListenersAttached) return;
         this.visibilityListenersAttached = true;
-        document.addEventListener("visibilitychange", () => {
+        this._visibilityHandler = () => {
             if (document.visibilityState === 'visible') {
                 this.sendHeartbeat();
             }
-        });
+        };
+        document.addEventListener('visibilitychange', this._visibilityHandler);
     }
 
     async sendHeartbeat() {
@@ -214,6 +226,10 @@ export class PresenceControllerClass {
             this.unsubscribeActiveSession();
             this.unsubscribeActiveSession = null;
         }
+        if (this._beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            this._beforeUnloadHandler = null;
+        }
         
         if (this.isMaster()) {
             localStorage.removeItem(this.masterKey);
@@ -237,6 +253,26 @@ export class PresenceControllerClass {
         if (this.courseId && this.userData) {
             await this.stopPresenceSession(this.courseId, this.userData.uid || this.userData.username);
         }
+        
+        if (this._beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            this._beforeUnloadHandler = null;
+        }
+        if (this._networkOnlineHandler) {
+            window.removeEventListener('online', this._networkOnlineHandler);
+            this._networkOnlineHandler = null;
+        }
+        if (this._networkOfflineHandler) {
+            window.removeEventListener('offline', this._networkOfflineHandler);
+            this._networkOfflineHandler = null;
+        }
+        if (this._visibilityHandler) {
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
+            this._visibilityHandler = null;
+        }
+        
+        this.networkListenersAttached = false;
+        this.visibilityListenersAttached = false;
     }
 }
 

@@ -81,12 +81,18 @@ export class ChatRepositoryClass {
         }
     }
 
-    onCourseChannelMessagesSnapshot(courseId, callback) {
+    onCourseChannelMessagesSnapshot(courseId, lessonId, callback) {
         try {
             const db = FirebaseManager.getFirestore();
-            return db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
-                .collection(Constants.COLLECTIONS.CHANNEL_MESSAGES)
-                .orderBy('timestamp', 'asc')
+            let query = db.collection(Constants.COLLECTIONS.COURSES).doc(courseId)
+                .collection(Constants.COLLECTIONS.CHANNEL_MESSAGES);
+                
+            // Apply filtering at the database level to prevent data leaks
+            if (lessonId) {
+                query = query.where('lessonId', '==', lessonId);
+            }
+            
+            return query.orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
                     callback(snapshot.docChanges());
                 }, error => {
