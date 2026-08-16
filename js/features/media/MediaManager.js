@@ -21,6 +21,9 @@ class MediaManagerClass {
     }
 
     init() {
+        if (this._initialized) return;
+        this._initialized = true;
+
         if (this.uploadInput) {
             this.uploadInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
         }
@@ -319,6 +322,16 @@ class MediaManagerClass {
             console.error('[MediaManager] Restore error', error);
             eventBus.emit('notification:show', { type: 'error', message: 'فشل في استعادة الملف' });
         }
+    }
+
+    destroy() {
+        // Cleanup global handlers and eventbus subscriptions
+        window.deleteMedia = null;
+        window.copyMediaUrl = null;
+        window.restoreMedia = null;
+        window.toggleRecycleBin = null;
+        this._initialized = false;
+        // In a real app we might want to also remove eventBus listeners if they returned an unsubscribe function
     }
 }
 

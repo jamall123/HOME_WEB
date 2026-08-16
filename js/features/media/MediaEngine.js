@@ -203,7 +203,9 @@ export const MediaEngine = {
         }
         instance.isPublishing = true;
         
-        // Ensure any existing client is disconnected
+        // Ensure any existing tracks/client are disconnected
+        if (instance.localTracks.audio) { instance.localTracks.audio.close(); instance.localTracks.audio = null; }
+        if (instance.localTracks.video) { instance.localTracks.video.close(); instance.localTracks.video = null; }
         if (instance.agoraClient) {
             try { await instance.agoraClient.leave(); } catch (e) {}
             instance.agoraClient = null;
@@ -499,7 +501,9 @@ export const MediaEngine = {
         
         instance.isPublishing = true;
 
-        // Ensure any existing client is disconnected
+        // Ensure any existing tracks/client are disconnected
+        if (instance.localTracks.audio) { instance.localTracks.audio.close(); instance.localTracks.audio = null; }
+        if (instance.localTracks.video) { instance.localTracks.video.close(); instance.localTracks.video = null; }
         if (instance.agoraClient) {
             try { await instance.agoraClient.leave(); } catch (e) {}
             instance.agoraClient = null;
@@ -566,6 +570,9 @@ export const MediaEngine = {
         const sessionId = SessionManager.getSessionId();
         const instance = this.getInstance(sessionId);
         if (!instance) return;
+
+        if (instance.localTracks.audio) { instance.localTracks.audio.close(); instance.localTracks.audio = null; }
+        if (instance.localTracks.video) { instance.localTracks.video.close(); instance.localTracks.video = null; }
 
         if (instance.agoraClient) {
             try {

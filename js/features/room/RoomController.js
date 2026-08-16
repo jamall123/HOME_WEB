@@ -294,6 +294,11 @@ class RoomControllerClass {
         if (ResourceManager && typeof ResourceManager.destroy === 'function') await ResourceManager.destroy();
         if (MediaManager && typeof MediaManager.destroy === 'function') await MediaManager.destroy();
         
+        // Ensure RoomSync and Events are destroyed
+        if (this.roomSync && typeof this.roomSync.destroy === 'function') this.roomSync.destroy();
+        if (this.roomEvents && typeof this.roomEvents.destroy === 'function') this.roomEvents.destroy();
+        if (typeof PresenceController !== 'undefined' && typeof PresenceController.destroy === 'function') await PresenceController.destroy();
+        
         // Media Engine teardown
         if (MediaEngine) {
             if (typeof MediaEngine.stopLiveWebRTC === 'function') await MediaEngine.stopLiveWebRTC(this.courseId);

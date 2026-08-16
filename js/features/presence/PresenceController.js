@@ -230,6 +230,21 @@ export class PresenceControllerClass {
             window.removeEventListener('beforeunload', this._beforeUnloadHandler);
             this._beforeUnloadHandler = null;
         }
+        if (this._networkOnlineHandler) {
+            window.removeEventListener('online', this._networkOnlineHandler);
+            this._networkOnlineHandler = null;
+        }
+        if (this._networkOfflineHandler) {
+            window.removeEventListener('offline', this._networkOfflineHandler);
+            this._networkOfflineHandler = null;
+        }
+        if (this._visibilityHandler) {
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
+            this._visibilityHandler = null;
+        }
+        
+        this.networkListenersAttached = false;
+        this.visibilityListenersAttached = false;
         
         if (this.isMaster()) {
             localStorage.removeItem(this.masterKey);
