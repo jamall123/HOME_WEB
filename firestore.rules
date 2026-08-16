@@ -98,12 +98,17 @@ service cloud.firestore {
     }
 
     match /course_chats/{chatId} {
+      // chatId format: {courseId}_{channel}_{lessonId}
+      // Extract courseId from the chatId path for list-query compatibility
+      // (resource is null during collection queries, so we cannot use resource.data)
+      function chatCourseId() {
+        return chatId.split('_')[0];
+      }
       allow read: if isAdmin() || isInstructorRole() ||
-        (isSignedIn() && resource != null &&
-          exists(path("/databases/" + database + "/documents/enrollments/" + request.auth.uid + "_" + resource.data.courseId)));
+        (isSignedIn() && isEnrolled(chatCourseId()));
       allow create: if isSignedIn() && (
         isAdmin() || isInstructorRole() ||
-        exists(path("/databases/" + database + "/documents/enrollments/" + request.auth.uid + "_" + request.resource.data.courseId))
+        isEnrolled(request.resource.data.courseId)
       ) && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin() || isInstructorRole();
     }

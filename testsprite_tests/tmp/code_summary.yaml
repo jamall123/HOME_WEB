@@ -1,83 +1,100 @@
 version: "2"
 type: frontend
 tech_stack:
-  - HTML
-  - Vanilla JS
-  - Firebase
-  - Agora
+  - HTML5
+  - Vanilla JavaScript (ES Modules)
+  - Vite (build tool)
+  - Firebase (Auth, Firestore, Storage, Hosting)
+  - Agora RTC (live video streaming)
+  - CSS3 (custom design system)
 routes:
   - path: /
     file: index.html
     auth_required: false
-    description: User/Student login page
-  - path: /admin-panel.html
-    file: admin-panel.html
-    auth_required: true
-    description: Admin Dashboard
+    description: Landing page for Jhome company with hero, features, and CTA sections
+  - path: /courses.html
+    file: courses.html
+    auth_required: false
+    description: Course catalog listing available academy courses with enrollment CTA
   - path: /course-room.html
     file: course-room.html
     auth_required: true
-    description: Course Video Room
+    description: Live course room with video, curriculum, chat, and instructor dashboard
 features:
-  - name: Student Login
-    description: Student login using generic code/room ID which authenticates via Cloud Functions
+  - name: Homepage
+    description: Company landing page showcasing Jhome tech products and services
     files:
       - index.html
-      - js/index.js
-      - js/core/BackendGateway.js
+      - css/style.css
+      - js/features/global/GlobalController.js
     entry_route: /
     user_interactions:
-      - Fill login code input field
-      - Fill room ID input field
-      - Click Login button to submit
-      - See error message on invalid credentials
-    api_calls:
-      - method: POST
-        endpoint: /api_v1_academy_login
+      - View hero section with company branding
+      - Scroll through features and story sections
+      - Click enrollment CTA button
+    api_calls: []
     auth_required: false
-  - name: Admin Login
-    description: Admin login with email and password using Firebase Auth
+  - name: Course Catalog
+    description: Browse available courses and request enrollment
     files:
-      - index.html
-      - js/index.js
-    entry_route: /
+      - courses.html
+      - js/repositories/CourseRepository.js
+      - js/features/enrollment/EnrollmentController.js
+    entry_route: /courses.html
     user_interactions:
-      - Switch to Admin Tab
-      - Fill email input field
-      - Fill password input field
-      - Click Login button to submit
-      - See error message on invalid credentials
+      - View list of available courses
+      - Click to enroll in a course
+      - Submit enrollment request form
     api_calls:
+      - method: GET
+        endpoint: Firestore /courses collection
       - method: POST
-        endpoint: Firebase Auth API
+        endpoint: Firestore /enrollmentRequests collection
     auth_required: false
-  - name: Admin Dashboard
-    description: Admin interface to manage courses, students, and settings
-    files:
-      - admin-panel.html
-      - js/admin.js
-      - js/modules/AdminController.js
-    entry_route: /admin-panel.html
-    user_interactions:
-      - Fill form to create new student
-      - Submit to generate student username/password
-      - Manage courses and roles
-    api_calls:
-      - method: POST
-        endpoint: /api_v1_admin_users_create
-    auth_required: true
-  - name: Course Room
-    description: Student and Teacher interface for live video classes using Agora
+  - name: Live Course Room
+    description: Interactive learning room with live video, curriculum, chat and presence
     files:
       - course-room.html
-      - js/academy.js
-      - js/agora.js
+      - js/features/room/RoomController.js
+      - js/features/curriculum/CurriculumController.js
+      - js/features/media/MediaEngine.js
+      - js/features/chat/ChatController.js
+      - js/features/presence/PresenceController.js
     entry_route: /course-room.html
     user_interactions:
-      - Join meeting
-      - Send chat message
-      - Mute/Unmute microphone
-      - Share screen
-    api_calls: []
+      - Join the course room
+      - Watch live or recorded video
+      - Navigate between curriculum lessons
+      - Send chat messages
+      - View attendees list
+      - Instructor starts/stops live broadcast
+    api_calls:
+      - method: GET
+        endpoint: Firestore /curriculum, /curriculumLessons
+      - method: POST
+        endpoint: Firestore /course_chats
+      - method: POST
+        endpoint: Firestore /activeSessions (presence heartbeat)
     auth_required: true
-known_limitations: []
+  - name: Admin Dashboard
+    description: Admin panel for managing users, courses, and enrollment requests
+    files:
+      - js/features/admin/AdminController.js
+      - js/repositories/AdminRepository.js
+      - js/repositories/UserRepository.js
+    entry_route: /course-room.html
+    user_interactions:
+      - View pending enrollment requests
+      - Approve or reject enrollment requests
+      - Create and manage users
+      - View analytics
+    api_calls:
+      - method: GET
+        endpoint: Firestore /enrollmentRequests
+      - method: POST
+        endpoint: Firestore /enrollments
+    auth_required: true
+known_limitations:
+  - issue: courseRoom chunk is ~285kB uncompressed (67kB gzipped) - acceptable for complex SPA
+    location: dist/assets/courseRoom-*.js
+    impact: Slightly longer initial load for course room page

@@ -1,8 +1,8 @@
 {
-  "status": "commited",
+  "status": "init",
   "type": "frontend",
   "scope": "codebase",
-  "localEndpoint": "http://localhost:5173",
+  "localEndpoint": "http://localhost:4173/",
   "loginUser": "admin@sudanfree.com",
   "loginPassword": "Jamal@www20",
   "executionArgs": {
@@ -15,5 +15,6 @@
     "envs": {
       "API_KEY": "sk-user-S7qPQ-sqSZtsap7KiYmpk3puutXSG0i7KDYftXH-RHNn8PcdmtVDTqFiH_gu4QkMtthjl2PEH-ajq0E5TtHyOm8g9iJtfq_RjwieKQ4t-rWZM04zpgtXuOHU3LDRN7zoQuA"
     }
-  }
+  },
+  "serverPort": 42869
 }

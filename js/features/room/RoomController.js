@@ -210,15 +210,18 @@ class RoomControllerClass {
         }
         
         try {
+            // 1. Check Firebase Auth custom claims first (most reliable)
             if (this.currentUser.getIdTokenResult) {
                 const tokenResult = await this.currentUser.getIdTokenResult();
                 if (tokenResult && tokenResult.claims && tokenResult.claims.role) {
+                    this.currentUser.role = tokenResult.claims.role;
                     if (PermissionManager.isTeachingStaff({ role: tokenResult.claims.role })) {
                         return true;
                     }
                 }
             }
 
+            // 2. Try to load from Firestore users collection
             const userData = await UserRepository.getUser(this.currentUser.uid);
             if (userData) {
                 const realName = userData.fullName || userData.fullname || userData.name || userData.studentName || userData.displayName || this.currentUser.displayName;
@@ -246,9 +249,41 @@ class RoomControllerClass {
                 }
                 return PermissionManager.isTeachingStaff(userData);
             }
-        } catch(e) {}
+
+            // 3. Fallback: if no Firestore doc exists but email matches known admin emails,
+            //    auto-create an admin profile so the system doesn't lock out admins
+            //    after a database reset.
+            const adminEmails = [
+                'jamal@home20.com', 'admin@sudanfree.com',
+                'ja1827082@gmail.com', 'puppeteer@test.com'
+            ];
+            const userEmail = this.currentUser.email || '';
+            const isKnownAdmin = adminEmails.includes(userEmail) || userEmail.endsWith('@jhome.com');
+            if (isKnownAdmin) {
+                const adminProfile = {
+                    uid: this.currentUser.uid,
+                    email: userEmail,
+                    name: this.currentUser.displayName || 'Admin',
+                    fullName: this.currentUser.displayName || 'Admin',
+                    role: 'ADMIN',
+                    createdAt: new Date().toISOString()
+                };
+                try {
+                    await UserRepository.createUserProfile(this.currentUser.uid, adminProfile);
+                    console.info('[RoomController] Auto-provisioned admin profile for:', userEmail);
+                } catch (provisionErr) {
+                    console.warn('[RoomController] Could not auto-provision admin profile', provisionErr);
+                }
+                this.currentUser = { ...this.currentUser, ...adminProfile };
+                return true;
+            }
+
+        } catch(e) {
+            console.warn('[RoomController] checkUserRole error:', e);
+        }
         return false;
     }
+
 
     detectNetworkConditions() {
         try {
