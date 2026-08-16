@@ -25,6 +25,18 @@ class CurriculumControllerClass {
         this.courseId = null;
         this.unsubscribeSections = null;
         this.unsubscribeLessons = {};
+        this.isSwitchingLesson = false;
+    }
+
+    destroy() {
+        if (this.unsubscribeSections) {
+            this.unsubscribeSections();
+            this.unsubscribeSections = null;
+        }
+        for (const sectionId in this.unsubscribeLessons) {
+            this.unsubscribeLessons[sectionId]();
+        }
+        this.unsubscribeLessons = {};
     }
 
     async init(courseId) {
@@ -55,6 +67,12 @@ class CurriculumControllerClass {
                 this.unsubscribeSections();
                 this.unsubscribeSections = null;
             }
+
+            // Clean up old lesson subscriptions before a fresh load
+            for (const sectionId in this.unsubscribeLessons) {
+                this.unsubscribeLessons[sectionId]();
+            }
+            this.unsubscribeLessons = {};
 
             let initialLoadDone = false;
 
@@ -118,7 +136,7 @@ class CurriculumControllerClass {
             totalLessonsCount += lessons.length;
             
             // Find active (uncompleted) lesson
-            const active = lessons.find(l => l.status !== 'Completed');
+            const active = lessons.find(l => l.status !== 'Completed' && !CurriculumProgress.progressCache.completedLessons.includes(l.id));
             if (active && !activeLesson) activeLesson = active; // Take first active
         }
 
@@ -257,40 +275,47 @@ class CurriculumControllerClass {
     }
 
     async selectLesson(lessonId, autoResume = false) {
-        this.cache.currentLessonId = lessonId;
-        
-        // Update URL to ensure multi-tab isolation
-        const url = new URL(window.location);
-        url.searchParams.set('lessonId', lessonId);
-        window.history.pushState({ path: url.href }, '', url.href);
-        
-        this.notifyUIRender();
-        
-        // Find lesson object
-        let lesson = null;
-        for (const sectionId in this.cache.lessons) {
-            const found = this.cache.lessons[sectionId].find(l => l.id === lessonId);
-            if (found) { lesson = found; break; }
-        }
+        if (this.isSwitchingLesson) return;
+        this.isSwitchingLesson = true;
 
-        if (lesson) {
-            try {
-                // Ensure the previous session is fully destroyed before opening the new one
-                if (RoomEngine && typeof RoomEngine.destroyRoomSession === 'function') {
-                    await RoomEngine.destroyRoomSession();
-                }
-
-                // Switch the session globally
-                await SessionManager.switchSession(this.courseId, lessonId);
-
-                eventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
-            } catch (error) {
-                console.error("[CurriculumController] Failed to transition session:", error);
+        try {
+            this.cache.currentLessonId = lessonId;
+            
+            // Update URL to ensure multi-tab isolation
+            const url = new URL(window.location);
+            url.searchParams.set('lessonId', lessonId);
+            window.history.pushState({ path: url.href }, '', url.href);
+            
+            this.notifyUIRender();
+            
+            // Find lesson object
+            let lesson = null;
+            for (const sectionId in this.cache.lessons) {
+                const found = this.cache.lessons[sectionId].find(l => l.id === lessonId);
+                if (found) { lesson = found; break; }
             }
+
+            if (lesson) {
+                try {
+                    // Ensure the previous session is fully destroyed before opening the new one
+                    if (RoomEngine && typeof RoomEngine.destroyRoomSession === 'function') {
+                        await RoomEngine.destroyRoomSession();
+                    }
+
+                    // Switch the session globally
+                    await SessionManager.switchSession(this.courseId, lessonId);
+
+                    eventBus.emit(Events.PLAY_LECTURE, { ...lesson, autoResume });
+                } catch (error) {
+                    console.error("[CurriculumController] Failed to transition session:", error);
+                }
+            }
+            
+            // Example: Emit event for Analytics
+            CurriculumService.logAnalytics('lesson_opened', { lessonId });
+        } finally {
+            this.isSwitchingLesson = false;
         }
-        
-        // Example: Emit event for Analytics
-        CurriculumService.logAnalytics('lesson_opened', { lessonId });
     }
 
     searchCurriculum(query) {
@@ -341,31 +366,37 @@ class CurriculumControllerClass {
     }
 
     async createAutomaticLesson(title, description, lessonNumber) {
-        let section = this.cache.sections[0];
-        if (!section) {
-            const docRef = await CurriculumService.addSection(this.courseId, "بث مباشر", 0);
-            section = { id: docRef.id, title: "بث مباشر", courseId: this.courseId, order: 0, status: 'Published' };
-            this.cache.sections.push(section);
-            this.cache.lessons[section.id] = [];
+        try {
+            let section = this.cache.sections[0];
+            if (!section) {
+                const docRef = await CurriculumService.addSection(this.courseId, "بث مباشر", 0);
+                section = { id: docRef.id, title: "بث مباشر", courseId: this.courseId, order: 0, status: 'Published' };
+                this.cache.sections.push(section);
+                this.cache.lessons[section.id] = [];
+            }
+
+            const finalTitle = title || `الدرس ${lessonNumber}`;
+            const newLesson = {
+                title: finalTitle,
+                description: description || '',
+                type: 'video',
+                duration: '0',
+                locked: false,
+                status: 'Active',
+                order: this.cache.lessons[section.id].length
+            };
+
+            const lessonDocRef = await CurriculumService.addLesson(section.id, newLesson);
+            newLesson.id = lessonDocRef.id;
+            
+            this.cache.lessons[section.id].push(newLesson);
+            this.notifyUIRender();
+            return newLesson;
+        } catch (error) {
+            console.error("Failed to create automatic lesson", error);
+            NotificationManager.show("فشل إنشاء الدرس التلقائي", "error");
+            return null;
         }
-
-        const finalTitle = title || `الدرس ${lessonNumber}`;
-        const newLesson = {
-            title: finalTitle,
-            description: description || '',
-            type: 'video',
-            duration: '0',
-            locked: false,
-            status: 'Active',
-            order: this.cache.lessons[section.id].length
-        };
-
-        const lessonDocRef = await CurriculumService.addLesson(section.id, newLesson);
-        newLesson.id = lessonDocRef.id;
-        
-        this.cache.lessons[section.id].push(newLesson);
-        this.notifyUIRender();
-        return newLesson;
     }
 
     async renameLesson(lessonId, newTitle) {

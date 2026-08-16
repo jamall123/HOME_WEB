@@ -1,5 +1,6 @@
 import { CurriculumController } from './CurriculumController.js';
 import { LessonRegistry } from './LessonRegistry.js';
+import { CurriculumProgress } from './CurriculumProgress.js';
 
 /**
  * CurriculumUI.js
@@ -286,7 +287,7 @@ class CurriculumUIClass {
             sectionLessons.forEach(lesson => {
                 const handler = LessonRegistry.getHandler(lesson.type);
                 const isActive = state.currentLessonId === lesson.id;
-                const isCompleted = lesson.status === 'Completed';
+                const isCompleted = lesson.status === 'Completed' || (CurriculumProgress.progressCache && CurriculumProgress.progressCache.completedLessons.includes(lesson.id));
                 const hasRecordings = lesson.recordings && lesson.recordings.length > 0;
                 const isInstructor = this.isInstructor;
 

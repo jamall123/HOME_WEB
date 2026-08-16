@@ -46,9 +46,13 @@ class CurriculumProgressClass {
     }
 
     async fetchCourseSettings() {
-        const settings = await CurriculumRepository.getCourseSettings(this.courseId);
-        if (settings && settings.unlockSystem) {
-            this.unlockSystem = settings.unlockSystem;
+        try {
+            const settings = await CurriculumRepository.getCourseSettings(this.courseId);
+            if (settings && settings.unlockSystem) {
+                this.unlockSystem = settings.unlockSystem;
+            }
+        } catch (error) {
+            console.error("[CurriculumProgress] Failed to fetch course settings", error);
         }
     }
 
@@ -56,7 +60,13 @@ class CurriculumProgressClass {
         try {
             const local = localStorage.getItem(`progress_${this.userId}_${this.courseId}`);
             if (local) {
-                this.progressCache = { ...this.progressCache, ...JSON.parse(local) };
+                const parsed = JSON.parse(local);
+                this.progressCache = { 
+                    ...this.progressCache, 
+                    ...parsed,
+                    completedLessons: parsed.completedLessons || this.progressCache.completedLessons || [],
+                    videoTimestamps: parsed.videoTimestamps || this.progressCache.videoTimestamps || {}
+                };
                 this.progressCache.loginCount = (this.progressCache.loginCount || 0) + 1;
                 this.resumeState();
             }
@@ -102,7 +112,11 @@ class CurriculumProgressClass {
 
     async syncNow() {
         this.isOffline = false;
-        await StudentProgressRepository.syncProgress(this.userId, this.courseId, this.progressCache);
+        try {
+            await StudentProgressRepository.syncProgress(this.userId, this.courseId, this.progressCache);
+        } catch (error) {
+            console.error("[CurriculumProgress] Failed to sync progress", error);
+        }
     }
 
     resumeState() {
