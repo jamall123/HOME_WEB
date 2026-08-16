@@ -60,6 +60,12 @@ export const NotificationManager = {
     show(message, type = 'info', duration = 3000) {
         if (!this.container) this.init();
 
+        // Cap concurrent notifications to 5
+        const currentToasts = this.container.querySelectorAll('.toast');
+        if (currentToasts.length >= 5) {
+            currentToasts[0].remove();
+        }
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type} animate-fade`;
         
@@ -86,23 +92,39 @@ export const NotificationManager = {
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             min-width: 250px;
             font-family: var(--font-ar);
+            position: relative;
         `;
 
         toast.innerHTML = `
-            <i class="fas ${icons[type]}" style="color: ${colors[type]};"></i>
-            <span>${message}</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas ${icons[type]}" style="color: ${colors[type]};"></i>
+                <span>${message}</span>
+            </div>
+            <button class="toast-close-btn" style="background: none; border: none; color: #ccc; cursor: pointer; padding: 0 5px; font-size: 16px;">&times;</button>
         `;
 
         this.container.appendChild(toast);
 
-        setTimeout(() => {
+        let timeoutId;
+
+        const dismiss = () => {
+            if (timeoutId) clearTimeout(timeoutId);
             toast.style.opacity = '0';
             toast.style.transform = 'translateY(10px)';
             toast.style.transition = 'all 0.3s ease';
             setTimeout(() => toast.remove(), 300);
-        }, duration);
+        };
+
+        // Add dismiss mechanism
+        const closeBtn = toast.querySelector('.toast-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', dismiss);
+        }
+
+        timeoutId = setTimeout(dismiss, duration);
     }
 };

@@ -34,8 +34,9 @@ export class OfflineSyncEngineClass {
     }
 
     async triggerBackgroundSync() {
-        if (!this.isOnline) return;
-
+        if (!this.isOnline || this.isSyncing) return;
+        
+        this.isSyncing = true;
         try {
             const pendingOps = await OfflineQueueDb.getAll('metadata_sync');
             if (pendingOps.length === 0) return;
@@ -43,6 +44,24 @@ export class OfflineSyncEngineClass {
             // console.log(`[OfflineSyncEngine] Syncing ${pendingOps.length} pending operations...`);
             
             for (const op of pendingOps) {
+                // Guard against corrupt/stale data
+                if (!op || !op.collection || !op.docId || !op.data) {
+                    console.warn('[OfflineSyncEngine] Corrupt operation detected. Removing:', op ? op.syncId : 'unknown');
+                    if (op && op.syncId) await OfflineQueueDb.delete('metadata_sync', op.syncId);
+                    continue;
+                }
+
+                // If operation is older than 30 days, consider it stale
+                const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+                if (Date.now() - (op.timestamp || 0) > THIRTY_DAYS) {
+                    console.warn('[OfflineSyncEngine] Stale operation detected. Moving to DLQ:', op.syncId);
+                    op.errorReason = 'Stale operation (too old)';
+                    op.dlqTimestamp = Date.now();
+                    await OfflineQueueDb.put('offline_dlq', op);
+                    await OfflineQueueDb.delete('metadata_sync', op.syncId);
+                    continue;
+                }
+
                 try {
                     await OfflineSyncRepository.executeSyncOperation(op.collection, op.docId, op.action, op.data);
                     // Clear successful syncs
@@ -70,6 +89,8 @@ export class OfflineSyncEngineClass {
             // console.log('[OfflineSyncEngine] Sync processing completed.');
         } catch (error) {
             console.error('[OfflineSyncEngine] Sync failed:', error);
+        } finally {
+            this.isSyncing = false;
         }
     }
 
